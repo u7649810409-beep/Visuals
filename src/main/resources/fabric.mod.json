@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "ruffyclient",
+  "version": "${version}",
+  "name": "Ruffy Client",
+  "description": "Ersetzt den Menue-Hintergrund durch ein eigenes Bild.",
+  "authors": ["Du"],
+  "license": "MIT",
+  "icon": "assets/ruffyclient/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["de.ruffy.client.RuffyClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.4",
+    "minecraft": "~1.21.11",
+    "java": ">=21"
+  }
+}
