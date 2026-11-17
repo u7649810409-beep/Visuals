@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "ruffyclient",
   "version": "${version}",
-  "name": "Ruffy Client",
-  "description": "Ersetzt den Menue-Hintergrund durch ein eigenes Bild.",
-  "authors": ["Du"],
+  "name": "Ruffy Visuals",
+  "description": "An original client-side visual client with a nebula-themed ClickGUI, HUD widgets and cosmetic particle effects.",
+  "authors": ["Ruffy"],
   "license": "MIT",
   "icon": "assets/ruffyclient/icon.png",
   "environment": "client",
@@ -13,6 +13,7 @@
   },
   "depends": {
     "fabricloader": ">=0.18.4",
+    "fabric-api": "*",
     "minecraft": "~1.21.11",
     "java": ">=21"
   }
