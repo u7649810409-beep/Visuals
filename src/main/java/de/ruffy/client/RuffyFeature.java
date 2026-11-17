@@ -34,6 +34,8 @@ public record RuffyFeature(String key, String title, String description, Section
             new RuffyFeature("direction", "Direction", "Current compass direction", Section.HUD, Group.GENERAL),
             new RuffyFeature("speed", "Movement Speed", "Horizontal blocks per second", Section.HUD, Group.MOTION),
             new RuffyFeature("world_clock", "World Clock", "In-game time in a compact HUD chip", Section.HUD, Group.GENERAL),
+            new RuffyFeature("health_hud", "Health", "Compact health value and status bar", Section.HUD, Group.GENERAL),
+            new RuffyFeature("armor_hud", "Armor", "Show equipped armor points", Section.HUD, Group.GENERAL),
 
             new RuffyFeature("nebula_particles", "Ambient Particles", "Soft purple particles around you", Section.MOTION, Group.MOTION),
             new RuffyFeature("orbit_particles", "Orbit Shards", "Slow particles orbiting your player", Section.MOTION, Group.MOTION),
