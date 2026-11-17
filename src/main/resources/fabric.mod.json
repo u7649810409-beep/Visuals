@@ -6,7 +6,6 @@
   "description": "An original client-side visual client with a nebula-themed ClickGUI, HUD widgets and cosmetic particle effects.",
   "authors": ["Ruffy"],
   "license": "MIT",
-  "icon": "assets/ruffyclient/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["de.ruffy.client.RuffyClient"]
