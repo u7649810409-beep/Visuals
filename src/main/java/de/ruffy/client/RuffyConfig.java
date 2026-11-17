@@ -48,7 +48,8 @@ public final class RuffyConfig {
     private static final Map<String, Integer> INTEGER_DEFAULTS = Map.of(
             "palette", 0,
             "hud_opacity", 44,
-            "menu_opacity", 94
+            "menu_opacity", 94,
+            "effect_quality", 2
     );
 
     private static final int[] PRIMARY = {
@@ -104,6 +105,7 @@ public final class RuffyConfig {
             case "palette" -> Math.max(0, Math.min(5, value));
             case "hud_opacity" -> Math.max(12, Math.min(90, value));
             case "menu_opacity" -> Math.max(60, Math.min(100, value));
+            case "effect_quality" -> Math.max(0, Math.min(2, value));
             default -> value;
         };
         VALUES.setProperty(key, Integer.toString(clamped));
