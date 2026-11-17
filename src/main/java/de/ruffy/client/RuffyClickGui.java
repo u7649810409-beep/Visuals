@@ -51,7 +51,7 @@ public final class RuffyClickGui extends Screen {
     private int listTop, rowHeight;
 
     public RuffyClickGui() {
-        super(Component.literal("Ruffy Visuals"));
+        super(Component.literal("Ruffy Visuals Control Center"));
     }
 
     @Override
@@ -867,7 +867,7 @@ public final class RuffyClickGui extends Screen {
             case "watermark", "fps", "keystrokes", "direction",
                     "nebula_particles", "jump_burst", "landing_ring",
                     "hit_sparks", "swing_animation", "critical_sparks",
-                    "damage_pulse", "underwater_bubbles", "palette_sparks" -> true;
+                    "damage_pulse", "underwater_bubbles", "palette_sparks", "health_hud" -> true;
             default -> false;
         };
     }
