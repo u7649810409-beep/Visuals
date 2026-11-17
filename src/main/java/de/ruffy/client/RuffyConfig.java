@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Properties;
 
-/** Persistent client-only settings for Ruffy Visuals. */
 public final class RuffyConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger("ruffyclient/config");
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("ruffyclient.properties");

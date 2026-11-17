@@ -2,7 +2,6 @@ package de.ruffy.client;
 
 import java.util.List;
 
-/** The settings exposed in the click GUI. Every entry maps to a live feature. */
 public record RuffyFeature(String key, String title, String description, Category category) {
     public enum Category {
         HUD("HUD", "Information on your screen"),

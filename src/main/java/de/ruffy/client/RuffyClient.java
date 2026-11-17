@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
-/** Main client entrypoint for the standalone, visual-only Ruffy client. */
 public final class RuffyClient implements ClientModInitializer {
     public static final String MOD_ID = "ruffyclient";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
@@ -134,7 +133,6 @@ public final class RuffyClient implements ClientModInitializer {
         client.level.addParticle(ParticleTypes.SWEEP_ATTACK,
                 centerX, centerY, centerZ, 0.0, 0.0, 0.0);
 
-        // A short horizontal arc of cyan-like vanilla spark particles around the slash.
         for (int i = 0; i < 9; i++) {
             double t = i / 8.0;
             double side = (t - 0.5) * 0.78;

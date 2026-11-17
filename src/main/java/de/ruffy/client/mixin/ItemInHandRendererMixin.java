@@ -6,10 +6,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-/**
- * Changes only the visual first-person arm swing curve.
- * It does not modify attack cooldowns, hit registration or server-side combat.
- */
 @Mixin(ItemInHandRenderer.class)
 public abstract class ItemInHandRendererMixin {
     @ModifyVariable(
