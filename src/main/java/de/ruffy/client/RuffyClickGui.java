@@ -10,33 +10,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Module browser inspired by clean visual-client control panels:
- * category tabs, searchable module grid and a dedicated settings inspector.
- */
+/** Compact inventory-sized control center for Ruffy Visuals. */
 public final class RuffyClickGui extends Screen {
     private static final int WHITE = 0xFFF1F5FA;
     private static final int MUTED = 0xFF9AA9B9;
     private static final int DIM = 0xFF63758A;
-    private static final int PANEL = 0xE90D141F;
-    private static final int PANEL_ALT = 0xE9141D2A;
     private static final int CARD = 0x9B172230;
     private static final int CARD_HOVER = 0xC3223546;
     private static final int BORDER = 0x554E6578;
     private static final int GREEN = 0xFF67D8B4;
 
     private enum Tab {
-        VISUALS("Visuals"), PRESETS("Presets"), WORLD("World"),
-        HUD("HUD"), STYLE("Style"), CONFIGS("Configs"), SETUP("Setup");
-
+        VISUALS("Visuals", 68), PRESETS("Presets", 62), WORLD("World", 56),
+        HUD("HUD", 44), STYLE("Style", 48), CONFIGS("Configs", 58), SETUP("Setup", 48);
         private final String label;
-        Tab(String label) { this.label = label; }
+        private final int width;
+        Tab(String label, int width) { this.label = label; this.width = width; }
     }
 
     private enum Filter {
-        ALL("All"), ENTITIES("Entities"), MOTION("Motion"), STARRED("Starred");
+        ALL("All", 35), ENTITIES("Entities", 59), MOTION("Motion", 48), STARRED("★", 28);
         private final String label;
-        Filter(String label) { this.label = label; }
+        private final int width;
+        Filter(String label, int width) { this.label = label; this.width = width; }
     }
 
     private static final String[] PALETTE_NAMES = {
@@ -52,22 +48,22 @@ public final class RuffyClickGui extends Screen {
     private int panelX, panelY, panelW, panelH;
     private int leftX, leftW, rightX, rightW;
     private int searchX, searchY, searchW;
+    private int listTop, rowHeight;
 
     public RuffyClickGui() {
-        super(Component.literal("Ruffy Visuals Control Center"));
+        super(Component.literal("Ruffy Visuals"));
     }
 
     @Override
     protected void init() {
         super.init();
         calculateLayout();
-
-        searchBox = new EditBox(font, searchX, searchY, searchW, 21,
-                Component.literal("Search modules"));
+        searchBox = new EditBox(font, searchX, searchY + 3, searchW, 18,
+                Component.literal("Search"));
         searchBox.setBordered(false);
         searchBox.setMaxLength(36);
         searchBox.setTextColor(0xFFEAF2FA);
-        searchBox.setHint(Component.literal("Search modules"));
+        searchBox.setHint(Component.literal("Search"));
         searchBox.setValue(searchText);
         searchBox.setResponder(value -> {
             searchText = value.toLowerCase(Locale.ROOT);
@@ -78,17 +74,21 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void calculateLayout() {
-        panelW = Math.min(1320, Math.max(760, width - 44));
-        panelH = Math.min(720, Math.max(460, height - 34));
+        panelW = Math.min(620, Math.max(460, width - 24));
+        panelH = Math.min(390, Math.max(320, height - 24));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
-        leftX = panelX + 22;
-        leftW = Math.max(360, (panelW - 64) * 55 / 100);
-        rightX = leftX + leftW + 20;
-        rightW = panelX + panelW - 22 - rightX;
-        searchX = leftX + 270;
-        searchY = panelY + 132;
-        searchW = Math.max(100, leftW - 278);
+
+        leftX = panelX + 14;
+        leftW = (panelW - 40) * 55 / 100;
+        rightX = leftX + leftW + 12;
+        rightW = panelX + panelW - 14 - rightX;
+
+        searchX = leftX + 177;
+        searchY = panelY + 79;
+        searchW = Math.max(65, leftW - 181);
+        listTop = panelY + 108;
+        rowHeight = Math.max(22, Math.min(25, (panelH - 145) / 8));
     }
 
     @Override
@@ -110,7 +110,7 @@ public final class RuffyClickGui extends Screen {
         switch (tab) {
             case VISUALS -> drawModuleBrowser(g, mouseX, mouseY, null);
             case WORLD -> drawModuleBrowser(g, mouseX, mouseY, RuffyFeature.Section.WORLD);
-            case HUD -> drawHudPage(g, mouseX, mouseY);
+            case HUD -> drawModuleBrowser(g, mouseX, mouseY, RuffyFeature.Section.HUD);
             case PRESETS -> drawPresets(g, mouseX, mouseY);
             case STYLE -> drawStyle(g, mouseX, mouseY);
             case CONFIGS -> drawConfigs(g, mouseX, mouseY);
@@ -127,152 +127,114 @@ public final class RuffyClickGui extends Screen {
         for (int x = 0; x < width; x += 56) g.fill(x, 0, x + 1, height, grid);
         for (int y = 0; y < height; y += 56) g.fill(0, y, width, y + 1, grid);
         int accent = RuffyConfig.primaryColor();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 12; i++) {
             int x = Math.floorMod(i * 139 + 31, Math.max(1, width));
             int y = Math.floorMod(i * 83 + 19, Math.max(1, height));
-            g.fill(x, y, x + 2, y + 2, withAlpha(accent, i % 3 == 0 ? 110 : 55));
+            g.fill(x, y, x + 2, y + 2, withAlpha(accent, i % 3 == 0 ? 95 : 45));
         }
     }
 
     private void drawHeader(GuiGraphics g, int header) {
         int primary = RuffyConfig.primaryColor();
-        g.fill(panelX, panelY, panelX + panelW, panelY + 58, header);
+        g.fill(panelX, panelY, panelX + panelW, panelY + 39, header);
         g.fill(panelX, panelY, panelX + panelW, panelY + 2, primary);
 
-        int logoX = panelX + 20;
-        int logoY = panelY + 15;
-        g.fill(logoX, logoY, logoX + 29, logoY + 29, 0xD91A2B3B);
-        g.renderOutline(logoX, logoY, 29, 29, withAlpha(primary, 190));
-        g.drawCenteredString(font, "R", logoX + 14, logoY + 9, primary);
+        int logoX = panelX + 12;
+        int logoY = panelY + 8;
+        g.fill(logoX, logoY, logoX + 24, logoY + 24, 0xD91A2B3B);
+        g.renderOutline(logoX, logoY, 24, 24, withAlpha(primary, 190));
+        g.drawCenteredString(font, "R", logoX + 12, logoY + 6, primary);
 
-        g.drawString(font, "RUFFY", panelX + 59, panelY + 14, WHITE, false);
-        g.drawString(font, "VISUALS", panelX + 59, panelY + 29, primary, false);
-        g.drawString(font, "CLIENT CONTROL CENTER", panelX + 138, panelY + 22, DIM, false);
+        g.drawString(font, "RUFFY", panelX + 43, panelY + 9, WHITE, false);
+        g.drawString(font, "VISUALS", panelX + 43, panelY + 22, primary, false);
+        g.drawString(font, "CLIENT", panelX + 103, panelY + 16, DIM, false);
 
-        String status = "●  SYSTEM ONLINE";
-        int statusWidth = font.width(status);
-        g.drawString(font, status, panelX + panelW - statusWidth - 126,
-                panelY + 22, GREEN, false);
-        g.fill(panelX + panelW - 93, panelY + 15,
-                panelX + panelW - 22, panelY + 43, 0x7A101A28);
-        g.renderOutline(panelX + panelW - 93, panelY + 15, 71, 28, BORDER);
-        g.drawCenteredString(font, "ESC  ×", panelX + panelW - 57,
-                panelY + 25, MUTED);
-        g.fill(panelX, panelY + 58, panelX + panelW, panelY + 59, BORDER);
+        g.fill(panelX + panelW - 76, panelY + 8,
+                panelX + panelW - 12, panelY + 31, 0x7A101A28);
+        g.renderOutline(panelX + panelW - 76, panelY + 8, 64, 23, BORDER);
+        g.drawCenteredString(font, "ESC  ×", panelX + panelW - 44,
+                panelY + 15, MUTED);
     }
 
     private void drawNavigation(GuiGraphics g, int mouseX, int mouseY) {
-        int y = panelY + 60;
-        g.fill(panelX, y, panelX + panelW, y + 51, 0x6C101925);
-        int x = panelX + 20;
+        int y = panelY + 40;
+        g.fill(panelX, y, panelX + panelW, y + 30, 0x6C101925);
+        int x = panelX + 10;
         for (Tab item : Tab.values()) {
-            int w = switch (item) {
-                case VISUALS -> 112;
-                case PRESETS, CONFIGS, SETUP -> 98;
-                case WORLD, HUD, STYLE -> 82;
-            };
             boolean selected = item == tab;
-            boolean hovered = inside(mouseX, mouseY, x, y + 5, w - 5, 39);
-            if (selected) {
-                g.fill(x, y + 5, x + w - 5, y + 43, 0x8B1E3546);
-                g.fill(x + 9, y + 41, x + w - 14, y + 43,
-                        RuffyConfig.primaryColor());
-            } else if (hovered) {
-                g.fill(x, y + 5, x + w - 5, y + 43, 0x541F2B3A);
+            boolean hovered = inside(mouseX, mouseY, x, y + 3, item.width - 3, 24);
+            if (selected || hovered) {
+                g.fill(x, y + 3, x + item.width - 3, y + 27,
+                        selected ? 0x8B1E3546 : 0x541F2B3A);
             }
-            g.drawString(font, navIcon(item), x + 10, y + 18,
-                    selected ? RuffyConfig.primaryColor() : DIM, false);
-            g.drawString(font, item.label, x + 29, y + 18,
-                    selected ? WHITE : MUTED, false);
-            x += w;
+            if (selected) g.fill(x + 6, y + 25, x + item.width - 9, y + 27,
+                    RuffyConfig.primaryColor());
+            g.drawCenteredString(font, item.label, x + (item.width - 3) / 2,
+                    y + 10, selected ? WHITE : MUTED);
+            x += item.width;
         }
-        g.fill(panelX, y + 50, panelX + panelW, y + 51, BORDER);
-    }
-
-    private String navIcon(Tab value) {
-        return switch (value) {
-            case VISUALS -> "✧";
-            case PRESETS -> "▤";
-            case WORLD -> "◇";
-            case HUD -> "▣";
-            case STYLE -> "◉";
-            case CONFIGS -> "☷";
-            case SETUP -> "⌘";
-        };
+        g.fill(panelX, y + 29, panelX + panelW, y + 30, BORDER);
     }
 
     private void drawModuleBrowser(GuiGraphics g, int mouseX, int mouseY,
                                    RuffyFeature.Section requiredSection) {
-        int filterY = panelY + 122;
-        drawFilterBar(g, mouseX, mouseY, filterY, requiredSection == null);
+        drawFilterBar(g, mouseX, mouseY, requiredSection);
 
         List<RuffyFeature> features = filteredFeatures(requiredSection);
-        int maxPages = Math.max(1, (features.size() + 15) / 16);
-        modulePage = Math.max(0, Math.min(modulePage, maxPages - 1));
+        int pages = Math.max(1, (features.size() + 7) / 8);
+        modulePage = Math.max(0, Math.min(modulePage, pages - 1));
 
-        int startY = panelY + 164;
-        int gap = 8;
-        int cardGap = 8;
-        int cardW = (leftW - cardGap) / 2;
-        int cardH = 41;
-
-        for (int i = 0; i < 16; i++) {
-            int featureIndex = modulePage * 16 + i;
-            if (featureIndex >= features.size()) break;
-            RuffyFeature feature = features.get(featureIndex);
-            int col = i / 8;
-            int row = i % 8;
-            int x = leftX + col * (cardW + cardGap);
-            int y = startY + row * (cardH + gap);
-            drawModuleRow(g, mouseX, mouseY, feature, x, y, cardW, cardH);
+        int rowW = leftW;
+        for (int i = 0; i < 8; i++) {
+            int index = modulePage * 8 + i;
+            if (index >= features.size()) break;
+            RuffyFeature feature = features.get(index);
+            int y = listTop + i * rowHeight;
+            drawModuleRow(g, mouseX, mouseY, feature, leftX, y, rowW, rowHeight - 2);
         }
 
-        drawModuleFooter(g, features.size(), maxPages);
-        drawInspector(g, mouseX, mouseY, features);
+        drawModuleFooter(g, features.size(), pages);
+        drawInspector(g, mouseX, mouseY);
     }
 
-    private void drawFilterBar(GuiGraphics g, int mouseX, int mouseY, int y, boolean showFilters) {
+    private void drawFilterBar(GuiGraphics g, int mouseX, int mouseY,
+                               RuffyFeature.Section requiredSection) {
+        int y = panelY + 77;
+        boolean showFilters = requiredSection == null;
         if (showFilters) {
             int x = leftX;
             for (Filter item : Filter.values()) {
-                int w = switch (item) {
-                    case ALL -> 48;
-                    case ENTITIES -> 74;
-                    case MOTION -> 64;
-                    case STARRED -> 64;
-                };
                 boolean selected = item == filter;
-                boolean hovered = inside(mouseX, mouseY, x, y, w, 24);
+                boolean hovered = inside(mouseX, mouseY, x, y, item.width, 22);
                 if (selected || hovered) {
-                    g.fill(x, y, x + w, y + 24,
+                    g.fill(x, y, x + item.width, y + 22,
                             selected ? 0xAA1C3A4D : 0x551E2B3B);
-                    if (selected) g.fill(x, y + 22, x + w, y + 24,
+                    if (selected) g.fill(x, y + 20, x + item.width, y + 22,
                             RuffyConfig.primaryColor());
                 }
-                g.drawCenteredString(font, item.label, x + w / 2, y + 8,
-                        selected ? WHITE : MUTED);
-                x += w + 4;
+                g.drawCenteredString(font, item.label, x + item.width / 2,
+                        y + 7, selected ? WHITE : MUTED);
+                x += item.width + 2;
+            }
+
+            if (searchBox != null) {
+                g.fill(searchX - 4, searchY + 1, searchX + searchW + 4, searchY + 23,
+                        0x77111D2A);
+                g.renderOutline(searchX - 4, searchY + 1, searchW + 8, 22, BORDER);
+                g.drawString(font, "⌕", searchX + 4, searchY + 7, DIM, false);
+                searchBox.setVisible(true);
             }
         } else {
-            String title = tab == Tab.WORLD ? "WORLD MODULES" : "HUD MODULES";
-            g.drawString(font, title, leftX + 3, y + 8, RuffyConfig.primaryColor(), false);
+            String title = requiredSection == RuffyFeature.Section.WORLD ? "WORLD MODULES" : "HUD MODULES";
+            g.drawString(font, title, leftX + 2, y + 7, RuffyConfig.primaryColor(), false);
+            if (searchBox != null) searchBox.setVisible(false);
         }
-
-        if (showFilters) {
-            int searchWidth = searchBox == null ? searchW : searchBox.getWidth();
-            g.fill(searchX - 5, searchY - 1, searchX + searchWidth + 5, searchY + 22,
-                    0x77111D2A);
-            g.renderOutline(searchX - 5, searchY - 1, searchWidth + 10, 23, BORDER);
-            g.drawString(font, "⌕", searchX + 7, searchY + 6, DIM, false);
-        }
-        if (searchBox != null) searchBox.setVisible(showFilters);
     }
 
     private List<RuffyFeature> filteredFeatures(RuffyFeature.Section requiredSection) {
         List<RuffyFeature> result = new ArrayList<>();
         for (RuffyFeature feature : RuffyFeature.ALL) {
             if (requiredSection != null && feature.section() != requiredSection) continue;
-
             if (tab == Tab.HUD && feature.section() != RuffyFeature.Section.HUD) continue;
             if (tab == Tab.WORLD && feature.section() != RuffyFeature.Section.WORLD) continue;
 
@@ -292,34 +254,30 @@ public final class RuffyClickGui extends Screen {
         return result;
     }
 
-    private void drawModuleRow(GuiGraphics g, int mouseX, int mouseY, RuffyFeature feature,
-                               int x, int y, int w, int h) {
+    private void drawModuleRow(GuiGraphics g, int mouseX, int mouseY,
+                               RuffyFeature feature, int x, int y, int w, int h) {
         boolean selected = feature.key().equals(selectedKey);
         boolean hovered = inside(mouseX, mouseY, x, y, w, h);
         boolean enabled = RuffyConfig.get(feature.key());
         boolean favorite = RuffyConfig.get("favorite_" + feature.key());
         int primary = RuffyConfig.primaryColor();
 
-        g.fill(x, y, x + w, y + h,
-                selected ? 0xB32A3C4E : hovered ? CARD_HOVER : CARD);
+        g.fill(x, y, x + w, y + h, selected ? 0xB32A3C4E : hovered ? CARD_HOVER : CARD);
         g.renderOutline(x, y, w, h, selected ? withAlpha(primary, 150) : BORDER);
         if (selected || enabled) {
-            g.fill(x, y + 7, x + 2, y + h - 7,
+            g.fill(x, y + 5, x + 2, y + h - 5,
                     enabled ? primary : withAlpha(primary, 90));
         }
 
-        String symbol = iconFor(feature);
-        g.drawString(font, symbol, x + 10, y + 14,
+        g.drawString(font, iconFor(feature), x + 7, y + (h - 8) / 2,
                 enabled ? primary : DIM, false);
-        g.drawString(font, feature.title(), x + 31, y + 8,
+        g.drawString(font, feature.title(), x + 23, y + (h - 8) / 2,
                 selected ? WHITE : 0xFFE0E7EF, false);
-        g.drawString(font, feature.section().title().toUpperCase(Locale.ROOT),
-                x + 31, y + 23, DIM, false);
 
-        int starX = x + w - 57;
-        g.drawString(font, favorite ? "★" : "☆", starX, y + 13,
+        int starX = x + w - 48;
+        g.drawString(font, favorite ? "★" : "☆", starX, y + (h - 8) / 2,
                 favorite ? 0xFFFFD47A : DIM, false);
-        drawSwitch(g, x + w - 34, y + 12, enabled, 26, 16);
+        drawSwitch(g, x + w - 29, y + (h - 15) / 2, enabled, 24, 15);
     }
 
     private String iconFor(RuffyFeature feature) {
@@ -336,247 +294,186 @@ public final class RuffyClickGui extends Screen {
         for (RuffyFeature feature : RuffyFeature.ALL) {
             if (RuffyConfig.get(feature.key())) enabled++;
         }
-        int y = panelY + panelH - 42;
-        g.drawString(font, count + " MODULES  ·  " + enabled + " ENABLED",
-                leftX + 2, y + 7, MUTED, false);
+        int y = panelY + panelH - 32;
+        g.drawString(font, count + " MODULES · " + enabled + " ON",
+                leftX + 2, y + 8, MUTED, false);
 
-        int mid = leftX + leftW - 112;
-        drawSmallButton(g, mid, y, 24, 23, "‹", modulePage > 0);
-        g.drawCenteredString(font, (modulePage + 1) + " / " + pages,
-                mid + 55, y + 8, WHITE);
-        drawSmallButton(g, mid + 86, y, 24, 23, "›", modulePage < pages - 1);
+        int mid = leftX + leftW - 78;
+        drawSmallButton(g, mid, y, 20, 20, "‹", modulePage > 0);
+        g.drawCenteredString(font, (modulePage + 1) + "/" + pages,
+                mid + 48, y + 7, WHITE);
+        drawSmallButton(g, mid + 76, y, 20, 20, "›", modulePage < pages - 1);
     }
 
-    private void drawInspector(GuiGraphics g, int mouseX, int mouseY,
-                               List<RuffyFeature> visibleFeatures) {
+    private void drawInspector(GuiGraphics g, int mouseX, int mouseY) {
         int x = rightX;
-        int y = panelY + 122;
+        int y = listTop;
         int w = rightW;
-        int h = panelH - 164;
+        int h = panelY + panelH - 38 - y;
         g.fill(x, y, x + w, y + h, 0x7A0E1723);
         g.renderOutline(x, y, w, h, BORDER);
-        g.fill(x, y, x + w, y + 2, 0x553F91AA);
+        g.fill(x, y, x + w, y + 2, withAlpha(RuffyConfig.primaryColor(), 100));
 
         RuffyFeature selected = RuffyFeature.ALL.stream()
                 .filter(feature -> feature.key().equals(selectedKey)).findFirst().orElse(null);
-
         if (selected == null) {
-            g.drawCenteredString(font, "⚙", x + w / 2, y + h / 2 - 18, DIM);
             g.drawCenteredString(font, "SELECT A MODULE", x + w / 2,
-                    y + h / 2 + 8, MUTED);
+                    y + h / 2, MUTED);
             return;
         }
 
-        int pad = 20;
+        int pad = 11;
         int primary = RuffyConfig.primaryColor();
-        g.drawString(font, "MODULE SETTINGS", x + pad, y + 18, DIM, false);
-
-        g.fill(x + pad, y + 44, x + pad + 42, y + 86, 0xAA1D3040);
-        g.renderOutline(x + pad, y + 44, 42, 42, withAlpha(primary, 140));
-        g.drawCenteredString(font, iconFor(selected), x + pad + 21, y + 58, primary);
-
-        g.drawString(font, selected.title(), x + pad + 56, y + 49, WHITE, false);
+        g.drawString(font, "MODULE SETTINGS", x + pad, y + 13, DIM, false);
+        g.fill(x + pad, y + 32, x + pad + 27, y + 59, 0xAA1D3040);
+        g.renderOutline(x + pad, y + 32, 27, 27, withAlpha(primary, 140));
+        g.drawCenteredString(font, iconFor(selected), x + pad + 13, y + 41, primary);
+        g.drawString(font, selected.title(), x + pad + 34, y + 35, WHITE, false);
         g.drawString(font, selected.section().title().toUpperCase(Locale.ROOT),
-                x + pad + 56, y + 67, primary, false);
+                x + pad + 34, y + 48, primary, false);
 
-        int descY = y + 105;
-        drawWrapped(g, selected.description(), x + pad, descY, w - pad * 2, MUTED, 16);
+        drawWrapped(g, selected.description(), x + pad, y + 69,
+                w - pad * 2, MUTED, 12);
 
-        int toggleY = y + 174;
-        g.fill(x + pad, toggleY, x + w - pad, toggleY + 50, 0x641A2B3B);
-        g.drawString(font, "MODULE STATE", x + pad + 12, toggleY + 10, MUTED, false);
+        int toggleY = y + 104;
+        g.fill(x + pad, toggleY, x + w - pad, toggleY + 39, 0x641A2B3B);
+        g.drawString(font, "MODULE STATE", x + pad + 8, toggleY + 7, MUTED, false);
         boolean active = RuffyConfig.get(selected.key());
         g.drawString(font, active ? "ENABLED" : "DISABLED",
-                x + pad + 12, toggleY + 27, active ? primary : DIM, false);
-        drawSwitch(g, x + w - pad - 48, toggleY + 16, active, 36, 18);
+                x + pad + 8, toggleY + 21, active ? primary : DIM, false);
+        drawSwitch(g, x + w - pad - 38, toggleY + 11, active, 29, 16);
 
-        int infoY = toggleY + 70;
-        g.drawString(font, "DETAILS", x + pad, infoY, DIM, false);
-        g.drawString(font, "Client-side visual module", x + pad, infoY + 20, WHITE, false);
-        g.drawString(font, "No server changes or combat automation", x + pad,
-                infoY + 38, MUTED, false);
-        g.drawString(font, "CONFIG KEY", x + pad, infoY + 72, DIM, false);
-        g.drawString(font, selected.key(), x + pad, infoY + 90, MUTED, false);
+        int detailY = toggleY + 49;
+        g.drawString(font, "CLIENT-SIDE VISUAL", x + pad, detailY, DIM, false);
 
-        if (selected.key().equals("watermark") || selected.section() == RuffyFeature.Section.HUD) {
-            g.drawString(font, "HUD OPACITY", x + pad, infoY + 122, DIM, false);
-            drawSlider(g, x + pad, infoY + 143, w - pad * 2,
+        if (selected.section() == RuffyFeature.Section.HUD) {
+            int sliderY = detailY + 27;
+            g.drawString(font, "HUD OPACITY  " + RuffyConfig.getInt("hud_opacity") + "%",
+                    x + pad, sliderY, MUTED, false);
+            drawSlider(g, x + pad, sliderY + 16, w - pad * 2,
                     RuffyConfig.getInt("hud_opacity"), 12, 90);
+        } else {
+            g.drawString(font, "NO GAMEPLAY MODIFICATION", x + pad,
+                    detailY + 25, DIM, false);
+            g.drawString(font, "RIGHT SHIFT TO CLOSE", x + pad,
+                    detailY + 40, DIM, false);
         }
-
-        if (h > 430) {
-            g.drawString(font, "ACCENT COLOR", x + pad, y + h - 61, DIM, false);
-            swatch(g, x + pad, y + h - 40, 22, primary,
-                    true, mouseX, mouseY);
-            swatch(g, x + pad + 32, y + h - 40, 22,
-                    RuffyConfig.secondaryColor(), false, mouseX, mouseY);
-            g.drawString(font, "EDIT IN STYLE TAB", x + pad + 66,
-                    y + h - 33, MUTED, false);
-        }
-    }
-
-    private void drawHudPage(GuiGraphics g, int mouseX, int mouseY) {
-        drawModuleBrowser(g, mouseX, mouseY, RuffyFeature.Section.HUD);
-        int x = rightX + 18;
-        int y = panelY + panelH - 100;
-        g.drawString(font, "TRANSPARENCY", x, y - 24, DIM, false);
-        drawSlider(g, x, y, rightW - 36, RuffyConfig.getInt("hud_opacity"), 12, 90);
     }
 
     private void drawPresets(GuiGraphics g, int mouseX, int mouseY) {
-        int x = panelX + 32;
-        int y = panelY + 132;
-        g.drawString(font, "QUICK PROFILES", x, y - 26, DIM, false);
+        int x = panelX + 18;
+        int y = panelY + 82;
+        g.drawString(font, "QUICK PROFILES", x, y, WHITE, false);
         String[] names = {"NEBULA", "CINEMATIC", "PERFORMANCE", "CLEAN"};
-        String[] descriptions = {
-                "Balanced cyan and violet visuals",
-                "Soft particles and a subtle HUD",
-                "Reduced particles for higher FPS",
-                "Minimal UI and low transparency"
-        };
+        String[] desc = {"Balanced color and particles", "Soft glow and trails",
+                "Reduced particle load", "Minimal overlay"};
         int[] palettes = {0, 1, 4, 5};
-        int gap = 16;
-        int cardW = Math.min(420, (panelW - 92) / 2);
-        int cardH = 116;
-        for (int i = 0; i < names.length; i++) {
-            int col = i % 2;
-            int row = i / 2;
-            int cx = x + col * (cardW + gap);
-            int cy = y + row * (cardH + gap);
-            boolean hovered = inside(mouseX, mouseY, cx, cy, cardW, cardH);
-            int color = palettePrimary(palettes[i]);
-            g.fill(cx, cy, cx + cardW, cy + cardH, hovered ? CARD_HOVER : CARD);
-            g.renderOutline(cx, cy, cardW, cardH,
-                    hovered ? withAlpha(color, 190) : BORDER);
-            g.fill(cx, cy, cx + cardW, cy + 2, color);
-            g.fill(cx + 18, cy + 20, cx + 52, cy + 54, withAlpha(color, 42));
-            g.renderOutline(cx + 18, cy + 20, 34, 34, withAlpha(color, 175));
-            g.drawCenteredString(font, "✧", cx + 35, cy + 30, color);
-            g.drawString(font, names[i], cx + 66, cy + 22, WHITE, false);
-            g.drawString(font, descriptions[i], cx + 66, cy + 41, MUTED, false);
-            g.drawString(font, "APPLY PROFILE  →", cx + 18, cy + 84, color, false);
+        int w = (panelW - 50) / 2;
+        for (int i = 0; i < 4; i++) {
+            int cx = x + (i % 2) * (w + 10);
+            int cy = y + 24 + (i / 2) * 84;
+            int c = palettePrimary(palettes[i]);
+            boolean hover = inside(mouseX, mouseY, cx, cy, w, 74);
+            g.fill(cx, cy, cx + w, cy + 74, hover ? CARD_HOVER : CARD);
+            g.renderOutline(cx, cy, w, 74, hover ? withAlpha(c, 180) : BORDER);
+            g.fill(cx, cy, cx + w, cy + 2, c);
+            g.drawString(font, names[i], cx + 10, cy + 13, WHITE, false);
+            g.drawString(font, desc[i], cx + 10, cy + 30, MUTED, false);
+            g.drawString(font, "APPLY  →", cx + 10, cy + 51, c, false);
         }
     }
 
     private void drawStyle(GuiGraphics g, int mouseX, int mouseY) {
-        int x = panelX + 34;
-        int y = panelY + 128;
-        g.drawString(font, "COLOR SYSTEM", x, y, WHITE, false);
-        g.drawString(font, "Choose a coordinated primary and secondary accent palette.",
-                x, y + 18, MUTED, false);
-
-        int sw = 178;
-        int sh = 82;
-        int gap = 14;
+        int x = panelX + 18;
+        int y = panelY + 80;
+        g.drawString(font, "COLOR PALETTE", x, y, WHITE, false);
+        int sw = (panelW - 64) / 3;
         for (int i = 0; i < PALETTE_NAMES.length; i++) {
-            int col = i % 3;
-            int row = i / 3;
-            int cx = x + col * (sw + gap);
-            int cy = y + 52 + row * (sh + gap);
+            int cx = x + (i % 3) * (sw + 8);
+            int cy = y + 22 + (i / 3) * 48;
             int primary = palettePrimary(i);
-            boolean chosen = RuffyConfig.getInt("palette") == i;
-            boolean hovered = inside(mouseX, mouseY, cx, cy, sw, sh);
-            g.fill(cx, cy, cx + sw, cy + sh, hovered ? CARD_HOVER : CARD);
-            g.renderOutline(cx, cy, sw, sh,
-                    chosen ? withAlpha(primary, 220) : BORDER);
-            g.fill(cx, cy, cx + sw, cy + 2, primary);
-            swatch(g, cx + 14, cy + 19, 28, primary, chosen, mouseX, mouseY);
-            swatch(g, cx + 50, cy + 19, 28, paletteSecondary(i), false, mouseX, mouseY);
+            boolean selected = RuffyConfig.getInt("palette") == i;
+            boolean hover = inside(mouseX, mouseY, cx, cy, sw, 41);
+            g.fill(cx, cy, cx + sw, cy + 41, hover ? CARD_HOVER : CARD);
+            g.renderOutline(cx, cy, sw, 41, selected ? withAlpha(primary, 220) : BORDER);
+            g.fill(cx + 7, cy + 8, cx + 20, cy + 21, primary);
+            g.fill(cx + 23, cy + 8, cx + 36, cy + 21, paletteSecondary(i));
             g.drawString(font, PALETTE_NAMES[i].toUpperCase(Locale.ROOT),
-                    cx + 90, cy + 25, chosen ? WHITE : MUTED, false);
-            if (chosen) g.drawString(font, "SELECTED", cx + 90, cy + 43, primary, false);
+                    cx + 44, cy + 11, selected ? WHITE : MUTED, false);
         }
 
-        int sliderY = y + 52 + 2 * (sh + gap) + 24;
-        g.drawString(font, "HUD TRANSPARENCY", x, sliderY, WHITE, false);
-        g.drawString(font, RuffyConfig.getInt("hud_opacity") + "%",
-                x + 280, sliderY, RuffyConfig.primaryColor(), false);
-        drawSlider(g, x, sliderY + 24, 330, RuffyConfig.getInt("hud_opacity"), 12, 90);
+        int sliderY = y + 132;
+        g.drawString(font, "HUD TRANSPARENCY  " + RuffyConfig.getInt("hud_opacity") + "%",
+                x, sliderY, MUTED, false);
+        drawSlider(g, x, sliderY + 14, panelW - 42,
+                RuffyConfig.getInt("hud_opacity"), 12, 90);
 
-        int menuY = sliderY + 82;
-        g.drawString(font, "MENU OPACITY", x, menuY, WHITE, false);
-        g.drawString(font, RuffyConfig.getInt("menu_opacity") + "%",
-                x + 280, menuY, RuffyConfig.primaryColor(), false);
-        drawSlider(g, x, menuY + 24, 330, RuffyConfig.getInt("menu_opacity"), 60, 100);
+        int menuY = sliderY + 48;
+        g.drawString(font, "MENU OPACITY  " + RuffyConfig.getInt("menu_opacity") + "%",
+                x, menuY, MUTED, false);
+        drawSlider(g, x, menuY + 14, panelW - 42,
+                RuffyConfig.getInt("menu_opacity"), 60, 100);
+
+        int qualityY = menuY + 48;
+        g.drawString(font, "EFFECT QUALITY  " + qualityName(RuffyConfig.getInt("effect_quality")),
+                x, qualityY, MUTED, false);
+        drawSlider(g, x, qualityY + 14, panelW - 42,
+                RuffyConfig.getInt("effect_quality"), 0, 2);
+    }
+
+    private void drawHudSettings(GuiGraphics g, int x, int y, int w) {
+        g.drawString(font, "TRANSPARENCY", x, y, MUTED, false);
+        drawSlider(g, x, y + 14, w, RuffyConfig.getInt("hud_opacity"), 12, 90);
     }
 
     private void drawConfigs(GuiGraphics g, int mouseX, int mouseY) {
-        int x = panelX + 34;
-        int y = panelY + 132;
+        int x = panelX + 18;
+        int y = panelY + 83;
         g.drawString(font, "CONFIGURATION", x, y, WHITE, false);
-        g.drawString(font, "Your options are saved automatically.", x, y + 19, MUTED, false);
-
-        drawActionCard(g, mouseX, mouseY, x, y + 58, 360, 70,
-                "RESET MODULES", "Restore the default module states");
-        drawActionCard(g, mouseX, mouseY, x, y + 142, 360, 70,
-                "RESET STYLE", "Return to the Nebula palette and opacity");
-        drawActionCard(g, mouseX, mouseY, x, y + 226, 360, 70,
-                "RESET EVERYTHING", "Restore all client options to defaults");
-
-        int infoX = x + 410;
-        g.fill(infoX, y + 58, infoX + 380, y + 296, 0x65131E2B);
-        g.renderOutline(infoX, y + 58, 380, 238, BORDER);
-        g.drawString(font, "LOCAL CONFIG", infoX + 18, y + 78, RuffyConfig.primaryColor(), false);
-        g.drawString(font, ".minecraft/config/ruffyclient.properties",
-                infoX + 18, y + 105, WHITE, false);
-        g.drawString(font, "Version: 1.21.11 / Fabric", infoX + 18, y + 137, MUTED, false);
-        g.drawString(font, "The config stays on this client.", infoX + 18, y + 159, MUTED, false);
+        g.drawString(font, "Options are saved automatically.", x, y + 17, MUTED, false);
+        drawActionCard(g, mouseX, mouseY, x, y + 45, panelW - 36, 49,
+                "RESET MODULES", "Restore default module states");
+        drawActionCard(g, mouseX, mouseY, x, y + 102, panelW - 36, 49,
+                "RESET STYLE", "Nebula palette and default opacity");
+        drawActionCard(g, mouseX, mouseY, x, y + 159, panelW - 36, 49,
+                "RESET EVERYTHING", "Restore all client options");
     }
 
     private void drawSetup(GuiGraphics g) {
-        int x = panelX + 34;
-        int y = panelY + 132;
-        g.drawString(font, "SETUP & CONTROLS", x, y, WHITE, false);
-        drawInfoRow(g, x, y + 42, "RIGHT SHIFT", "Open or close the Visuals control center");
-        drawInfoRow(g, x, y + 82, "LEFT CLICK", "Select modules, stars, colors and settings");
-        drawInfoRow(g, x, y + 122, "ESC", "Close the control center");
-        drawInfoRow(g, x, y + 162, "CONFIG", "Saved automatically in the Minecraft config folder");
-        drawInfoRow(g, x, y + 202, "COMPATIBILITY", "Minecraft Java 1.21.11 · Fabric · Java 21");
-        drawInfoRow(g, x, y + 242, "VISUAL EFFECTS", "Client-side cosmetics; no server-side combat changes");
-
-        int right = x + Math.min(700, (panelW - 110) / 2);
-        g.fill(right, y + 36, right + 340, y + 285, 0x65131E2B);
-        g.renderOutline(right, y + 36, 340, 249, BORDER);
-        g.drawString(font, "RENDER PROFILE", right + 18, y + 56, RuffyConfig.primaryColor(), false);
-        g.drawString(font, "Balanced", right + 18, y + 83, WHITE, false);
-        g.drawString(font, "Use the Performance preset to reduce", right + 18, y + 116, MUTED, false);
-        g.drawString(font, "the number of cosmetic particles.", right + 18, y + 134, MUTED, false);
-        g.drawString(font, "Tip: disable individual effects you", right + 18, y + 174, MUTED, false);
-        g.drawString(font, "do not use to keep the screen clean.", right + 18, y + 192, MUTED, false);
+        int x = panelX + 18;
+        int y = panelY + 86;
+        g.drawString(font, "CONTROLS", x, y, WHITE, false);
+        drawInfoRow(g, x, y + 24, "RIGHT SHIFT", "Open or close this menu");
+        drawInfoRow(g, x, y + 56, "LEFT CLICK", "Toggle modules, favorites and settings");
+        drawInfoRow(g, x, y + 88, "ESC", "Close the menu");
+        drawInfoRow(g, x, y + 120, "CONFIG", "Saved in config/ruffyclient.properties");
+        drawInfoRow(g, x, y + 152, "VERSION", "Minecraft 1.21.11 · Fabric · Java 21");
     }
 
     private void drawActionCard(GuiGraphics g, int mouseX, int mouseY,
                                 int x, int y, int w, int h, String title, String subtitle) {
         boolean hovered = inside(mouseX, mouseY, x, y, w, h);
         g.fill(x, y, x + w, y + h, hovered ? CARD_HOVER : CARD);
-        g.renderOutline(x, y, w, h, hovered ? withAlpha(RuffyConfig.primaryColor(), 170) : BORDER);
+        g.renderOutline(x, y, w, h,
+                hovered ? withAlpha(RuffyConfig.primaryColor(), 170) : BORDER);
         g.fill(x, y, x + 2, y + h, RuffyConfig.primaryColor());
-        g.drawString(font, title, x + 16, y + 16, WHITE, false);
-        g.drawString(font, subtitle, x + 16, y + 37, MUTED, false);
+        g.drawString(font, title, x + 12, y + 8, WHITE, false);
+        g.drawString(font, subtitle, x + 12, y + 25, MUTED, false);
     }
 
     private void drawInfoRow(GuiGraphics g, int x, int y, String left, String right) {
-        g.fill(x, y, x + 670, y + 31, 0x57172230);
-        g.drawString(font, left, x + 12, y + 10, RuffyConfig.primaryColor(), false);
-        g.drawString(font, right, x + 150, y + 10, MUTED, false);
+        g.fill(x, y, x + panelW - 36, y + 25, 0x57172230);
+        g.drawString(font, left, x + 8, y + 8, RuffyConfig.primaryColor(), false);
+        g.drawString(font, right, x + 112, y + 8, MUTED, false);
     }
 
     private void drawSlider(GuiGraphics g, int x, int y, int w, int value, int min, int max) {
-        int barY = y + 7;
-        int fill = Math.max(0, Math.min(w, (value - min) * w / (max - min)));
-        g.fill(x, barY, x + w, barY + 4, 0xFF2B3948);
-        g.fill(x, barY, x + fill, barY + 4, RuffyConfig.primaryColor());
-        g.fill(x + fill - 3, barY - 3, x + fill + 3, barY + 7, WHITE);
-        g.renderOutline(x, barY - 3, w, 10, 0x444F6274);
-    }
-
-    private void swatch(GuiGraphics g, int x, int y, int size, int color,
-                        boolean selected, int mouseX, int mouseY) {
-        g.fill(x, y, x + size, y + size, color);
-        g.renderOutline(x, y, size, size,
-                selected ? WHITE : 0x88596B7F);
-        if (selected) g.renderOutline(x - 2, y - 2, size + 4, size + 4,
-                withAlpha(RuffyConfig.primaryColor(), 220));
+        int barY = y + 5;
+        float ratio = (value - min) / (float) (max - min);
+        int fill = Math.max(0, Math.min(w, Math.round(ratio * w)));
+        g.fill(x, barY, x + w, barY + 3, 0xFF2B3948);
+        g.fill(x, barY, x + fill, barY + 3, RuffyConfig.primaryColor());
+        g.fill(x + fill - 2, barY - 2, x + fill + 2, barY + 5, WHITE);
     }
 
     private void drawSwitch(GuiGraphics g, int x, int y, boolean enabled, int w, int h) {
@@ -584,7 +481,7 @@ public final class RuffyClickGui extends Screen {
         g.fill(x, y, x + w, y + h, track);
         g.renderOutline(x, y, w, h, enabled
                 ? withAlpha(RuffyConfig.primaryColor(), 190) : BORDER);
-        int knob = Math.max(8, h - 6);
+        int knob = Math.max(7, h - 6);
         int knobX = enabled ? x + w - knob - 3 : x + 3;
         g.fill(knobX, y + 3, knobX + knob, y + h - 3,
                 enabled ? WHITE : 0xFFAAB6C2);
@@ -594,8 +491,7 @@ public final class RuffyClickGui extends Screen {
                                  String label, boolean active) {
         g.fill(x, y, x + w, y + h, active ? 0xAA1C3647 : 0x55202B38);
         g.renderOutline(x, y, w, h, active ? withAlpha(RuffyConfig.primaryColor(), 170) : BORDER);
-        g.drawCenteredString(font, label, x + w / 2, y + 7,
-                active ? WHITE : DIM);
+        g.drawCenteredString(font, label, x + w / 2, y + 6, active ? WHITE : DIM);
     }
 
     private void drawWrapped(GuiGraphics g, String text, int x, int y,
@@ -620,11 +516,19 @@ public final class RuffyClickGui extends Screen {
     private void drawFooter(GuiGraphics g) {
         int y = panelY + panelH - 1;
         g.fill(panelX, y, panelX + panelW, y + 1, BORDER);
-        g.fill(panelX, y, panelX + 114, y + 1, RuffyConfig.primaryColor());
-        g.drawString(font, "RUFFY VISUALS  ·  CLIENT ONLY",
-                panelX + 21, panelY + panelH - 21, DIM, false);
-        g.drawString(font, "RIGHT SHIFT TO TOGGLE",
-                panelX + panelW - 156, panelY + panelH - 21, DIM, false);
+        g.fill(panelX, y, panelX + 88, y + 1, RuffyConfig.primaryColor());
+        g.drawString(font, "RUFFY VISUALS", panelX + 13,
+                panelY + panelH - 17, DIM, false);
+        g.drawString(font, "RIGHT SHIFT", panelX + panelW - 75,
+                panelY + panelH - 17, DIM, false);
+    }
+
+    private static String qualityName(int quality) {
+        return switch (quality) {
+            case 0 -> "LOW";
+            case 1 -> "MEDIUM";
+            default -> "HIGH";
+        };
     }
 
     private static int palettePrimary(int palette) {
@@ -663,7 +567,6 @@ public final class RuffyClickGui extends Screen {
             if (tab == Tab.VISUALS && handleFilters(mx, my)) return true;
             if (handleModuleListClick(mx, my)) return true;
             if (handleInspectorClick(mx, my)) return true;
-            if (tab == Tab.HUD && handleHudOpacityClick(mx, my)) return true;
             if (handlePagination(mx, my)) return true;
         }
 
@@ -674,42 +577,31 @@ public final class RuffyClickGui extends Screen {
     }
 
     private boolean handleNavigation(int mx, int my) {
-        int y = panelY + 60;
-        if (my < y + 5 || my > y + 43) return false;
-        int x = panelX + 20;
+        int y = panelY + 40;
+        if (my < y + 3 || my > y + 27) return false;
+        int x = panelX + 10;
         for (Tab item : Tab.values()) {
-            int w = switch (item) {
-                case VISUALS -> 112;
-                case PRESETS, CONFIGS, SETUP -> 98;
-                case WORLD, HUD, STYLE -> 82;
-            };
-            if (inside(mx, my, x, y + 5, w - 5, 39)) {
+            if (inside(mx, my, x, y + 3, item.width - 3, 24)) {
                 tab = item;
                 modulePage = 0;
                 if (searchBox != null) searchBox.setVisible(tab == Tab.VISUALS);
                 return true;
             }
-            x += w;
+            x += item.width;
         }
         return false;
     }
 
     private boolean handleFilters(int mx, int my) {
-        int y = panelY + 122;
+        int y = panelY + 77;
         int x = leftX;
         for (Filter item : Filter.values()) {
-            int w = switch (item) {
-                case ALL -> 48;
-                case ENTITIES -> 74;
-                case MOTION -> 64;
-                case STARRED -> 64;
-            };
-            if (inside(mx, my, x, y, w, 24)) {
+            if (inside(mx, my, x, y, item.width, 22)) {
                 filter = item;
                 modulePage = 0;
                 return true;
             }
-            x += w + 4;
+            x += item.width + 2;
         }
         return false;
     }
@@ -718,28 +610,20 @@ public final class RuffyClickGui extends Screen {
         RuffyFeature.Section section = tab == Tab.HUD ? RuffyFeature.Section.HUD
                 : tab == Tab.WORLD ? RuffyFeature.Section.WORLD : null;
         List<RuffyFeature> features = filteredFeatures(section);
-        int startY = panelY + 164;
-        int gap = 8;
-        int cardGap = 8;
-        int cardW = (leftW - cardGap) / 2;
-        int cardH = 41;
 
-        for (int i = 0; i < 16; i++) {
-            int index = modulePage * 16 + i;
+        for (int i = 0; i < 8; i++) {
+            int index = modulePage * 8 + i;
             if (index >= features.size()) break;
             RuffyFeature feature = features.get(index);
-            int col = i / 8;
-            int row = i % 8;
-            int x = leftX + col * (cardW + cardGap);
-            int y = startY + row * (cardH + gap);
-            if (!inside(mx, my, x, y, cardW, cardH)) continue;
+            int y = listTop + i * rowHeight;
+            if (!inside(mx, my, leftX, y, leftW, rowHeight - 2)) continue;
 
-            if (mx >= x + cardW - 62 && mx < x + cardW - 38) {
+            if (mx >= leftX + leftW - 54 && mx < leftX + leftW - 33) {
                 String key = "favorite_" + feature.key();
                 RuffyConfig.set(key, !RuffyConfig.get(key));
                 return true;
             }
-            if (mx >= x + cardW - 36) {
+            if (mx >= leftX + leftW - 31) {
                 RuffyConfig.set(feature.key(), !RuffyConfig.get(feature.key()));
                 selectedKey = feature.key();
                 return true;
@@ -752,52 +636,50 @@ public final class RuffyClickGui extends Screen {
 
     private boolean handleInspectorClick(int mx, int my) {
         int x = rightX;
-        int y = panelY + 122;
+        int y = listTop;
         RuffyFeature selected = RuffyFeature.ALL.stream()
                 .filter(feature -> feature.key().equals(selectedKey)).findFirst().orElse(null);
         if (selected == null) return false;
 
-        int toggleY = y + 174;
-        if (inside(mx, my, x + 16, toggleY, rightW - 32, 50)) {
+        int toggleY = y + 104;
+        if (inside(mx, my, x + 8, toggleY, rightW - 16, 39)) {
             RuffyConfig.set(selected.key(), !RuffyConfig.get(selected.key()));
             return true;
+        }
+
+        if (selected.section() == RuffyFeature.Section.HUD) {
+            int sliderY = toggleY + 49 + 27 + 16;
+            if (inside(mx, my, x + 10, sliderY, rightW - 20, 16)) {
+                int value = 12 + Math.round((mx - (x + 10)) * 78.0F / Math.max(1, rightW - 20));
+                RuffyConfig.setInt("hud_opacity", value);
+                return true;
+            }
         }
         return false;
     }
 
     private boolean handlePagination(int mx, int my) {
-        int y = panelY + panelH - 42;
-        int mid = leftX + leftW - 112;
-        if (!inside(mx, my, mid, y, 110, 23)) return false;
+        int y = panelY + panelH - 32;
+        int mid = leftX + leftW - 78;
+        if (!inside(mx, my, mid, y, 96, 20)) return false;
         List<RuffyFeature> features = filteredFeatures(
                 tab == Tab.HUD ? RuffyFeature.Section.HUD
                         : tab == Tab.WORLD ? RuffyFeature.Section.WORLD : null
         );
-        int pages = Math.max(1, (features.size() + 15) / 16);
-        if (mx < mid + 25) modulePage = Math.max(0, modulePage - 1);
-        else if (mx > mid + 84) modulePage = Math.min(pages - 1, modulePage + 1);
-        return true;
-    }
-
-    private boolean handleHudOpacityClick(int mx, int my) {
-        int x = rightX + 18;
-        int y = panelY + panelH - 100;
-        if (!inside(mx, my, x, y - 24, rightW - 36, 42)) return false;
-        int value = 12 + Math.round((mx - x) * 78.0F / Math.max(1, rightW - 36));
-        RuffyConfig.setInt("hud_opacity", value);
+        int pages = Math.max(1, (features.size() + 7) / 8);
+        if (mx < mid + 22) modulePage = Math.max(0, modulePage - 1);
+        else if (mx > mid + 74) modulePage = Math.min(pages - 1, modulePage + 1);
         return true;
     }
 
     private boolean handlePresetClick(int mx, int my) {
-        int x = panelX + 32;
-        int y = panelY + 132;
-        int gap = 16;
-        int cardW = Math.min(420, (panelW - 92) / 2);
-        int cardH = 116;
+        int x = panelX + 18;
+        int y = panelY + 106;
+        int w = (panelW - 50) / 2;
         for (int i = 0; i < 4; i++) {
-            int cx = x + (i % 2) * (cardW + gap);
-            int cy = y + (i / 2) * (cardH + gap);
-            if (inside(mx, my, cx, cy, cardW, cardH)) {
+            int cx = x + (i % 2) * (w + 10);
+            int cy = y + (i / 2) * 84;
+            if (inside(mx, my, cx, cy, w, 74)) {
                 applyPreset(i);
                 return true;
             }
@@ -818,6 +700,7 @@ public final class RuffyClickGui extends Screen {
             case 3 -> 22;
             default -> 44;
         });
+        RuffyConfig.setInt("effect_quality", preset == 2 || preset == 3 ? 0 : 2);
 
         boolean reduced = preset == 2 || preset == 3;
         RuffyConfig.set("nebula_particles", !reduced);
@@ -839,53 +722,58 @@ public final class RuffyClickGui extends Screen {
     }
 
     private boolean handleStyleClick(int mx, int my) {
-        int x = panelX + 34;
-        int y = panelY + 128;
-        int sw = 178;
-        int sh = 82;
-        int gap = 14;
+        int x = panelX + 18;
+        int y = panelY + 102;
+        int sw = (panelW - 64) / 3;
         for (int i = 0; i < PALETTE_NAMES.length; i++) {
-            int cx = x + (i % 3) * (sw + gap);
-            int cy = y + 52 + (i / 3) * (sh + gap);
-            if (inside(mx, my, cx, cy, sw, sh)) {
+            int cx = x + (i % 3) * (sw + 8);
+            int cy = y + 22 + (i / 3) * 48;
+            if (inside(mx, my, cx, cy, sw, 41)) {
                 RuffyConfig.setInt("palette", i);
                 return true;
             }
         }
 
-        int sliderY = y + 52 + 2 * (sh + gap) + 24;
-        if (inside(mx, my, x, sliderY + 17, 330, 19)) {
-            int value = 12 + Math.round((mx - x) * 78.0F / 330.0F);
-            RuffyConfig.setInt("hud_opacity", value);
+        int sliderY = panelY + 80 + 132;
+        if (inside(mx, my, x, sliderY + 9, panelW - 42, 16)) {
+            RuffyConfig.setInt("hud_opacity",
+                    12 + Math.round((mx - x) * 78.0F / (panelW - 42)));
             return true;
         }
 
-        int menuY = sliderY + 82;
-        if (inside(mx, my, x, menuY + 17, 330, 19)) {
-            int value = 60 + Math.round((mx - x) * 40.0F / 330.0F);
-            RuffyConfig.setInt("menu_opacity", value);
+        int menuY = sliderY + 48;
+        if (inside(mx, my, x, menuY + 9, panelW - 42, 16)) {
+            RuffyConfig.setInt("menu_opacity",
+                    60 + Math.round((mx - x) * 40.0F / (panelW - 42)));
+            return true;
+        }
+
+        int qualityY = menuY + 48;
+        if (inside(mx, my, x, qualityY + 9, panelW - 42, 16)) {
+            RuffyConfig.setInt("effect_quality",
+                    Math.round((mx - x) * 2.0F / (panelW - 42)));
             return true;
         }
         return false;
     }
 
     private boolean handleConfigClick(int mx, int my) {
-        int x = panelX + 34;
-        int y = panelY + 132;
-        if (inside(mx, my, x, y + 58, 360, 70)) {
+        int x = panelX + 18;
+        int y = panelY + 128;
+        if (inside(mx, my, x, y, panelW - 36, 49)) {
             for (RuffyFeature feature : RuffyFeature.ALL) {
-                // The module reset restores feature defaults without clearing style or favorites.
                 RuffyConfig.set(feature.key(), defaultModuleState(feature.key()));
             }
             return true;
         }
-        if (inside(mx, my, x, y + 142, 360, 70)) {
+        if (inside(mx, my, x, y + 57, panelW - 36, 49)) {
             RuffyConfig.setInt("palette", 0);
             RuffyConfig.setInt("hud_opacity", 44);
             RuffyConfig.setInt("menu_opacity", 94);
+            RuffyConfig.setInt("effect_quality", 2);
             return true;
         }
-        if (inside(mx, my, x, y + 226, 360, 70)) {
+        if (inside(mx, my, x, y + 114, panelW - 36, 49)) {
             RuffyConfig.reset();
             return true;
         }
@@ -900,6 +788,36 @@ public final class RuffyClickGui extends Screen {
                     "damage_pulse", "underwater_bubbles" -> true;
             default -> false;
         };
+    }
+
+    private static String qualityName(int quality) {
+        return switch (quality) {
+            case 0 -> "LOW";
+            case 1 -> "MEDIUM";
+            default -> "HIGH";
+        };
+    }
+
+    private static int palettePrimary(int palette) {
+        int[] colors = {0xFF58D8F5, 0xFFFF75CF, 0xFF67E4B6,
+                0xFFFFC36B, 0xFF91BFFF, 0xFFE1E8F2};
+        return colors[Math.max(0, Math.min(colors.length - 1, palette))];
+    }
+
+    private static int paletteSecondary(int palette) {
+        int[] colors = {0xFF9B7BFF, 0xFF9D85FF, 0xFF65CFFF,
+                0xFFFF826F, 0xFFB6D5FF, 0xFF9AA8BA};
+        return colors[Math.max(0, Math.min(colors.length - 1, palette))];
+    }
+
+    private static int withAlpha(int color, int alpha) {
+        return ((alpha & 0xFF) << 24) | (color & 0x00FFFFFF);
+    }
+
+    private static boolean inside(double mouseX, double mouseY,
+                                  int x, int y, int w, int h) {
+        return mouseX >= x && mouseX < x + w
+                && mouseY >= y && mouseY < y + h;
     }
 
     @Override
