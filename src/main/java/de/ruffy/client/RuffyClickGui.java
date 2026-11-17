@@ -790,36 +790,6 @@ public final class RuffyClickGui extends Screen {
         };
     }
 
-    private static String qualityName(int quality) {
-        return switch (quality) {
-            case 0 -> "LOW";
-            case 1 -> "MEDIUM";
-            default -> "HIGH";
-        };
-    }
-
-    private static int palettePrimary(int palette) {
-        int[] colors = {0xFF58D8F5, 0xFFFF75CF, 0xFF67E4B6,
-                0xFFFFC36B, 0xFF91BFFF, 0xFFE1E8F2};
-        return colors[Math.max(0, Math.min(colors.length - 1, palette))];
-    }
-
-    private static int paletteSecondary(int palette) {
-        int[] colors = {0xFF9B7BFF, 0xFF9D85FF, 0xFF65CFFF,
-                0xFFFF826F, 0xFFB6D5FF, 0xFF9AA8BA};
-        return colors[Math.max(0, Math.min(colors.length - 1, palette))];
-    }
-
-    private static int withAlpha(int color, int alpha) {
-        return ((alpha & 0xFF) << 24) | (color & 0x00FFFFFF);
-    }
-
-    private static boolean inside(double mouseX, double mouseY,
-                                  int x, int y, int w, int h) {
-        return mouseX >= x && mouseX < x + w
-                && mouseY >= y && mouseY < y + h;
-    }
-
     @Override
     public void onClose() {
         if (minecraft != null) minecraft.setScreen(null);
