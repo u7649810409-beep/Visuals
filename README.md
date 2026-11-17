@@ -2,18 +2,22 @@
 
 A standalone, client-side visual mod for **Minecraft Java 1.21.11** using Fabric.
 
-## Visual direction
+## Futuristic visual suite
 
-The interface uses a restrained sci-fi control-center style: deep navy panels, fine cyan outlines, violet secondary accents, compact typography, clear active states and consistent spacing.
+- Clean sci-fi ClickGUI with compact cards, cyan status accents and violet secondary highlights.
+- **Right Shift** opens the control center.
+- Persistent module toggles in `config/ruffyclient.properties`.
+- Minimal HUD watermark, FPS counter, optional coordinates and WASD keystrokes.
 
-## Features
+## Motion and combat feedback
 
-- **Right Shift** opens the futuristic ClickGUI.
-- Three clean sections: HUD, Effects and About.
-- Persistent feature toggles in `config/ruffyclient.properties`.
-- Compact HUD watermark, FPS counter and optional coordinates.
-- Minimal WASD keystrokes display with active key feedback.
-- Optional ambient purple particles, movement trail and jump burst.
+- **Smooth Swing** adjusts the first-person arm swing curve with a snappier ease-out animation.
+- **Impact Slash** adds a sweep visual and electric sparks when the local player swings.
+- **Air Sparks** adds subtle particles while descending.
+- **Landing Ring** emits a compact energy ring on landing.
+- **Sprint Dust**, **Movement Trail**, **Jump Burst** and **Nebula Particles** add optional movement cosmetics.
+
+All effects are client-side cosmetics. The swing animation does not change attack cooldowns, hit registration, reach, damage, packets or server-side behavior.
 
 ## Requirements
 
@@ -34,7 +38,7 @@ GitHub Actions builds the remapped JAR with Java 21 and Gradle 9.2.1. The distri
 
 1. Install Fabric Loader for Minecraft 1.21.11.
 2. Install Fabric API for 1.21.11.
-3. Put the built `ruffy-visuals` JAR into `.minecraft/mods`.
+3. Put `ruffy-visuals-1.1.0.jar` into `.minecraft/mods`.
 4. Launch the Fabric 1.21.11 profile and press **Right Shift** in a world.
 
-All toggles affect only local UI and cosmetic effects. No gameplay automation is included.
+The feature toggles are saved automatically in the Ruffy Visuals config file.

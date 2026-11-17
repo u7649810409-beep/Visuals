@@ -17,14 +17,19 @@ public final class RuffyConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger("ruffyclient/config");
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("ruffyclient.properties");
     private static final Properties VALUES = new Properties();
-    private static final Map<String, Boolean> DEFAULTS = Map.of(
-            "watermark", true,
-            "fps", true,
-            "coordinates", false,
-            "keystrokes", true,
-            "nebula_particles", true,
-            "movement_trail", false,
-            "jump_burst", true
+    private static final Map<String, Boolean> DEFAULTS = Map.ofEntries(
+            Map.entry("watermark", true),
+            Map.entry("fps", true),
+            Map.entry("coordinates", false),
+            Map.entry("keystrokes", true),
+            Map.entry("nebula_particles", true),
+            Map.entry("movement_trail", false),
+            Map.entry("jump_burst", true),
+            Map.entry("swing_animation", true),
+            Map.entry("hit_sparks", true),
+            Map.entry("critical_sparks", true),
+            Map.entry("landing_ring", true),
+            Map.entry("sprint_dust", false)
     );
 
     private RuffyConfig() {}

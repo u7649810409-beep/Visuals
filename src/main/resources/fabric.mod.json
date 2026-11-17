@@ -3,13 +3,16 @@
   "id": "ruffyclient",
   "version": "${version}",
   "name": "Ruffy Visuals",
-  "description": "An original client-side visual client with a nebula-themed ClickGUI, HUD widgets and cosmetic particle effects.",
+  "description": "A futuristic client-side visual client with a clean ClickGUI, HUD widgets, hit effects and a custom swing animation.",
   "authors": ["Ruffy"],
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
     "client": ["de.ruffy.client.RuffyClient"]
   },
+  "mixins": [
+    "ruffyclient.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.18.4",
     "fabric-api": "*",

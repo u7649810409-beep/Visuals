@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "ruffyclient",
+  "version": "${version}",
+  "name": "Ruffy Visuals",
+  "description": "An original client-side visual client with a nebula-themed ClickGUI, HUD widgets and cosmetic particle effects.",
+  "authors": ["Ruffy"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["de.ruffy.client.RuffyClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.4",
+    "fabric-api": "*",
+    "minecraft": "~1.21.11",
+    "java": ">=21"
+  }
+}
