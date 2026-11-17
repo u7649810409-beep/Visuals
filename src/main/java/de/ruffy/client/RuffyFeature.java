@@ -2,16 +2,18 @@ package de.ruffy.client;
 
 import java.util.List;
 
-public record RuffyFeature(String key, String title, String description, Category category) {
-    public enum Category {
-        HUD("HUD", "Information on your screen"),
-        EFFECTS("Effects", "Movement, combat feedback and motion"),
-        ABOUT("About", "Client information and controls");
+/** One independently switchable module shown in the Visuals control center. */
+public record RuffyFeature(String key, String title, String description, Section section, Group group) {
+    public enum Section {
+        HUD("HUD", "Clean, transparent on-screen information"),
+        MOTION("Motion", "Movement trails and kinetic effects"),
+        ENTITIES("Entities", "Player and combat feedback visuals"),
+        WORLD("World", "Atmosphere and environment effects");
 
         private final String title;
         private final String subtitle;
 
-        Category(String title, String subtitle) {
+        Section(String title, String subtitle) {
             this.title = title;
             this.subtitle = subtitle;
         }
@@ -20,18 +22,37 @@ public record RuffyFeature(String key, String title, String description, Categor
         public String subtitle() { return subtitle; }
     }
 
+    public enum Group {
+        GENERAL, ENTITIES, MOTION
+    }
+
     public static final List<RuffyFeature> ALL = List.of(
-            new RuffyFeature("watermark", "Watermark", "Show the RUFFY VISUALS tag", Category.HUD),
-            new RuffyFeature("fps", "FPS Counter", "Display the current frame rate", Category.HUD),
-            new RuffyFeature("coordinates", "Coordinates", "Show your XYZ position", Category.HUD),
-            new RuffyFeature("keystrokes", "Keystrokes", "Show pressed movement keys", Category.HUD),
-            new RuffyFeature("nebula_particles", "Nebula Particles", "Soft ambient particles around you", Category.EFFECTS),
-            new RuffyFeature("movement_trail", "Movement Trail", "Leave a subtle trail while moving", Category.EFFECTS),
-            new RuffyFeature("jump_burst", "Jump Burst", "Emit a compact burst when jumping", Category.EFFECTS),
-            new RuffyFeature("sprint_dust", "Sprint Dust", "Small dust puffs while sprinting", Category.EFFECTS),
-            new RuffyFeature("landing_ring", "Landing Ring", "A clean energy ring on landing", Category.EFFECTS),
-            new RuffyFeature("critical_sparks", "Air Sparks", "Light sparks while falling", Category.EFFECTS),
-            new RuffyFeature("hit_sparks", "Impact Slash", "A short slash and sparks on each swing", Category.EFFECTS),
-            new RuffyFeature("swing_animation", "Smooth Swing", "A sharper custom first-person swing curve", Category.EFFECTS)
+            new RuffyFeature("watermark", "Watermark", "Compact Ruffy status tag", Section.HUD, Group.GENERAL),
+            new RuffyFeature("fps", "Performance", "Live FPS counter", Section.HUD, Group.GENERAL),
+            new RuffyFeature("coordinates", "Coordinates", "Player XYZ position", Section.HUD, Group.GENERAL),
+            new RuffyFeature("keystrokes", "Keystrokes", "Minimal WASD input display", Section.HUD, Group.MOTION),
+            new RuffyFeature("direction", "Direction", "Current compass direction", Section.HUD, Group.GENERAL),
+            new RuffyFeature("speed", "Movement Speed", "Horizontal blocks per second", Section.HUD, Group.MOTION),
+            new RuffyFeature("world_clock", "World Clock", "In-game time in a compact HUD chip", Section.HUD, Group.GENERAL),
+
+            new RuffyFeature("nebula_particles", "Ambient Particles", "Soft purple particles around you", Section.MOTION, Group.MOTION),
+            new RuffyFeature("orbit_particles", "Orbit Shards", "Slow particles orbiting your player", Section.MOTION, Group.MOTION),
+            new RuffyFeature("movement_trail", "Movement Trail", "Subtle light trail while moving", Section.MOTION, Group.MOTION),
+            new RuffyFeature("jump_burst", "Jump Burst", "Energy burst when leaving the ground", Section.MOTION, Group.MOTION),
+            new RuffyFeature("sprint_dust", "Sprint Dust", "Soft dust puffs while sprinting", Section.MOTION, Group.MOTION),
+            new RuffyFeature("landing_ring", "Landing Ring", "Energy ring when touching down", Section.MOTION, Group.MOTION),
+            new RuffyFeature("step_sparks", "Footstep Sparks", "Small stepside sparks while walking", Section.MOTION, Group.MOTION),
+            new RuffyFeature("starfall", "Starfall", "A faint falling-star particle effect", Section.MOTION, Group.MOTION),
+
+            new RuffyFeature("hit_sparks", "Impact Slash", "Sweep and sparks on each hand swing", Section.ENTITIES, Group.ENTITIES),
+            new RuffyFeature("swing_animation", "Smooth Swing", "Refined first-person swing timing", Section.ENTITIES, Group.ENTITIES),
+            new RuffyFeature("critical_sparks", "Air Sparks", "Light particles while descending", Section.ENTITIES, Group.ENTITIES),
+            new RuffyFeature("low_health_aura", "Low Health Aura", "Warning aura when health is critical", Section.ENTITIES, Group.ENTITIES),
+            new RuffyFeature("potion_glow", "Potion Glow", "Enchant particles while effects are active", Section.ENTITIES, Group.ENTITIES),
+            new RuffyFeature("damage_pulse", "Damage Pulse", "A brief visual pulse after taking damage", Section.ENTITIES, Group.ENTITIES),
+
+            new RuffyFeature("underwater_bubbles", "Water Bubbles", "Bubbles around you underwater", Section.WORLD, Group.MOTION),
+            new RuffyFeature("weather_fx", "Weather FX", "Local rain particles in rainy biomes", Section.WORLD, Group.MOTION),
+            new RuffyFeature("cave_dust", "Cave Dust", "Ambient dust in very dark areas", Section.WORLD, Group.MOTION)
     );
 }
