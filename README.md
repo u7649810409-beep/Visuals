@@ -1,45 +1,40 @@
-# Ruffy Visuals 1.2.0
+# Ruffy Visuals 1.3.0
 
 A standalone client-side visual mod for **Minecraft Java 1.21.11** using Fabric.
 
-## Control center
+## Compact control center
 
-The ClickGUI is inspired by desktop visual-client panels:
+- Inventory-inspired compact window (responsive between 420–560 GUI pixels wide).
+- Seven tabs: **Visuals, Presets, World, HUD, Style, Configs, Setup**.
+- Search field reflows below the filters on narrow displays.
+- Module browser with **All, Entities, Motion and Starred** filters.
+- Eight modules per page, favorites, active switches and a right-side settings inspector.
+- Four profiles: Nebula, Cinematic, Performance and Clean.
+- Open with **Right Shift**.
 
-- Seven top-level tabs: **Visuals, Presets, World, HUD, Style, Configs, Setup**.
-- Searchable module browser with **All, Entities, Motion and Starred** filters.
-- Two-column module list with favorites, active switches and a right-side inspector.
-- Four quick profiles: Nebula, Cinematic, Performance and Clean.
-- Keyboard shortcut: **Right Shift**.
+## Color and transparency
 
-## Multi-color style
+Six coordinated palettes: Nebula, Orchid, Emerald, Solar, Arctic and Mono.
 
-Choose from six coordinated palettes:
+The Style tab controls HUD panel opacity, menu opacity and effect quality. HUD chips wrap on small screens and truncate long values instead of drawing off-screen. Jump and Sprint key states are shown in the compact keystrokes panel.
 
-- Nebula (cyan / violet)
-- Orchid (pink / violet)
-- Emerald (mint / cyan)
-- Solar (amber / coral)
-- Arctic (ice blue)
-- Mono (silver)
-
-The Style tab contains separate **HUD transparency** and **menu opacity** controls. The HUD uses translucent panels, color-matched outlines and compact information chips.
-
-## Modules
+## Visual modules (25)
 
 **HUD:** Watermark, Performance (FPS), Coordinates, Keystrokes, Direction, Movement Speed and World Clock.
 
-**Motion:** Ambient Particles, Orbit Shards, Movement Trail, Jump Burst, Sprint Dust, Landing Ring, Footstep Sparks and Starfall.
+**Motion:** Ambient Particles, Orbit Shards, Movement Trail, Jump Burst, Sprint Dust, Landing Ring, Footstep Sparks, Starfall and Palette Sparks.
 
 **Entities:** Impact Slash, Smooth Swing, Air Sparks, Low Health Aura, Potion Glow and Damage Pulse.
 
 **World:** Water Bubbles, Weather FX and Cave Dust.
 
-All effects are individually switchable and saved to `config/ruffyclient.properties`.
+Palette Sparks use Minecraft's native dust particle options in the currently selected accent colors. The visual effect engine has Low, Medium and High quality levels, scaling spawn frequency and detail.
+
+All modules are individually switchable. Settings are stored in `config/ruffyclient.properties`.
 
 ## Swing animation and safety
 
-Smooth Swing adjusts only the local first-person rendering curve. Impact Slash and particles are cosmetic. Nothing changes attack cooldowns, hit registration, reach, damage, packets or server-side behavior.
+Smooth Swing adjusts only the local first-person rendering curve. Impact Slash and particles are cosmetic. Nothing changes attack cooldowns, hit registration, reach, damage, packets or server-side behaviour.
 
 ## Requirements
 
@@ -54,12 +49,12 @@ Smooth Swing adjusts only the local first-person rendering curve. Impact Slash a
 gradle build
 ```
 
-GitHub Actions builds the remapped mod JAR with Java 21 and Gradle 9.2.1. The distributable file is written to `build/libs/ruffy-visuals-1.2.0.jar`.
+GitHub Actions builds the remapped JAR with Java 21 and Gradle 9.2.1. The distributable file is written to `build/libs/ruffy-visuals-1.3.0.jar`.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 1.21.11.
 2. Install Fabric API for 1.21.11.
-3. Put `ruffy-visuals-1.2.0.jar` into `.minecraft/mods`.
+3. Put `ruffy-visuals-1.3.0.jar` into `.minecraft/mods`.
 4. Launch the Fabric 1.21.11 profile.
-5. Press **Right Shift** in a world to open the control center.
+5. Press **Right Shift** in a world.
