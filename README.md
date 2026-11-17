@@ -1,17 +1,19 @@
 # Ruffy Visuals
 
-An original, client-side visuals mod for **Minecraft Java 1.21.11** using Fabric. It is built as a standalone mod, not a modified Minecraft client or a server component.
+A standalone, client-side visual mod for **Minecraft Java 1.21.11** using Fabric.
 
-> The linked YouTube video could not be loaded in this environment (YouTube throttled the request), so this first implementation is an original visual-client foundation rather than a verified one-to-one reproduction. Provide a downloaded clip or screenshots to align the next iteration with the exact reference.
+## Visual direction
 
-## Current features
+The interface uses a restrained sci-fi control-center style: deep navy panels, fine cyan outlines, violet secondary accents, compact typography, clear active states and consistent spacing.
 
-- **Right Shift** opens the nebula-themed ClickGUI.
+## Features
+
+- **Right Shift** opens the futuristic ClickGUI.
+- Three clean sections: HUD, Effects and About.
 - Persistent feature toggles in `config/ruffyclient.properties`.
-- HUD watermark, FPS counter, coordinates and WASD keystrokes.
-- Ambient purple portal particles around the local player.
-- Optional movement trail and jump-burst particles.
-- Client-side only: no server plugin and no gameplay/combat automation.
+- Compact HUD watermark, FPS counter and optional coordinates.
+- Minimal WASD keystrokes display with active key feedback.
+- Optional ambient purple particles, movement trail and jump burst.
 
 ## Requirements
 
@@ -22,13 +24,11 @@ An original, client-side visuals mod for **Minecraft Java 1.21.11** using Fabric
 
 ## Build
 
-GitHub Actions builds the remapped JAR with Java 21 and Gradle 9.2.1. You can also build locally with Gradle 9.2.1 or newer:
-
 ```bash
 gradle build
 ```
 
-The distributable JAR is written to `build/libs/ruffy-visuals-1.0.0.jar` (Loom may also create a sources JAR).
+GitHub Actions builds the remapped JAR with Java 21 and Gradle 9.2.1. The distributable file is written to `build/libs/`.
 
 ## Install
 
@@ -37,6 +37,4 @@ The distributable JAR is written to `build/libs/ruffy-visuals-1.0.0.jar` (Loom m
 3. Put the built `ruffy-visuals` JAR into `.minecraft/mods`.
 4. Launch the Fabric 1.21.11 profile and press **Right Shift** in a world.
 
-## Notes
-
-The visual effects are cosmetic and local. No ESP, aim assistance, reach changes, packet manipulation, or other combat automation is included.
+All toggles affect only local UI and cosmetic effects. No gameplay automation is included.
