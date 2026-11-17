@@ -86,9 +86,9 @@ public final class RuffyClickGui extends Screen {
         leftW = Math.max(360, (panelW - 64) * 55 / 100);
         rightX = leftX + leftW + 20;
         rightW = panelX + panelW - 22 - rightX;
-        searchX = leftX + 242;
+        searchX = leftX + 270;
         searchY = panelY + 132;
-        searchW = Math.max(100, leftW - 250);
+        searchW = Math.max(100, leftW - 278);
     }
 
     @Override
@@ -258,11 +258,13 @@ public final class RuffyClickGui extends Screen {
             g.drawString(font, title, leftX + 3, y + 8, RuffyConfig.primaryColor(), false);
         }
 
-        int searchWidth = searchBox == null ? searchW : searchBox.getWidth();
-        g.fill(searchX - 5, searchY - 1, searchX + searchWidth + 5, searchY + 22,
-                0x77111D2A);
-        g.renderOutline(searchX - 5, searchY - 1, searchWidth + 10, 23, BORDER);
-        g.drawString(font, "⌕", searchX + 7, searchY + 6, DIM, false);
+        if (showFilters) {
+            int searchWidth = searchBox == null ? searchW : searchBox.getWidth();
+            g.fill(searchX - 5, searchY - 1, searchX + searchWidth + 5, searchY + 22,
+                    0x77111D2A);
+            g.renderOutline(searchX - 5, searchY - 1, searchWidth + 10, 23, BORDER);
+            g.drawString(font, "⌕", searchX + 7, searchY + 6, DIM, false);
+        }
         if (searchBox != null) searchBox.setVisible(showFilters);
     }
 
