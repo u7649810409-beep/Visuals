@@ -17,7 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
-/** Main client entrypoint for Ruffy Visuals. All added effects are local cosmetics. */
+/**
+ * Client-side visual effects engine. Effects are local cosmetic particles only;
+ * no attack timing, reach, hit registration or server behaviour is modified.
+ */
 public final class RuffyClient implements ClientModInitializer {
     public static final String MOD_ID = "ruffyclient";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
@@ -49,7 +52,7 @@ public final class RuffyClient implements ClientModInitializer {
         );
 
         ClientTickEvents.END_CLIENT_TICK.register(RuffyClient::tick);
-        LOGGER.info("Ruffy Visuals initialized: multi-palette HUD and visual effects ready");
+        LOGGER.info("Ruffy Visuals initialized: compact GUI and enhanced effects engine ready");
     }
 
     private static void tick(Minecraft client) {
@@ -69,144 +72,205 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         LocalPlayer player = client.player;
-        boolean onGround = player.onGround();
-        boolean swinging = player.swinging;
         Vec3 velocity = player.getDeltaMovement();
         double horizontalSpeedSq = velocity.horizontalDistanceSqr();
+        boolean onGround = player.onGround();
+        boolean swinging = player.swinging;
+        int quality = RuffyConfig.getInt("effect_quality");
+        int detail = quality == 0 ? 1 : quality == 1 ? 2 : 3;
+        int lowFrequency = quality == 0 ? 14 : quality == 1 ? 9 : 6;
 
-        // Soft nebula particles: sparse and unobtrusive.
-        if (RuffyConfig.get("nebula_particles") && tick % 8 == 0) {
+        // Ambient nebula: slow drifting points with a faint enchanted shimmer.
+        if (RuffyConfig.get("nebula_particles") && tick % lowFrequency == 0) {
             double angle = RANDOM.nextDouble() * Math.PI * 2.0;
-            double radius = 1.0 + RANDOM.nextDouble() * 1.3;
-            client.level.addParticle(ParticleTypes.PORTAL,
-                    player.getX() + Math.cos(angle) * radius,
-                    player.getY() + 0.35 + RANDOM.nextDouble() * 1.5,
-                    player.getZ() + Math.sin(angle) * radius,
-                    0.0, 0.018, 0.0);
-        }
-
-        // Orbit shards move around the player's upper body.
-        if (RuffyConfig.get("orbit_particles") && tick % 3 == 0) {
-            double angle = tick * 0.11;
-            double radius = 0.62;
-            double height = 0.72 + Math.sin(angle * 1.7) * 0.42;
-            client.level.addParticle(ParticleTypes.END_ROD,
-                    player.getX() + Math.cos(angle) * radius,
-                    player.getY() + height,
-                    player.getZ() + Math.sin(angle) * radius,
-                    0.0, 0.008, 0.0);
-        }
-
-        if (RuffyConfig.get("movement_trail") && horizontalSpeedSq > 0.006 && tick % 2 == 0) {
-            client.level.addParticle(ParticleTypes.END_ROD,
-                    player.getX(), player.getY() + 0.12, player.getZ(),
-                    -velocity.x * 0.08, 0.012, -velocity.z * 0.08);
-        }
-
-        if (RuffyConfig.get("jump_burst") && wasOnGround && !onGround) {
-            spawnRing(client, player, ParticleTypes.END_ROD, 12, 0.48, 0.025);
-        }
-
-        if (RuffyConfig.get("landing_ring") && !wasOnGround && onGround) {
-            spawnRing(client, player, ParticleTypes.ELECTRIC_SPARK, 18, 0.72, 0.012);
-        }
-
-        if (RuffyConfig.get("sprint_dust") && player.isSprinting()
-                && horizontalSpeedSq > 0.004 && tick % 3 == 0) {
-            double length = Math.max(0.001, Math.sqrt(horizontalSpeedSq));
-            double backX = player.getX() - velocity.x / length * 0.34;
-            double backZ = player.getZ() - velocity.z / length * 0.34;
-            client.level.addParticle(ParticleTypes.CLOUD,
-                    backX, player.getY() + 0.08, backZ,
-                    -velocity.x * 0.12, 0.015, -velocity.z * 0.12);
-        }
-
-        if (RuffyConfig.get("step_sparks") && onGround
-                && horizontalSpeedSq > 0.004 && tick % 5 == 0) {
-            double side = RANDOM.nextBoolean() ? 0.18 : -0.18;
-            double yaw = Math.toRadians(player.getYRot() + 90.0F);
-            client.level.addParticle(ParticleTypes.ELECTRIC_SPARK,
-                    player.getX() + Math.cos(yaw) * side,
-                    player.getY() + 0.06,
-                    player.getZ() + Math.sin(yaw) * side,
-                    0.0, 0.018, 0.0);
-        }
-
-        if (RuffyConfig.get("critical_sparks") && !onGround
-                && velocity.y < -0.04 && tick % 4 == 0) {
-            double x = player.getX() + (RANDOM.nextDouble() - 0.5) * 0.55;
-            double y = player.getY() + player.getBbHeight() * 0.58;
-            double z = player.getZ() + (RANDOM.nextDouble() - 0.5) * 0.55;
-            client.level.addParticle(ParticleTypes.CRIT, x, y, z,
-                    (RANDOM.nextDouble() - 0.5) * 0.035, 0.025,
-                    (RANDOM.nextDouble() - 0.5) * 0.035);
-        }
-
-        if (RuffyConfig.get("low_health_aura") && player.getHealth() <= 6.0F && tick % 7 == 0) {
-            double angle = RANDOM.nextDouble() * Math.PI * 2.0;
-            double radius = 0.6 + RANDOM.nextDouble() * 0.45;
-            client.level.addParticle(ParticleTypes.SOUL_FIRE_FLAME,
-                    player.getX() + Math.cos(angle) * radius,
-                    player.getY() + 0.2 + RANDOM.nextDouble() * 1.2,
-                    player.getZ() + Math.sin(angle) * radius,
-                    0.0, 0.012, 0.0);
-        }
-
-        if (RuffyConfig.get("potion_glow") && !player.getActiveEffects().isEmpty() && tick % 6 == 0) {
-            client.level.addParticle(ParticleTypes.ENCHANT,
-                    player.getX() + (RANDOM.nextDouble() - 0.5) * 0.9,
-                    player.getY() + 0.35 + RANDOM.nextDouble() * 1.1,
-                    player.getZ() + (RANDOM.nextDouble() - 0.5) * 0.9,
-                    0.0, 0.025, 0.0);
-        }
-
-        if (RuffyConfig.get("damage_pulse") && player.getHealth() < previousHealth) {
-            for (int i = 0; i < 9; i++) {
-                double angle = (Math.PI * 2.0 * i) / 9.0;
-                client.level.addParticle(ParticleTypes.DAMAGE_INDICATOR,
-                        player.getX() + Math.cos(angle) * 0.55,
-                        player.getY() + 0.75,
-                        player.getZ() + Math.sin(angle) * 0.55,
-                        0.0, 0.04, 0.0);
+            double radius = 0.95 + RANDOM.nextDouble() * 1.45;
+            double x = player.getX() + Math.cos(angle) * radius;
+            double y = player.getY() + 0.25 + RANDOM.nextDouble() * 1.7;
+            double z = player.getZ() + Math.sin(angle) * radius;
+            client.level.addParticle(ParticleTypes.PORTAL, x, y, z,
+                    -Math.cos(angle) * 0.008, 0.018, -Math.sin(angle) * 0.008);
+            if (quality >= 1 && tick % (lowFrequency * 2) == 0) {
+                client.level.addParticle(ParticleTypes.ENCHANT,
+                        x + (RANDOM.nextDouble() - 0.5) * 0.25,
+                        y + 0.12, z + (RANDOM.nextDouble() - 0.5) * 0.25,
+                        0.0, 0.012, 0.0);
             }
         }
 
-        if (RuffyConfig.get("underwater_bubbles") && player.isUnderWater() && tick % 3 == 0) {
-            client.level.addParticle(ParticleTypes.BUBBLE,
-                    player.getX() + (RANDOM.nextDouble() - 0.5) * 0.8,
-                    player.getY() + 0.3 + RANDOM.nextDouble() * 1.0,
-                    player.getZ() + (RANDOM.nextDouble() - 0.5) * 0.8,
-                    0.0, 0.035, 0.0);
+        // Two counter-rotating orbit points create a more stable halo than a single particle.
+        if (RuffyConfig.get("orbit_particles") && tick % 2 == 0) {
+            double angle = tick * 0.095;
+            double radius = 0.66;
+            for (int i = 0; i < detail; i++) {
+                double a = angle + (Math.PI * 2.0 * i / detail);
+                double height = 0.72 + Math.sin(a * 1.7) * 0.38;
+                client.level.addParticle(i % 2 == 0 ? ParticleTypes.END_ROD : ParticleTypes.ENCHANT,
+                        player.getX() + Math.cos(a) * radius,
+                        player.getY() + height,
+                        player.getZ() + Math.sin(a) * radius,
+                        -Math.sin(a) * 0.012, 0.006, Math.cos(a) * 0.012);
+            }
         }
 
+        // Smooth trailing ribbons: three small points are spaced behind the motion vector.
+        if (RuffyConfig.get("movement_trail") && horizontalSpeedSq > 0.006
+                && tick % (quality == 0 ? 4 : 2) == 0) {
+            double speed = Math.sqrt(horizontalSpeedSq);
+            double backX = -velocity.x / Math.max(0.001, speed);
+            double backZ = -velocity.z / Math.max(0.001, speed);
+            double sideX = -backZ * 0.12;
+            double sideZ = backX * 0.12;
+            for (int i = 0; i < detail; i++) {
+                double distance = 0.18 + i * 0.16;
+                client.level.addParticle(ParticleTypes.END_ROD,
+                        player.getX() + backX * distance + sideX * (i - 1),
+                        player.getY() + 0.12 + i * 0.05,
+                        player.getZ() + backZ * distance + sideZ * (i - 1),
+                        -velocity.x * 0.025, 0.008, -velocity.z * 0.025);
+            }
+        }
+
+        // Jump: expanding ground ring plus a small upward core burst.
+        if (RuffyConfig.get("jump_burst") && wasOnGround && !onGround) {
+            spawnRing(client, player, ParticleTypes.END_ROD, 12 * detail, 0.46, 0.025, 0.08);
+            spawnRing(client, player, ParticleTypes.ELECTRIC_SPARK, 8 * detail, 0.25, 0.045, 0.13);
+            spawnVerticalBurst(client, player, detail);
+        }
+
+        // Landing: two offset rings and a short dust puff produce a layered impact.
+        if (RuffyConfig.get("landing_ring") && !wasOnGround && onGround) {
+            spawnRing(client, player, ParticleTypes.ELECTRIC_SPARK, 14 * detail, 0.72, 0.012, 0.06);
+            spawnRing(client, player, ParticleTypes.CLOUD, 10 * detail, 0.48, 0.009, 0.04);
+            client.level.addParticle(ParticleTypes.POOF,
+                    player.getX(), player.getY() + 0.06, player.getZ(),
+                    0.0, 0.018, 0.0);
+        }
+
+        // Sprint dust sits behind the player and spreads slightly to both sides.
+        if (RuffyConfig.get("sprint_dust") && player.isSprinting()
+                && horizontalSpeedSq > 0.004 && tick % (quality == 0 ? 5 : 3) == 0) {
+            double speed = Math.max(0.001, Math.sqrt(horizontalSpeedSq));
+            double backX = -velocity.x / speed;
+            double backZ = -velocity.z / speed;
+            for (int i = 0; i < detail; i++) {
+                double side = (i - (detail - 1) / 2.0) * 0.23;
+                client.level.addParticle(ParticleTypes.CLOUD,
+                        player.getX() + backX * 0.32 - backZ * side,
+                        player.getY() + 0.06,
+                        player.getZ() + backZ * 0.32 + backX * side,
+                        backX * 0.035, 0.012, backZ * 0.035);
+            }
+        }
+
+        // Tiny directional footstep sparks at alternating sides.
+        if (RuffyConfig.get("step_sparks") && onGround
+                && horizontalSpeedSq > 0.004 && tick % (quality == 0 ? 9 : 5) == 0) {
+            double side = ((tick / 5) % 2 == 0 ? 1.0 : -1.0) * 0.19;
+            double yaw = Math.toRadians(player.getYRot() + 90.0F);
+            client.level.addParticle(ParticleTypes.ELECTRIC_SPARK,
+                    player.getX() + Math.cos(yaw) * side,
+                    player.getY() + 0.055,
+                    player.getZ() + Math.sin(yaw) * side,
+                    -velocity.x * 0.03, 0.02, -velocity.z * 0.03);
+        }
+
+        // Falling/critical sparks drift around the player's lower body.
+        if (RuffyConfig.get("critical_sparks") && !onGround
+                && velocity.y < -0.04 && tick % (quality == 0 ? 7 : 4) == 0) {
+            for (int i = 0; i < detail; i++) {
+                double angle = RANDOM.nextDouble() * Math.PI * 2.0;
+                double radius = 0.18 + RANDOM.nextDouble() * 0.34;
+                client.level.addParticle(ParticleTypes.CRIT,
+                        player.getX() + Math.cos(angle) * radius,
+                        player.getY() + player.getBbHeight() * 0.48,
+                        player.getZ() + Math.sin(angle) * radius,
+                        Math.cos(angle) * 0.018, 0.026, Math.sin(angle) * 0.018);
+            }
+        }
+
+        // Low health halo climbs in a narrow spiral around the player.
+        if (RuffyConfig.get("low_health_aura") && player.getHealth() <= 6.0F
+                && tick % (quality == 0 ? 8 : 5) == 0) {
+            double angle = tick * 0.18;
+            double radius = 0.58 + Math.sin(angle * 1.4) * 0.08;
+            client.level.addParticle(ParticleTypes.SOUL_FIRE_FLAME,
+                    player.getX() + Math.cos(angle) * radius,
+                    player.getY() + 0.25 + Math.floorMod(tick, 28) / 28.0 * 1.35,
+                    player.getZ() + Math.sin(angle) * radius,
+                    0.0, 0.015, 0.0);
+        }
+
+        // Potion glow: little enchant particles orbit the torso instead of random positions.
+        if (RuffyConfig.get("potion_glow") && !player.getActiveEffects().isEmpty()
+                && tick % (quality == 0 ? 10 : 6) == 0) {
+            double angle = tick * 0.16;
+            double radius = 0.43;
+            client.level.addParticle(ParticleTypes.ENCHANT,
+                    player.getX() + Math.cos(angle) * radius,
+                    player.getY() + 0.55 + Math.sin(angle * 1.7) * 0.55,
+                    player.getZ() + Math.sin(angle) * radius,
+                    0.0, 0.022, 0.0);
+        }
+
+        // Damage pulse: short radial burst only when health actually decreases.
+        if (RuffyConfig.get("damage_pulse") && player.getHealth() < previousHealth) {
+            for (int i = 0; i < 10 * detail; i++) {
+                double angle = (Math.PI * 2.0 * i) / (10 * detail);
+                client.level.addParticle(ParticleTypes.DAMAGE_INDICATOR,
+                        player.getX() + Math.cos(angle) * 0.58,
+                        player.getY() + 0.72 + Math.sin(angle * 2.0) * 0.08,
+                        player.getZ() + Math.sin(angle) * 0.58,
+                        Math.cos(angle) * 0.025, 0.035, Math.sin(angle) * 0.025);
+            }
+        }
+
+        // Underwater bubbles rise from around the player at a restrained interval.
+        if (RuffyConfig.get("underwater_bubbles") && player.isUnderWater()
+                && tick % (quality == 0 ? 6 : 3) == 0) {
+            client.level.addParticle(ParticleTypes.BUBBLE,
+                    player.getX() + (RANDOM.nextDouble() - 0.5) * 0.8,
+                    player.getY() + 0.25 + RANDOM.nextDouble() * 1.0,
+                    player.getZ() + (RANDOM.nextDouble() - 0.5) * 0.8,
+                    (RANDOM.nextDouble() - 0.5) * 0.012, 0.035,
+                    (RANDOM.nextDouble() - 0.5) * 0.012);
+        }
+
+        // Local weather detail; vanilla weather itself is left untouched.
         if (RuffyConfig.get("weather_fx") && client.level.isRainingAt(player.blockPosition())
-                && tick % 3 == 0) {
+                && tick % (quality == 0 ? 6 : 3) == 0) {
             client.level.addParticle(ParticleTypes.DRIPPING_WATER,
                     player.getX() + (RANDOM.nextDouble() - 0.5) * 5.0,
-                    player.getY() + 2.2 + RANDOM.nextDouble(),
+                    player.getY() + 2.0 + RANDOM.nextDouble(),
                     player.getZ() + (RANDOM.nextDouble() - 0.5) * 5.0,
                     0.0, -0.02, 0.0);
         }
 
-        if (RuffyConfig.get("cave_dust") && player.getY() < 32.0 && tick % 9 == 0) {
+        // Dust is faint and sparse so it does not flood dark scenes.
+        if (RuffyConfig.get("cave_dust") && player.getY() < 32.0
+                && tick % (quality == 0 ? 14 : 9) == 0) {
             client.level.addParticle(ParticleTypes.ASH,
                     player.getX() + (RANDOM.nextDouble() - 0.5) * 4.0,
                     player.getY() + 0.5 + RANDOM.nextDouble() * 1.6,
                     player.getZ() + (RANDOM.nextDouble() - 0.5) * 4.0,
-                    0.0, 0.006, 0.0);
+                    (RANDOM.nextDouble() - 0.5) * 0.008, 0.006,
+                    (RANDOM.nextDouble() - 0.5) * 0.008);
         }
 
-        if (RuffyConfig.get("starfall") && tick % 13 == 0) {
-            client.level.addParticle(ParticleTypes.END_ROD,
-                    player.getX() + (RANDOM.nextDouble() - 0.5) * 8.0,
-                    player.getY() + 3.0 + RANDOM.nextDouble() * 3.0,
-                    player.getZ() + (RANDOM.nextDouble() - 0.5) * 8.0,
-                    (RANDOM.nextDouble() - 0.5) * 0.025, -0.055,
-                    (RANDOM.nextDouble() - 0.5) * 0.025);
+        // Starfall: short multi-point streaks outside the player's immediate field.
+        if (RuffyConfig.get("starfall") && tick % (quality == 0 ? 18 : 12) == 0) {
+            double sx = player.getX() + (RANDOM.nextDouble() - 0.5) * 8.0;
+            double sy = player.getY() + 3.0 + RANDOM.nextDouble() * 3.0;
+            double sz = player.getZ() + (RANDOM.nextDouble() - 0.5) * 8.0;
+            for (int i = 0; i < detail; i++) {
+                client.level.addParticle(ParticleTypes.END_ROD,
+                        sx - i * 0.08, sy + i * 0.14, sz,
+                        0.012, -0.06, 0.0);
+            }
         }
 
+        // Client-side slash particles trigger on the start of a swing animation.
         if (RuffyConfig.get("hit_sparks") && swinging && !wasSwinging) {
-            spawnImpactSlash(client, player);
+            spawnImpactSlash(client, player, detail);
         }
 
         previousHealth = player.getHealth();
@@ -215,7 +279,7 @@ public final class RuffyClient implements ClientModInitializer {
         tick++;
     }
 
-    private static void spawnImpactSlash(Minecraft client, LocalPlayer player) {
+    private static void spawnImpactSlash(Minecraft client, LocalPlayer player, int detail) {
         Vec3 look = player.getLookAngle();
         double centerX = player.getX() + look.x * 0.92;
         double centerY = player.getY() + player.getBbHeight() * 0.62 + look.y * 0.18;
@@ -224,40 +288,59 @@ public final class RuffyClient implements ClientModInitializer {
         client.level.addParticle(ParticleTypes.SWEEP_ATTACK,
                 centerX, centerY, centerZ, 0.0, 0.0, 0.0);
 
-        for (int i = 0; i < 11; i++) {
-            double t = i / 10.0;
-            double side = (t - 0.5) * 0.82;
-            double lift = Math.sin(t * Math.PI) * 0.22;
-            client.level.addParticle(ParticleTypes.ELECTRIC_SPARK,
-                    centerX + look.z * side,
-                    centerY + lift,
-                    centerZ - look.x * side,
+        // Curved slash arc, followed by a small secondary spark burst.
+        int arcCount = 7 + detail * 4;
+        for (int i = 0; i < arcCount; i++) {
+            double t = i / (double) (arcCount - 1);
+            double side = (t - 0.5) * 0.92;
+            double lift = Math.sin(t * Math.PI) * 0.26;
+            double x = centerX + look.z * side;
+            double y = centerY + lift;
+            double z = centerZ - look.x * side;
+            client.level.addParticle(i % 3 == 0
+                            ? ParticleTypes.END_ROD : ParticleTypes.ELECTRIC_SPARK,
+                    x, y, z,
                     look.x * 0.025 + (RANDOM.nextDouble() - 0.5) * 0.025,
-                    0.018 + RANDOM.nextDouble() * 0.025,
+                    0.018 + RANDOM.nextDouble() * 0.03,
                     look.z * 0.025 + (RANDOM.nextDouble() - 0.5) * 0.025);
         }
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 3 * detail; i++) {
             client.level.addParticle(ParticleTypes.CRIT,
-                    centerX + (RANDOM.nextDouble() - 0.5) * 0.22,
-                    centerY + (RANDOM.nextDouble() - 0.5) * 0.18,
-                    centerZ + (RANDOM.nextDouble() - 0.5) * 0.22,
-                    0.0, 0.02, 0.0);
+                    centerX + (RANDOM.nextDouble() - 0.5) * 0.28,
+                    centerY + (RANDOM.nextDouble() - 0.5) * 0.22,
+                    centerZ + (RANDOM.nextDouble() - 0.5) * 0.28,
+                    (RANDOM.nextDouble() - 0.5) * 0.04, 0.024,
+                    (RANDOM.nextDouble() - 0.5) * 0.04);
+        }
+    }
+
+    private static void spawnVerticalBurst(Minecraft client, LocalPlayer player, int detail) {
+        for (int i = 0; i < 5 * detail; i++) {
+            double angle = (Math.PI * 2.0 * i) / (5 * detail);
+            double radius = 0.22 + RANDOM.nextDouble() * 0.2;
+            client.level.addParticle(ParticleTypes.WITCH,
+                    player.getX() + Math.cos(angle) * radius,
+                    player.getY() + 0.18,
+                    player.getZ() + Math.sin(angle) * radius,
+                    Math.cos(angle) * 0.015, 0.06,
+                    Math.sin(angle) * 0.015);
         }
     }
 
     private static void spawnRing(Minecraft client, LocalPlayer player,
                                   net.minecraft.core.particles.SimpleParticleType particle,
-                                  int count, double radius, double verticalVelocity) {
+                                  int count, double radius, double verticalVelocity,
+                                  double radiusVelocity) {
         for (int i = 0; i < count; i++) {
             double angle = (Math.PI * 2.0 * i) / count;
             double dx = Math.cos(angle);
             double dz = Math.sin(angle);
             client.level.addParticle(particle,
                     player.getX() + dx * radius,
-                    player.getY() + 0.08,
+                    player.getY() + 0.065,
                     player.getZ() + dz * radius,
-                    dx * 0.022, verticalVelocity, dz * 0.022);
+                    dx * radiusVelocity, verticalVelocity, dz * radiusVelocity);
         }
     }
 }
