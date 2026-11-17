@@ -43,7 +43,9 @@ public final class RuffyConfig {
             Map.entry("weather_fx", false),
             Map.entry("cave_dust", false),
             Map.entry("starfall", false),
-            Map.entry("palette_sparks", true)
+            Map.entry("palette_sparks", true),
+            Map.entry("health_hud", true),
+            Map.entry("armor_hud", false)
     );
 
     private static final Map<String, Integer> INTEGER_DEFAULTS = Map.of(
