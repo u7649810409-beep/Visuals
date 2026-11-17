@@ -404,7 +404,7 @@ public final class RuffyClickGui extends Screen {
         }
 
         int sliderY = y + 132;
-        g.drawString(font, "HUD TRANSPARENCY  " + RuffyConfig.getInt("hud_opacity") + "%",
+        g.drawString(font, "HUD PANEL OPACITY  " + RuffyConfig.getInt("hud_opacity") + "%",
                 x, sliderY, MUTED, false);
         drawSlider(g, x, sliderY + 14, panelW - 42,
                 RuffyConfig.getInt("hud_opacity"), 12, 90);
@@ -720,6 +720,7 @@ public final class RuffyClickGui extends Screen {
         RuffyConfig.set("weather_fx", preset == 1);
         RuffyConfig.set("cave_dust", preset == 1);
         RuffyConfig.set("starfall", preset == 1);
+        RuffyConfig.set("palette_sparks", preset != 3);
     }
 
     private boolean handleStyleClick(int mx, int my) {
@@ -786,7 +787,7 @@ public final class RuffyClickGui extends Screen {
             case "watermark", "fps", "keystrokes", "direction",
                     "nebula_particles", "jump_burst", "landing_ring",
                     "hit_sparks", "swing_animation", "critical_sparks",
-                    "damage_pulse", "underwater_bubbles" -> true;
+                    "damage_pulse", "underwater_bubbles", "palette_sparks" -> true;
             default -> false;
         };
     }
