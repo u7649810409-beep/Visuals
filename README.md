@@ -4,7 +4,7 @@ A standalone client-side visual mod for **Minecraft Java 1.21.11** using Fabric.
 
 ## Compact control center
 
-- Inventory-inspired compact window (responsive between 420–560 GUI pixels wide).
+- Inventory-inspired compact window (responsive between 420–520 GUI pixels wide).
 - Seven tabs: **Visuals, Presets, World, HUD, Style, Configs, Setup**.
 - Search field reflows below the filters on narrow displays.
 - Module browser with **All, Entities, Motion and Starred** filters.
