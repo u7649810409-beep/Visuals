@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
@@ -89,6 +90,8 @@ public final class RuffyClient implements ClientModInitializer {
             double z = player.getZ() + Math.sin(angle) * radius;
             client.level.addParticle(ParticleTypes.PORTAL, x, y, z,
                     -Math.cos(angle) * 0.008, 0.018, -Math.sin(angle) * 0.008);
+            addPaletteDust(client, x, y, z, -Math.cos(angle) * 0.006, 0.016,
+                    -Math.sin(angle) * 0.006, 0.72F, false);
             if (quality >= 1 && tick % (lowFrequency * 2) == 0) {
                 client.level.addParticle(ParticleTypes.ENCHANT,
                         x + (RANDOM.nextDouble() - 0.5) * 0.25,
@@ -104,11 +107,13 @@ public final class RuffyClient implements ClientModInitializer {
             for (int i = 0; i < detail; i++) {
                 double a = angle + (Math.PI * 2.0 * i / detail);
                 double height = 0.72 + Math.sin(a * 1.7) * 0.38;
+                double px = player.getX() + Math.cos(a) * radius;
+                double py = player.getY() + height;
+                double pz = player.getZ() + Math.sin(a) * radius;
                 client.level.addParticle(i % 2 == 0 ? ParticleTypes.END_ROD : ParticleTypes.ENCHANT,
-                        player.getX() + Math.cos(a) * radius,
-                        player.getY() + height,
-                        player.getZ() + Math.sin(a) * radius,
-                        -Math.sin(a) * 0.012, 0.006, Math.cos(a) * 0.012);
+                        px, py, pz, -Math.sin(a) * 0.012, 0.006, Math.cos(a) * 0.012);
+                addPaletteDust(client, px, py, pz, -Math.sin(a) * 0.008,
+                        0.004, Math.cos(a) * 0.008, 0.62F, i % 2 == 0);
             }
         }
 
@@ -122,11 +127,13 @@ public final class RuffyClient implements ClientModInitializer {
             double sideZ = backX * 0.12;
             for (int i = 0; i < detail; i++) {
                 double distance = 0.18 + i * 0.16;
-                client.level.addParticle(ParticleTypes.END_ROD,
-                        player.getX() + backX * distance + sideX * (i - 1),
-                        player.getY() + 0.12 + i * 0.05,
-                        player.getZ() + backZ * distance + sideZ * (i - 1),
+                double px = player.getX() + backX * distance + sideX * (i - 1);
+                double py = player.getY() + 0.12 + i * 0.05;
+                double pz = player.getZ() + backZ * distance + sideZ * (i - 1);
+                client.level.addParticle(ParticleTypes.END_ROD, px, py, pz,
                         -velocity.x * 0.025, 0.008, -velocity.z * 0.025);
+                addPaletteDust(client, px, py, pz, -velocity.x * 0.018,
+                        0.006, -velocity.z * 0.018, 0.55F, i % 2 == 1);
             }
         }
 
@@ -134,6 +141,7 @@ public final class RuffyClient implements ClientModInitializer {
         if (RuffyConfig.get("jump_burst") && wasOnGround && !onGround) {
             spawnRing(client, player, ParticleTypes.END_ROD, 12 * detail, 0.46, 0.025, 0.08);
             spawnRing(client, player, ParticleTypes.ELECTRIC_SPARK, 8 * detail, 0.25, 0.045, 0.13);
+            spawnPaletteRing(client, player, 12 * detail, 0.38, 0.035, 0.1);
             spawnVerticalBurst(client, player, detail);
         }
 
@@ -141,6 +149,7 @@ public final class RuffyClient implements ClientModInitializer {
         if (RuffyConfig.get("landing_ring") && !wasOnGround && onGround) {
             spawnRing(client, player, ParticleTypes.ELECTRIC_SPARK, 14 * detail, 0.72, 0.012, 0.06);
             spawnRing(client, player, ParticleTypes.CLOUD, 10 * detail, 0.48, 0.009, 0.04);
+            spawnPaletteRing(client, player, 16 * detail, 0.62, 0.012, 0.055);
             client.level.addParticle(ParticleTypes.POOF,
                     player.getX(), player.getY() + 0.06, player.getZ(),
                     0.0, 0.018, 0.0);
@@ -154,11 +163,13 @@ public final class RuffyClient implements ClientModInitializer {
             double backZ = -velocity.z / speed;
             for (int i = 0; i < detail; i++) {
                 double side = (i - (detail - 1) / 2.0) * 0.23;
-                client.level.addParticle(ParticleTypes.CLOUD,
-                        player.getX() + backX * 0.32 - backZ * side,
-                        player.getY() + 0.06,
-                        player.getZ() + backZ * 0.32 + backX * side,
+                double px = player.getX() + backX * 0.32 - backZ * side;
+                double py = player.getY() + 0.06;
+                double pz = player.getZ() + backZ * 0.32 + backX * side;
+                client.level.addParticle(ParticleTypes.CLOUD, px, py, pz,
                         backX * 0.035, 0.012, backZ * 0.035);
+                if (i == 0) addPaletteDust(client, px, py, pz,
+                        backX * 0.025, 0.008, backZ * 0.025, 0.48F, false);
             }
         }
 
@@ -167,11 +178,13 @@ public final class RuffyClient implements ClientModInitializer {
                 && horizontalSpeedSq > 0.004 && tick % (quality == 0 ? 9 : 5) == 0) {
             double side = ((tick / 5) % 2 == 0 ? 1.0 : -1.0) * 0.19;
             double yaw = Math.toRadians(player.getYRot() + 90.0F);
-            client.level.addParticle(ParticleTypes.ELECTRIC_SPARK,
-                    player.getX() + Math.cos(yaw) * side,
-                    player.getY() + 0.055,
-                    player.getZ() + Math.sin(yaw) * side,
+            double px = player.getX() + Math.cos(yaw) * side;
+            double py = player.getY() + 0.055;
+            double pz = player.getZ() + Math.sin(yaw) * side;
+            client.level.addParticle(ParticleTypes.ELECTRIC_SPARK, px, py, pz,
                     -velocity.x * 0.03, 0.02, -velocity.z * 0.03);
+            addPaletteDust(client, px, py, pz, -velocity.x * 0.02,
+                    0.018, -velocity.z * 0.02, 0.58F, tick % 2 == 0);
         }
 
         // Falling/critical sparks drift around the player's lower body.
@@ -193,11 +206,12 @@ public final class RuffyClient implements ClientModInitializer {
                 && tick % (quality == 0 ? 8 : 5) == 0) {
             double angle = tick * 0.18;
             double radius = 0.58 + Math.sin(angle * 1.4) * 0.08;
-            client.level.addParticle(ParticleTypes.SOUL_FIRE_FLAME,
-                    player.getX() + Math.cos(angle) * radius,
-                    player.getY() + 0.25 + Math.floorMod(tick, 28) / 28.0 * 1.35,
-                    player.getZ() + Math.sin(angle) * radius,
+            double px = player.getX() + Math.cos(angle) * radius;
+            double py = player.getY() + 0.25 + Math.floorMod(tick, 28) / 28.0 * 1.35;
+            double pz = player.getZ() + Math.sin(angle) * radius;
+            client.level.addParticle(ParticleTypes.SOUL_FIRE_FLAME, px, py, pz,
                     0.0, 0.015, 0.0);
+            addPaletteDust(client, px, py, pz, 0.0, 0.012, 0.0, 0.82F, true);
         }
 
         // Potion glow: little enchant particles orbit the torso instead of random positions.
@@ -205,22 +219,25 @@ public final class RuffyClient implements ClientModInitializer {
                 && tick % (quality == 0 ? 10 : 6) == 0) {
             double angle = tick * 0.16;
             double radius = 0.43;
-            client.level.addParticle(ParticleTypes.ENCHANT,
-                    player.getX() + Math.cos(angle) * radius,
-                    player.getY() + 0.55 + Math.sin(angle * 1.7) * 0.55,
-                    player.getZ() + Math.sin(angle) * radius,
+            double px = player.getX() + Math.cos(angle) * radius;
+            double py = player.getY() + 0.55 + Math.sin(angle * 1.7) * 0.55;
+            double pz = player.getZ() + Math.sin(angle) * radius;
+            client.level.addParticle(ParticleTypes.ENCHANT, px, py, pz,
                     0.0, 0.022, 0.0);
+            addPaletteDust(client, px, py, pz, 0.0, 0.018, 0.0, 0.5F, false);
         }
 
         // Damage pulse: short radial burst only when health actually decreases.
         if (RuffyConfig.get("damage_pulse") && player.getHealth() < previousHealth) {
             for (int i = 0; i < 10 * detail; i++) {
                 double angle = (Math.PI * 2.0 * i) / (10 * detail);
-                client.level.addParticle(ParticleTypes.DAMAGE_INDICATOR,
-                        player.getX() + Math.cos(angle) * 0.58,
-                        player.getY() + 0.72 + Math.sin(angle * 2.0) * 0.08,
-                        player.getZ() + Math.sin(angle) * 0.58,
+                double px = player.getX() + Math.cos(angle) * 0.58;
+                double py = player.getY() + 0.72 + Math.sin(angle * 2.0) * 0.08;
+                double pz = player.getZ() + Math.sin(angle) * 0.58;
+                client.level.addParticle(ParticleTypes.DAMAGE_INDICATOR, px, py, pz,
                         Math.cos(angle) * 0.025, 0.035, Math.sin(angle) * 0.025);
+                if (i % 2 == 0) addPaletteDust(client, px, py, pz,
+                        Math.cos(angle) * 0.018, 0.025, Math.sin(angle) * 0.018, 0.54F, true);
             }
         }
 
@@ -297,12 +314,14 @@ public final class RuffyClient implements ClientModInitializer {
             double x = centerX + look.z * side;
             double y = centerY + lift;
             double z = centerZ - look.x * side;
+            double vx = look.x * 0.025 + (RANDOM.nextDouble() - 0.5) * 0.025;
+            double vy = 0.018 + RANDOM.nextDouble() * 0.03;
+            double vz = look.z * 0.025 + (RANDOM.nextDouble() - 0.5) * 0.025;
             client.level.addParticle(i % 3 == 0
                             ? ParticleTypes.END_ROD : ParticleTypes.ELECTRIC_SPARK,
-                    x, y, z,
-                    look.x * 0.025 + (RANDOM.nextDouble() - 0.5) * 0.025,
-                    0.018 + RANDOM.nextDouble() * 0.03,
-                    look.z * 0.025 + (RANDOM.nextDouble() - 0.5) * 0.025);
+                    x, y, z, vx, vy, vz);
+            addPaletteDust(client, x, y, z, vx * 0.75, vy * 0.7,
+                    vz * 0.75, 0.6F, i % 2 == 0);
         }
 
         for (int i = 0; i < 3 * detail; i++) {
@@ -312,6 +331,29 @@ public final class RuffyClient implements ClientModInitializer {
                     centerZ + (RANDOM.nextDouble() - 0.5) * 0.28,
                     (RANDOM.nextDouble() - 0.5) * 0.04, 0.024,
                     (RANDOM.nextDouble() - 0.5) * 0.04);
+        }
+    }
+
+    private static void spawnPaletteDust(Minecraft client, double x, double y, double z,
+                                         double vx, double vy, double vz,
+                                         float scale, boolean secondary) {
+        if (!RuffyConfig.get("palette_sparks")) return;
+        int color = (secondary ? RuffyConfig.secondaryColor() : RuffyConfig.primaryColor()) & 0x00FFFFFF;
+        client.level.addParticle(new DustParticleOptions(color, scale), x, y, z, vx, vy, vz);
+    }
+
+    private static void spawnPaletteRing(Minecraft client, LocalPlayer player, int count,
+                                         double radius, double velocity, double lift) {
+        if (!RuffyConfig.get("palette_sparks")) return;
+        for (int i = 0; i < count; i++) {
+            double angle = Math.PI * 2.0 * i / count;
+            double dx = Math.cos(angle);
+            double dz = Math.sin(angle);
+            double r = radius + Math.sin(angle * 3.0) * 0.035;
+            spawnPaletteDust(client, player.getX() + dx * r,
+                    player.getY() + 0.065, player.getZ() + dz * r,
+                    dx * velocity, lift, dz * velocity,
+                    0.55F + (i % 3) * 0.08F, i % 2 == 0);
         }
     }
 
