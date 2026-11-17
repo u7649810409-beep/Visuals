@@ -80,13 +80,18 @@ public final class RuffyHud {
         }
 
         private void draw(GuiGraphics graphics, Minecraft client, String text, int accent) {
-            int width = client.font.width(text) + 18;
+            int maxTextWidth = Math.max(42, rightLimit - startX - 18);
+            String visible = text;
+            while (visible.length() > 3 && client.font.width(visible) > maxTextWidth) {
+                visible = visible.substring(0, visible.length() - 1);
+            }
+            int width = client.font.width(visible) + 18;
             if (x + width > rightLimit && x > startX) {
                 x = startX;
                 y += CHIP_HEIGHT + CHIP_GAP;
             }
             panel(graphics, x, y, width, CHIP_HEIGHT, accent);
-            graphics.drawString(client.font, text, x + 9, y + 7, WHITE, false);
+            graphics.drawString(client.font, visible, x + 9, y + 7, WHITE, false);
             x += width + CHIP_GAP;
         }
     }
