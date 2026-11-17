@@ -54,7 +54,7 @@ public final class RuffyConfig {
     );
 
     private static final int[] PRIMARY = {
-            0xFF58D8F5, // Nebula cyan
+            0xFFB45CFF, // Nebula violet
             0xFFFF75CF, // Orchid pink
             0xFF67E4B6, // Emerald mint
             0xFFFFC36B, // Solar amber
@@ -62,7 +62,7 @@ public final class RuffyConfig {
             0xFFE1E8F2  // Mono silver
     };
     private static final int[] SECONDARY = {
-            0xFF9B7BFF, 0xFF9D85FF, 0xFF65CFFF,
+            0xFF7B3ED6, 0xFF9D85FF, 0xFF65CFFF,
             0xFFFF826F, 0xFFB6D5FF, 0xFF9AA8BA
     };
 
@@ -123,7 +123,7 @@ public final class RuffyConfig {
 
     public static int hudPanelColor() {
         int alpha = 12 + (getInt("hud_opacity") * 150 / 100);
-        return (alpha << 24) | 0x000A1320;
+        return (alpha << 24) | 0x000D0B14;
     }
 
     public static int hudBorderColor() {
