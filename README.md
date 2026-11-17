@@ -1,26 +1,40 @@
-# Ruffy Visuals 1.3.0
+# Ruffy Visuals 1.4.0
 
 A standalone client-side visual mod for **Minecraft Java 1.21.11** using Fabric.
 
-## Compact control center
+## Violet Neon Control Center
 
-- Inventory-inspired compact window (responsive between 420–520 GUI pixels wide).
-- Seven tabs: **Visuals, Presets, World, HUD, Style, Configs, Setup**.
-- Search field reflows below the filters on narrow displays.
-- Module browser with **All, Entities, Motion and Starred** filters.
-- Eight modules per page, favorites, active switches and a right-side settings inspector.
-- Four profiles: Nebula, Cinematic, Performance and Clean.
+The compact ClickGUI is restyled as a charcoal-and-violet module launcher, inspired by the supplied visual reference:
+
+- Dark charcoal panels, neon violet edge lighting and purple active switches.
+- Seven tabs: **Visuals, Presets, World, HUD, Style, Configs and Setup**.
+- Searchable module list with **All, Entities, Motion and Starred** filters.
+- Module rows include a category icon, favorite star, settings/edit action and on/off switch.
+- A dedicated settings inspector sits at the right side of the module browser.
+- Compact window size: up to **520 × 340 GUI pixels**.
 - Open with **Right Shift**.
 
 ## Color and transparency
 
-Six coordinated palettes: Nebula, Orchid, Emerald, Solar, Arctic and Mono.
+Six coordinated palettes remain selectable: **Nebula (violet), Orchid, Emerald, Solar, Arctic and Mono**. The default palette is now violet/purple to match the reference.
 
-The Style tab controls HUD panel opacity, menu opacity and effect quality. HUD chips wrap on small screens and truncate long values instead of drawing off-screen. Jump and Sprint key states are shown in the compact keystrokes panel.
+The Style tab controls HUD panel transparency, menu opacity and effect quality. Palette Sparks use the selected primary/secondary colors in the actual Minecraft dust particles.
 
-## Visual modules (25)
+## HUD
 
-**HUD:** Watermark, Performance (FPS), Coordinates, Keystrokes, Direction, Movement Speed and World Clock.
+The in-game HUD follows the same visual system:
+
+- Semi-transparent charcoal information chips with violet/palette outlines.
+- Ruffy Visuals brand badge, FPS, coordinates, direction, speed and world clock.
+- Optional health bar and armor value.
+- Compact WASD, Jump and Sprint input panel.
+- Automatic line wrapping on narrow screens.
+
+HUD modules are independently switchable.
+
+## Visual modules (27)
+
+**HUD:** Watermark, Performance (FPS), Coordinates, Keystrokes, Direction, Movement Speed, World Clock, Health and Armor.
 
 **Motion:** Ambient Particles, Orbit Shards, Movement Trail, Jump Burst, Sprint Dust, Landing Ring, Footstep Sparks, Starfall and Palette Sparks.
 
@@ -28,9 +42,7 @@ The Style tab controls HUD panel opacity, menu opacity and effect quality. HUD c
 
 **World:** Water Bubbles, Weather FX and Cave Dust.
 
-Palette Sparks use Minecraft's native dust particle options in the currently selected accent colors. The visual effect engine has Low, Medium and High quality levels, scaling spawn frequency and detail.
-
-All modules are individually switchable. Settings are stored in `config/ruffyclient.properties`.
+The effects engine has Low, Medium and High quality levels, scaling particle frequency and detail. Settings are stored in `config/ruffyclient.properties`.
 
 ## Swing animation and safety
 
@@ -49,12 +61,12 @@ Smooth Swing adjusts only the local first-person rendering curve. Impact Slash a
 gradle build
 ```
 
-GitHub Actions builds the remapped JAR with Java 21 and Gradle 9.2.1. The distributable file is written to `build/libs/ruffy-visuals-1.3.0.jar`.
+GitHub Actions builds and verifies the remapped JAR with Java 21 and Gradle 9.2.1. The distributable file is written to `build/libs/ruffy-visuals-1.4.0.jar`.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 1.21.11.
 2. Install Fabric API for 1.21.11.
-3. Put `ruffy-visuals-1.3.0.jar` into `.minecraft/mods`.
+3. Put `ruffy-visuals-1.4.0.jar` into `.minecraft/mods`.
 4. Launch the Fabric 1.21.11 profile.
-5. Press **Right Shift** in a world.
+5. Press **Right Shift** in a world to open the Visuals control center.
