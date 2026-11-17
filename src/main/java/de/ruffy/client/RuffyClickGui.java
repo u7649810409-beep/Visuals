@@ -13,12 +13,12 @@ import java.util.Locale;
 /** Compact inventory-sized control center for Ruffy Visuals. */
 public final class RuffyClickGui extends Screen {
     private static final int WHITE = 0xFFF1F5FA;
-    private static final int MUTED = 0xFF9AA9B9;
-    private static final int DIM = 0xFF63758A;
-    private static final int CARD = 0x9B172230;
-    private static final int CARD_HOVER = 0xC3223546;
-    private static final int BORDER = 0x554E6578;
-    private static final int GREEN = 0xFF67D8B4;
+    private static final int MUTED = 0xFFC0B6CA;
+    private static final int DIM = 0xFF82758F;
+    private static final int CARD = 0xA8171720;
+    private static final int CARD_HOVER = 0xD52A2035;
+    private static final int BORDER = 0x666D4A80;
+    private static final int GREEN = 0xFF72D6AE;
 
     private enum Tab {
         VISUALS("Visuals", 68), PRESETS("Presets", 62), WORLD("World", 56),
@@ -98,12 +98,19 @@ public final class RuffyClickGui extends Screen {
         drawBackdrop(g);
 
         int alpha = 120 + RuffyConfig.getInt("menu_opacity") * 115 / 100;
-        int body = (alpha << 24) | 0x000B111B;
-        int header = (Math.min(250, alpha + 8) << 24) | 0x00131D2B;
+        int body = (alpha << 24) | 0x000D0C13;
+        int header = (Math.min(250, alpha + 8) << 24) | 0x00171320;
+        int accent = RuffyConfig.primaryColor();
 
-        g.fill(panelX - 2, panelY - 2, panelX + panelW + 2, panelY + panelH + 2, 0x5538B7CF);
+        // Layered violet edge bloom keeps the launcher crisp instead of flat.
+        g.fill(panelX - 5, panelY - 5, panelX + panelW + 5, panelY + panelH + 5,
+                withAlpha(accent, 18));
+        g.fill(panelX - 2, panelY - 2, panelX + panelW + 2, panelY + panelH + 2,
+                withAlpha(accent, 42));
         g.fill(panelX, panelY, panelX + panelW, panelY + panelH, body);
-        g.renderOutline(panelX, panelY, panelW, panelH, 0x775E8096);
+        g.renderOutline(panelX - 1, panelY - 1, panelW + 2, panelH + 2,
+                withAlpha(accent, 150));
+        g.renderOutline(panelX, panelY, panelW, panelH, 0x77574C63);
 
         drawHeader(g, header);
         drawNavigation(g, mouseX, mouseY);
@@ -123,58 +130,104 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void drawBackdrop(GuiGraphics g) {
-        g.fill(0, 0, width, height, 0xB8070C14);
-        int grid = 0x087CC8DE;
-        for (int x = 0; x < width; x += 56) g.fill(x, 0, x + 1, height, grid);
-        for (int y = 0; y < height; y += 56) g.fill(0, y, width, y + 1, grid);
+        g.fill(0, 0, width, height, 0xC907080D);
         int accent = RuffyConfig.primaryColor();
-        for (int i = 0; i < 12; i++) {
+        int trace = withAlpha(accent, 18);
+        int brightTrace = withAlpha(accent, 38);
+
+        // Quiet circuit-board traces stay around the edges and do not compete with text.
+        for (int i = 0; i < 7; i++) {
+            int y = 30 + i * 42;
+            int length = 38 + (i * 23) % 72;
+            g.fill(0, y, length, y + 1, trace);
+            g.fill(length - 1, y, length, y + 12, trace);
+            g.fill(length - 1, y + 11, length + 22, y + 12, brightTrace);
+
+            int right = width - length - 22;
+            g.fill(right, height - y, width, height - y + 1, trace);
+            g.fill(right, height - y - 12, right + 1, height - y + 1, trace);
+            g.fill(right - 22, height - y - 12, right + 1, height - y - 11, brightTrace);
+            g.fill(length + 20, y + 9, length + 23, y + 12, brightTrace);
+            g.fill(right - 23, height - y - 13, right - 20, height - y - 10, brightTrace);
+        }
+
+        for (int i = 0; i < 18; i++) {
             int x = Math.floorMod(i * 139 + 31, Math.max(1, width));
             int y = Math.floorMod(i * 83 + 19, Math.max(1, height));
-            g.fill(x, y, x + 2, y + 2, withAlpha(accent, i % 3 == 0 ? 95 : 45));
+            g.fill(x, y, x + 2, y + 2, withAlpha(accent, i % 4 == 0 ? 88 : 36));
         }
     }
 
     private void drawHeader(GuiGraphics g, int header) {
         int primary = RuffyConfig.primaryColor();
+        int secondary = RuffyConfig.secondaryColor();
         g.fill(panelX, panelY, panelX + panelW, panelY + 39, header);
         g.fill(panelX, panelY, panelX + panelW, panelY + 2, primary);
+        g.fill(panelX, panelY + 37, panelX + panelW, panelY + 39,
+                withAlpha(secondary, 70));
 
         int logoX = panelX + 12;
-        int logoY = panelY + 8;
-        g.fill(logoX, logoY, logoX + 24, logoY + 24, 0xD91A2B3B);
-        g.renderOutline(logoX, logoY, 24, 24, withAlpha(primary, 190));
+        int logoY = panelY + 7;
+        g.fill(logoX - 2, logoY - 2, logoX + 27, logoY + 27,
+                withAlpha(primary, 28));
+        g.fill(logoX, logoY, logoX + 24, logoY + 24, 0xE8201727);
+        g.renderOutline(logoX, logoY, 24, 24, withAlpha(primary, 210));
         g.drawCenteredString(font, "R", logoX + 12, logoY + 6, primary);
 
-        g.drawString(font, "RUFFY", panelX + 43, panelY + 9, WHITE, false);
-        g.drawString(font, "VISUALS", panelX + 43, panelY + 22, primary, false);
-        g.drawString(font, "CLIENT", panelX + 103, panelY + 16, DIM, false);
+        g.drawString(font, "RUFFY", panelX + 43, panelY + 8, WHITE, false);
+        g.drawString(font, "VISUALS", panelX + 43, panelY + 21, primary, false);
+        g.drawString(font, "CLIENT", panelX + 103, panelY + 15, DIM, false);
+        g.fill(panelX + 142, panelY + 11, panelX + 143, panelY + 29,
+                withAlpha(secondary, 90));
+        g.drawString(font, "VISUAL CONTROL CENTER", panelX + 151,
+                panelY + 16, MUTED, false);
 
         g.fill(panelX + panelW - 76, panelY + 8,
-                panelX + panelW - 12, panelY + 31, 0x7A101A28);
-        g.renderOutline(panelX + panelW - 76, panelY + 8, 64, 23, BORDER);
+                panelX + panelW - 12, panelY + 31, 0xA4110D18);
+        g.renderOutline(panelX + panelW - 76, panelY + 8, 64, 23,
+                withAlpha(primary, 105));
         g.drawCenteredString(font, "ESC  ×", panelX + panelW - 44,
                 panelY + 15, MUTED);
     }
 
     private void drawNavigation(GuiGraphics g, int mouseX, int mouseY) {
         int y = panelY + 40;
-        g.fill(panelX, y, panelX + panelW, y + 30, 0x6C101925);
+        g.fill(panelX, y, panelX + panelW, y + 30, 0x80100C17);
         int x = panelX + 10;
         for (Tab item : Tab.values()) {
             boolean selected = item == tab;
             boolean hovered = inside(mouseX, mouseY, x, y + 3, item.width - 3, 24);
-            if (selected || hovered) {
+            if (selected) {
                 g.fill(x, y + 3, x + item.width - 3, y + 27,
-                        selected ? 0x8B1E3546 : 0x541F2B3A);
+                        withAlpha(RuffyConfig.primaryColor(), 42));
+                g.renderOutline(x, y + 3, item.width - 3, 24,
+                        withAlpha(RuffyConfig.primaryColor(), 95));
+            } else if (hovered) {
+                g.fill(x, y + 3, x + item.width - 3, y + 27, 0x5C2A2232);
             }
-            if (selected) g.fill(x + 6, y + 25, x + item.width - 9, y + 27,
-                    RuffyConfig.primaryColor());
-            g.drawCenteredString(font, item.label, x + (item.width - 3) / 2,
-                    y + 10, selected ? WHITE : MUTED);
+            if (selected) {
+                g.fill(x + 6, y + 25, x + item.width - 9, y + 27,
+                        RuffyConfig.primaryColor());
+            }
+            g.drawString(font, tabIcon(item), x + 7, y + 10,
+                    selected ? RuffyConfig.primaryColor() : DIM, false);
+            g.drawString(font, item.label, x + 22, y + 10,
+                    selected ? WHITE : MUTED, false);
             x += item.width;
         }
         g.fill(panelX, y + 29, panelX + panelW, y + 30, BORDER);
+    }
+
+    private String tabIcon(Tab item) {
+        return switch (item) {
+            case VISUALS -> "✧";
+            case PRESETS -> "▱";
+            case WORLD -> "◇";
+            case HUD -> "▣";
+            case STYLE -> "◈";
+            case CONFIGS -> "⚙";
+            case SETUP -> "⌘";
+        };
     }
 
     private void drawModuleBrowser(GuiGraphics g, int mouseX, int mouseY,
@@ -209,9 +262,13 @@ public final class RuffyClickGui extends Screen {
                 boolean hovered = inside(mouseX, mouseY, x, y, item.width, 22);
                 if (selected || hovered) {
                     g.fill(x, y, x + item.width, y + 22,
-                            selected ? 0xAA1C3A4D : 0x551E2B3B);
-                    if (selected) g.fill(x, y + 20, x + item.width, y + 22,
-                            RuffyConfig.primaryColor());
+                            selected ? withAlpha(RuffyConfig.primaryColor(), 58) : 0x5C29212F);
+                    if (selected) {
+                        g.renderOutline(x, y, item.width, 22,
+                                withAlpha(RuffyConfig.primaryColor(), 130));
+                        g.fill(x + 3, y + 20, x + item.width - 3, y + 22,
+                                RuffyConfig.primaryColor());
+                    }
                 }
                 g.drawCenteredString(font, item.label, x + item.width / 2,
                         y + 7, selected ? WHITE : MUTED);
@@ -220,8 +277,9 @@ public final class RuffyClickGui extends Screen {
 
             if (searchBox != null) {
                 g.fill(searchX - 4, searchY + 1, searchX + searchW + 4, searchY + 23,
-                        0x77111D2A);
-                g.renderOutline(searchX - 4, searchY + 1, searchW + 8, 22, BORDER);
+                        0xB0131019);
+                g.renderOutline(searchX - 4, searchY + 1, searchW + 8, 22,
+                        withAlpha(RuffyConfig.primaryColor(), 95));
                 g.drawString(font, "⌕", searchX + 4, searchY + 7, DIM, false);
                 searchBox.setVisible(true);
             }
@@ -263,22 +321,36 @@ public final class RuffyClickGui extends Screen {
         boolean favorite = RuffyConfig.get("favorite_" + feature.key());
         int primary = RuffyConfig.primaryColor();
 
-        g.fill(x, y, x + w, y + h, selected ? 0xB32A3C4E : hovered ? CARD_HOVER : CARD);
-        g.renderOutline(x, y, w, h, selected ? withAlpha(primary, 150) : BORDER);
+        int rowFill = selected ? 0xD02B2035 : hovered ? CARD_HOVER : CARD;
+        g.fill(x, y, x + w, y + h, rowFill);
+        g.renderOutline(x, y, w, h,
+                selected ? withAlpha(primary, 220) : hovered ? withAlpha(primary, 95) : BORDER);
         if (selected || enabled) {
-            g.fill(x, y + 5, x + 2, y + h - 5,
-                    enabled ? primary : withAlpha(primary, 90));
+            g.fill(x, y + 4, x + 2, y + h - 4,
+                    enabled ? primary : withAlpha(primary, 105));
         }
 
-        g.drawString(font, iconFor(feature), x + 7, y + (h - 8) / 2,
-                enabled ? primary : DIM, false);
-        g.drawString(font, feature.title(), x + 23, y + (h - 8) / 2,
-                selected ? WHITE : 0xFFE0E7EF, false);
+        int iconX = x + 7;
+        int iconY = y + Math.max(2, (h - 16) / 2);
+        g.fill(iconX, iconY, iconX + 16, iconY + 16,
+                selected || enabled ? withAlpha(primary, 40) : 0x8A24202B);
+        g.renderOutline(iconX, iconY, 16, 16,
+                withAlpha(enabled ? primary : 0xFF8B8193, enabled ? 125 : 65));
+        g.drawCenteredString(font, iconFor(feature), iconX + 8, iconY + 4,
+                enabled ? primary : DIM);
+        g.drawString(font, feature.title(), x + 29, y + (h - 8) / 2,
+                selected ? WHITE : 0xFFE7E0EB, false);
 
-        int starX = x + w - 48;
-        g.drawString(font, favorite ? "★" : "☆", starX, y + (h - 8) / 2,
-                favorite ? 0xFFFFD47A : DIM, false);
-        drawSwitch(g, x + w - 29, y + (h - 15) / 2, enabled, 24, 15);
+        // Row actions mirror the reference: favorite, settings/edit, then active switch.
+        int starX = x + w - 78;
+        int editX = x + w - 55;
+        boolean starHover = inside(mouseX, mouseY, starX - 2, y + 2, 16, h - 4);
+        boolean editHover = inside(mouseX, mouseY, editX - 2, y + 2, 16, h - 4);
+        g.drawCenteredString(font, favorite ? "★" : "☆", starX + 6,
+                y + (h - 8) / 2, favorite ? 0xFFFFD47A : starHover ? primary : DIM);
+        g.drawCenteredString(font, editHover ? "⚙" : "✎", editX + 6,
+                y + (h - 8) / 2, editHover ? primary : MUTED);
+        drawSwitch(g, x + w - 30, y + (h - 15) / 2, enabled, 25, 15);
     }
 
     private String iconFor(RuffyFeature feature) {
@@ -478,14 +550,18 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void drawSwitch(GuiGraphics g, int x, int y, boolean enabled, int w, int h) {
-        int track = enabled ? withAlpha(RuffyConfig.primaryColor(), 160) : 0xFF293542;
+        if (enabled) {
+            g.fill(x - 3, y - 2, x + w + 3, y + h + 2,
+                    withAlpha(RuffyConfig.primaryColor(), 38));
+        }
+        int track = enabled ? withAlpha(RuffyConfig.primaryColor(), 218) : 0xFF34313B;
         g.fill(x, y, x + w, y + h, track);
         g.renderOutline(x, y, w, h, enabled
-                ? withAlpha(RuffyConfig.primaryColor(), 190) : BORDER);
+                ? withAlpha(RuffyConfig.secondaryColor(), 225) : 0xFF625B68);
         int knob = Math.max(7, h - 6);
         int knobX = enabled ? x + w - knob - 3 : x + 3;
         g.fill(knobX, y + 3, knobX + knob, y + h - 3,
-                enabled ? WHITE : 0xFFAAB6C2);
+                enabled ? WHITE : 0xFFAAA3B0);
     }
 
     private void drawSmallButton(GuiGraphics g, int x, int y, int w, int h,
@@ -533,13 +609,13 @@ public final class RuffyClickGui extends Screen {
     }
 
     private static int palettePrimary(int palette) {
-        int[] colors = {0xFF58D8F5, 0xFFFF75CF, 0xFF67E4B6,
+        int[] colors = {0xFFB45CFF, 0xFFFF75CF, 0xFF67E4B6,
                 0xFFFFC36B, 0xFF91BFFF, 0xFFE1E8F2};
         return colors[Math.max(0, Math.min(colors.length - 1, palette))];
     }
 
     private static int paletteSecondary(int palette) {
-        int[] colors = {0xFF9B7BFF, 0xFF9D85FF, 0xFF65CFFF,
+        int[] colors = {0xFF7B3ED6, 0xFF9D85FF, 0xFF65CFFF,
                 0xFFFF826F, 0xFFB6D5FF, 0xFF9AA8BA};
         return colors[Math.max(0, Math.min(colors.length - 1, palette))];
     }
@@ -619,12 +695,16 @@ public final class RuffyClickGui extends Screen {
             int y = listTop + i * rowHeight;
             if (!inside(mx, my, leftX, y, leftW, rowHeight - 2)) continue;
 
-            if (mx >= leftX + leftW - 54 && mx < leftX + leftW - 33) {
+            if (mx >= leftX + leftW - 80 && mx < leftX + leftW - 62) {
                 String key = "favorite_" + feature.key();
                 RuffyConfig.set(key, !RuffyConfig.get(key));
                 return true;
             }
-            if (mx >= leftX + leftW - 31) {
+            if (mx >= leftX + leftW - 58 && mx < leftX + leftW - 34) {
+                selectedKey = feature.key();
+                return true;
+            }
+            if (mx >= leftX + leftW - 32) {
                 RuffyConfig.set(feature.key(), !RuffyConfig.get(feature.key()));
                 selectedKey = feature.key();
                 return true;
