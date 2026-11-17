@@ -74,8 +74,8 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void calculateLayout() {
-        panelW = Math.min(620, Math.max(460, width - 24));
-        panelH = Math.min(390, Math.max(320, height - 24));
+        panelW = Math.min(560, Math.max(420, width - 24));
+        panelH = Math.min(360, Math.max(320, height - 24));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
 
@@ -84,11 +84,12 @@ public final class RuffyClickGui extends Screen {
         rightX = leftX + leftW + 12;
         rightW = panelX + panelW - 14 - rightX;
 
-        searchX = leftX + 177;
-        searchY = panelY + 79;
-        searchW = Math.max(65, leftW - 181);
-        listTop = panelY + 108;
-        rowHeight = Math.max(22, Math.min(25, (panelH - 145) / 8));
+        boolean stackedSearch = leftW < 260;
+        searchX = stackedSearch ? leftX : leftX + 177;
+        searchY = stackedSearch ? panelY + 100 : panelY + 79;
+        searchW = stackedSearch ? leftW : leftW - 181;
+        listTop = panelY + (stackedSearch ? 130 : 108);
+        rowHeight = Math.max(18, Math.min(25, (panelH - (listTop - panelY) - 50) / 8));
     }
 
     @Override
@@ -723,7 +724,7 @@ public final class RuffyClickGui extends Screen {
 
     private boolean handleStyleClick(int mx, int my) {
         int x = panelX + 18;
-        int y = panelY + 102;
+        int y = panelY + 80;
         int sw = (panelW - 64) / 3;
         for (int i = 0; i < PALETTE_NAMES.length; i++) {
             int cx = x + (i % 3) * (sw + 8);
