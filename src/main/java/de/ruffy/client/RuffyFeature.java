@@ -43,6 +43,7 @@ public record RuffyFeature(String key, String title, String description, Section
             new RuffyFeature("landing_ring", "Landing Ring", "Energy ring when touching down", Section.MOTION, Group.MOTION),
             new RuffyFeature("step_sparks", "Footstep Sparks", "Small stepside sparks while walking", Section.MOTION, Group.MOTION),
             new RuffyFeature("starfall", "Starfall", "A faint falling-star particle effect", Section.MOTION, Group.MOTION),
+            new RuffyFeature("palette_sparks", "Palette Sparks", "Use your selected accent colors in particle effects", Section.MOTION, Group.MOTION),
 
             new RuffyFeature("hit_sparks", "Impact Slash", "Sweep and sparks on each hand swing", Section.ENTITIES, Group.ENTITIES),
             new RuffyFeature("swing_animation", "Smooth Swing", "Refined first-person swing timing", Section.ENTITIES, Group.ENTITIES),
