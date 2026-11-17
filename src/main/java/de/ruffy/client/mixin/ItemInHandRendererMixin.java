@@ -14,7 +14,21 @@ public abstract class ItemInHandRendererMixin {
             argsOnly = true,
             ordinal = 0
     )
-    private float ruffy$smoothSwing(float vanillaProgress) {
+    private float ruffy$smoothBareArmSwing(float vanillaProgress) {
+        return ruffy$curve(vanillaProgress);
+    }
+
+    @ModifyVariable(
+            method = "applyItemArmAttackTransform",
+            at = @At("HEAD"),
+            argsOnly = true,
+            ordinal = 0
+    )
+    private float ruffy$smoothHeldItemSwing(float vanillaProgress) {
+        return ruffy$curve(vanillaProgress);
+    }
+
+    private static float ruffy$curve(float vanillaProgress) {
         if (!RuffyConfig.get("swing_animation")) {
             return vanillaProgress;
         }
