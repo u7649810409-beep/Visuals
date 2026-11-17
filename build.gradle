@@ -24,6 +24,7 @@ dependencies {
 
 loom {
     mixin {
+        useLegacyMixinAp = true
         defaultRefmapName = "ruffyclient.refmap.json"
     }
 }
