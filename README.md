@@ -32,13 +32,13 @@ All effects are client-side cosmetics. The swing animation does not change attac
 gradle build
 ```
 
-GitHub Actions builds the remapped JAR with Java 21 and Gradle 9.2.1. The distributable file is written to `build/libs/`.
+GitHub Actions builds the remapped JAR with Java 21 and Gradle 9.2.1. The distributable file is written to `build/libs/ruffy-visuals-1.1.1.jar`.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 1.21.11.
 2. Install Fabric API for 1.21.11.
-3. Put `ruffy-visuals-1.1.0.jar` into `.minecraft/mods`.
+3. Put `ruffy-visuals-1.1.1.jar` into `.minecraft/mods`.
 4. Launch the Fabric 1.21.11 profile and press **Right Shift** in a world.
 
 The feature toggles are saved automatically in the Ruffy Visuals config file.
