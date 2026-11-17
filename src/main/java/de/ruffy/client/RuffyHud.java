@@ -4,14 +4,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.player.Player;
 
-/** Clean, compact sci-fi HUD rendered through Fabric's HudElement API. */
+import java.util.Locale;
+
+/** Minimal transparent HUD chips with the selected client palette. */
 public final class RuffyHud {
-    private static final int PANEL = 0xC90B1524;
-    private static final int BORDER = 0x664C7187;
-    private static final int CYAN = 0xFF52D9F5;
-    private static final int VIOLET = 0xFF9B7BFF;
     private static final int WHITE = 0xFFF3F7FF;
-    private static final int MUTED = 0xFFA4B5C8;
+    private static final int MUTED = 0xFFB6C5D6;
 
     private RuffyHud() {}
 
@@ -20,44 +18,80 @@ public final class RuffyHud {
         Player player = client.player;
         if (player == null || client.options.hideGui) return;
 
-        int x = 10;
-        int y = 10;
+        int primary = RuffyConfig.primaryColor();
+        int secondary = RuffyConfig.secondaryColor();
+        int x = 12;
+        int y = 12;
+        int rowHeight = 23;
 
         if (RuffyConfig.get("watermark")) {
-            int width = 112;
-            panel(graphics, x, y, width, 25, CYAN);
-            graphics.fill(x + 8, y + 7, x + 10, y + 18, CYAN);
-            graphics.drawString(client.font, "RUFFY", x + 17, y + 5, WHITE, false);
-            graphics.drawString(client.font, "VISUALS", x + 59, y + 5, CYAN, false);
-            x += width + 7;
+            String name = "RUFFY";
+            String tag = "VISUALS";
+            int width = client.font.width(name) + client.font.width(tag) + 33;
+            panel(graphics, x, y, width, rowHeight, primary);
+            graphics.drawString(client.font, name, x + 10, y + 7, WHITE, false);
+            graphics.drawString(client.font, tag, x + 10 + client.font.width(name) + 5,
+                    y + 7, primary, false);
+            x += width + 5;
         }
 
         if (RuffyConfig.get("fps")) {
             String value = client.getFps() + " FPS";
             int width = client.font.width(value) + 18;
-            panel(graphics, x, y, width, 25, VIOLET);
-            graphics.drawString(client.font, value, x + 9, y + 8, WHITE, false);
-            x += width + 7;
+            panel(graphics, x, y, width, rowHeight, secondary);
+            graphics.drawString(client.font, value, x + 9, y + 7, WHITE, false);
+            x += width + 5;
         }
 
         if (RuffyConfig.get("coordinates")) {
-            String value = player.blockPosition().getX() + "  /  "
-                    + player.blockPosition().getY() + "  /  " + player.blockPosition().getZ();
+            String value = player.blockPosition().getX() + "  "
+                    + player.blockPosition().getY() + "  " + player.blockPosition().getZ();
             int width = client.font.width(value) + 18;
-            panel(graphics, x, y, width, 25, CYAN);
-            graphics.drawString(client.font, value, x + 9, y + 8, MUTED, false);
+            panel(graphics, x, y, width, rowHeight, primary);
+            graphics.drawString(client.font, value, x + 9, y + 7, MUTED, false);
+            x += width + 5;
+        }
+
+        if (RuffyConfig.get("direction")) {
+            String[] directions = {"S", "W", "N", "E"};
+            int index = Math.floorMod(Math.round(player.getYRot() / 90.0F), 4);
+            String value = "DIR  " + directions[index];
+            int width = client.font.width(value) + 18;
+            panel(graphics, x, y, width, rowHeight, secondary);
+            graphics.drawString(client.font, value, x + 9, y + 7, WHITE, false);
+            x += width + 5;
+        }
+
+        if (RuffyConfig.get("speed")) {
+            double speed = Math.sqrt(player.getDeltaMovement().horizontalDistanceSqr()) * 20.0;
+            String value = String.format(Locale.ROOT, "%.1f B/S", speed);
+            int width = client.font.width(value) + 18;
+            panel(graphics, x, y, width, rowHeight, primary);
+            graphics.drawString(client.font, value, x + 9, y + 7, WHITE, false);
+            x += width + 5;
+        }
+
+        if (RuffyConfig.get("world_clock") && client.level != null) {
+            long time = Math.floorMod(client.level.getDayTime() + 6000L, 24000L);
+            int hours = (int) (time / 1000L);
+            int minutes = (int) ((time % 1000L) * 60L / 1000L);
+            String value = String.format(Locale.ROOT, "%02d:%02d", hours, minutes);
+            int width = client.font.width(value) + 18;
+            panel(graphics, x, y, width, rowHeight, secondary);
+            graphics.drawString(client.font, value, x + 9, y + 7, WHITE, false);
         }
 
         if (RuffyConfig.get("keystrokes")) {
-            int keyY = client.getWindow().getGuiScaledHeight() - 63;
-            drawKeystrokes(graphics, client, 10, keyY);
+            int keyY = client.getWindow().getGuiScaledHeight() - 72;
+            drawKeystrokes(graphics, client, 12, keyY);
         }
     }
 
     private static void panel(GuiGraphics graphics, int x, int y, int width, int height, int accent) {
-        graphics.fill(x, y, x + width, y + height, PANEL);
-        graphics.renderOutline(x, y, width, height, BORDER);
-        graphics.fill(x, y, x + 2, y + height, accent);
+        graphics.fill(x, y, x + width, y + height, RuffyConfig.hudPanelColor());
+        graphics.renderOutline(x, y, width, height, RuffyConfig.hudBorderColor());
+        graphics.fill(x, y + 4, x + 2, y + height - 4, withAlpha(accent, 205));
+        graphics.fill(x + 3, y, x + width - 3, y + 1, withAlpha(accent, 45));
     }
 
     private static void drawKeystrokes(GuiGraphics graphics, Minecraft client, int x, int y) {
@@ -73,12 +107,17 @@ public final class RuffyHud {
 
     private static void drawKey(GuiGraphics graphics, Minecraft client, String label,
                                 int x, int y, boolean pressed) {
-        int fill = pressed ? 0xFF164456 : PANEL;
-        int accent = pressed ? CYAN : 0xFF526B83;
+        int panel = RuffyConfig.hudPanelColor();
+        int fill = pressed ? withAlpha(RuffyConfig.primaryColor(), 175) : panel;
         graphics.fill(x, y, x + 25, y + 22, fill);
-        graphics.renderOutline(x, y, 25, 22, BORDER);
-        if (pressed) graphics.fill(x + 2, y + 2, x + 23, y + 3, accent);
+        graphics.renderOutline(x, y, 25, 22, RuffyConfig.hudBorderColor());
+        if (pressed) graphics.fill(x + 3, y + 2, x + 22, y + 3,
+                withAlpha(RuffyConfig.primaryColor(), 230));
         graphics.drawCenteredString(client.font, label, x + 12, y + 7,
                 pressed ? WHITE : MUTED);
+    }
+
+    private static int withAlpha(int color, int alpha) {
+        return ((alpha & 0xFF) << 24) | (color & 0x00FFFFFF);
     }
 }
