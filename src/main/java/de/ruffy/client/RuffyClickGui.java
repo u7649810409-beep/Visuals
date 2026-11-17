@@ -74,8 +74,8 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void calculateLayout() {
-        panelW = Math.min(560, Math.max(420, width - 24));
-        panelH = Math.min(360, Math.max(320, height - 24));
+        panelW = Math.min(520, Math.max(420, width - 24));
+        panelH = Math.min(340, Math.max(320, height - 24));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
 
@@ -386,39 +386,39 @@ public final class RuffyClickGui extends Screen {
 
     private void drawStyle(GuiGraphics g, int mouseX, int mouseY) {
         int x = panelX + 18;
-        int y = panelY + 80;
+        int y = panelY + 72;
         g.drawString(font, "COLOR PALETTE", x, y, WHITE, false);
         int sw = (panelW - 64) / 3;
         for (int i = 0; i < PALETTE_NAMES.length; i++) {
             int cx = x + (i % 3) * (sw + 8);
-            int cy = y + 22 + (i / 3) * 48;
+            int cy = y + 18 + (i / 3) * 42;
             int primary = palettePrimary(i);
             boolean selected = RuffyConfig.getInt("palette") == i;
-            boolean hover = inside(mouseX, mouseY, cx, cy, sw, 41);
-            g.fill(cx, cy, cx + sw, cy + 41, hover ? CARD_HOVER : CARD);
-            g.renderOutline(cx, cy, sw, 41, selected ? withAlpha(primary, 220) : BORDER);
-            g.fill(cx + 7, cy + 8, cx + 20, cy + 21, primary);
-            g.fill(cx + 23, cy + 8, cx + 36, cy + 21, paletteSecondary(i));
+            boolean hover = inside(mouseX, mouseY, cx, cy, sw, 36);
+            g.fill(cx, cy, cx + sw, cy + 36, hover ? CARD_HOVER : CARD);
+            g.renderOutline(cx, cy, sw, 36, selected ? withAlpha(primary, 220) : BORDER);
+            g.fill(cx + 7, cy + 8, cx + 19, cy + 20, primary);
+            g.fill(cx + 22, cy + 8, cx + 34, cy + 20, paletteSecondary(i));
             g.drawString(font, PALETTE_NAMES[i].toUpperCase(Locale.ROOT),
-                    cx + 44, cy + 11, selected ? WHITE : MUTED, false);
+                    cx + 41, cy + 12, selected ? WHITE : MUTED, false);
         }
 
-        int sliderY = y + 132;
+        int sliderY = y + 100;
         g.drawString(font, "HUD PANEL OPACITY  " + RuffyConfig.getInt("hud_opacity") + "%",
                 x, sliderY, MUTED, false);
-        drawSlider(g, x, sliderY + 14, panelW - 42,
+        drawSlider(g, x, sliderY + 13, panelW - 42,
                 RuffyConfig.getInt("hud_opacity"), 12, 90);
 
-        int menuY = sliderY + 48;
+        int menuY = sliderY + 40;
         g.drawString(font, "MENU OPACITY  " + RuffyConfig.getInt("menu_opacity") + "%",
                 x, menuY, MUTED, false);
-        drawSlider(g, x, menuY + 14, panelW - 42,
+        drawSlider(g, x, menuY + 13, panelW - 42,
                 RuffyConfig.getInt("menu_opacity"), 60, 100);
 
-        int qualityY = menuY + 48;
+        int qualityY = menuY + 40;
         g.drawString(font, "EFFECT QUALITY  " + qualityName(RuffyConfig.getInt("effect_quality")),
                 x, qualityY, MUTED, false);
-        drawSlider(g, x, qualityY + 14, panelW - 42,
+        drawSlider(g, x, qualityY + 13, panelW - 42,
                 RuffyConfig.getInt("effect_quality"), 0, 2);
     }
 
@@ -725,33 +725,33 @@ public final class RuffyClickGui extends Screen {
 
     private boolean handleStyleClick(int mx, int my) {
         int x = panelX + 18;
-        int y = panelY + 80;
+        int y = panelY + 72;
         int sw = (panelW - 64) / 3;
         for (int i = 0; i < PALETTE_NAMES.length; i++) {
             int cx = x + (i % 3) * (sw + 8);
-            int cy = y + 22 + (i / 3) * 48;
-            if (inside(mx, my, cx, cy, sw, 41)) {
+            int cy = y + 18 + (i / 3) * 42;
+            if (inside(mx, my, cx, cy, sw, 36)) {
                 RuffyConfig.setInt("palette", i);
                 return true;
             }
         }
 
-        int sliderY = panelY + 80 + 132;
-        if (inside(mx, my, x, sliderY + 9, panelW - 42, 16)) {
+        int sliderY = y + 100;
+        if (inside(mx, my, x, sliderY + 11, panelW - 42, 18)) {
             RuffyConfig.setInt("hud_opacity",
                     12 + Math.round((mx - x) * 78.0F / (panelW - 42)));
             return true;
         }
 
-        int menuY = sliderY + 48;
-        if (inside(mx, my, x, menuY + 9, panelW - 42, 16)) {
+        int menuY = sliderY + 40;
+        if (inside(mx, my, x, menuY + 11, panelW - 42, 18)) {
             RuffyConfig.setInt("menu_opacity",
                     60 + Math.round((mx - x) * 40.0F / (panelW - 42)));
             return true;
         }
 
-        int qualityY = menuY + 48;
-        if (inside(mx, my, x, qualityY + 9, panelW - 42, 16)) {
+        int qualityY = menuY + 40;
+        if (inside(mx, my, x, qualityY + 11, panelW - 42, 18)) {
             RuffyConfig.setInt("effect_quality",
                     Math.round((mx - x) * 2.0F / (panelW - 42)));
             return true;
