@@ -43,7 +43,7 @@ public final class RuffyClient implements ClientModInitializer {
         WorldRenderEvents.AFTER_ENTITIES.register(RuffyVisualEffects::render);
         ClientTickEvents.END_CLIENT_TICK.register(RuffyClient::tick);
 
-        LOGGER.info("Ruffy Visuals 1.9.0 initialized: anti-aliased rounded UI and smooth spring animation ready");
+        LOGGER.info("Ruffy Visuals 2.0.0 Galaxy Edition initialized: procedural nebula and smooth rounded UI ready");
     }
 
     private static void tick(Minecraft client) {
