@@ -39,6 +39,8 @@ public record RuffyFeature(String key, String title, String description, Section
 
             new RuffyFeature("nebula_particles", "Ambient Glints", "Custom drifting glow geometry around you", Section.MOTION, Group.MOTION),
             new RuffyFeature("orbit_particles", "Orbit Rings", "Custom animated geometry loops around your player", Section.MOTION, Group.MOTION),
+            new RuffyFeature("prism_core", "3D Prism Core", "Two rotating octahedra, inner cube and three orbital rings", Section.MOTION, Group.MOTION),
+            new RuffyFeature("orbit_drones", "3D Orbit Drones", "Three rotating wireframe crystal drones around the player", Section.MOTION, Group.MOTION),
             new RuffyFeature("movement_trail", "Motion Ribbon", "Custom velocity ribbon that follows your movement", Section.MOTION, Group.MOTION),
             new RuffyFeature("jump_burst", "Jump Shockwave", "Custom expanding rings and radial light geometry", Section.MOTION, Group.MOTION),
             new RuffyFeature("sprint_dust", "Sprint Streaks", "Custom streaks that trail behind your sprint", Section.MOTION, Group.MOTION),
@@ -48,6 +50,7 @@ public record RuffyFeature(String key, String title, String description, Section
             new RuffyFeature("palette_sparks", "Palette FX", "Use selected Crimson palette colors in custom geometry", Section.MOTION, Group.MOTION),
 
             new RuffyFeature("hit_sparks", "Slash Arc", "Custom curved line geometry when you swing", Section.ENTITIES, Group.ENTITIES),
+            new RuffyFeature("three_d_slash", "3D Slash Volume", "Layered depth ribbons and ribs on each swing", Section.ENTITIES, Group.ENTITIES),
             new RuffyFeature("swing_animation", "Smooth Swing", "Refined first-person swing timing", Section.ENTITIES, Group.ENTITIES),
             new RuffyFeature("critical_sparks", "Air Streaks", "Custom velocity glints while descending", Section.ENTITIES, Group.ENTITIES),
             new RuffyFeature("low_health_aura", "Critical Aura", "Custom rising helix when health is low", Section.ENTITIES, Group.ENTITIES),
