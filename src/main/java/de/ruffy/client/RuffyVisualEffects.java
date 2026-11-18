@@ -285,7 +285,8 @@ public final class RuffyVisualEffects {
     public static void render(WorldRenderContext context) {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || POINTS.isEmpty() && RINGS.isEmpty()
-                && SLASHES.isEmpty() && !RuffyConfig.get("orbit_particles")) {
+                && SLASHES.isEmpty() && !RuffyConfig.get("orbit_particles")
+                && !RuffyConfig.get("prism_core") && !RuffyConfig.get("orbit_drones")) {
             return;
         }
 
@@ -307,6 +308,12 @@ public final class RuffyVisualEffects {
         }
         if (RuffyConfig.get("orbit_particles")) {
             drawOrbit(lines, pose, client.player);
+        }
+        if (RuffyConfig.get("prism_core")) {
+            drawPrismCore(lines, pose, client.player);
+        }
+        if (RuffyConfig.get("orbit_drones")) {
+            drawOrbitDrones(lines, pose, client.player);
         }
 
         matrices.popPose();
@@ -398,6 +405,126 @@ public final class RuffyVisualEffects {
         }
     }
 
+    /**
+     * 3D Prism Core: two independently rotating octahedra, an inner cube and
+     * three animated latitude loops. All vertices are generated in local space.
+     */
+    private static void drawPrismCore(VertexConsumer out, PoseStack.Pose pose,
+                                      LocalPlayer player) {
+        float opacity = amountForRender("prism_core");
+        if (opacity <= 0.01F) return;
+
+        double time = tick * 0.031;
+        Vec3 center = player.position().add(0.0, 1.13, 0.0);
+        drawOctahedron(out, pose, center, 0.52,
+                time, 0.48 + Math.sin(time * 0.7) * 0.16, -time * 0.62,
+                withAlpha(RuffyConfig.primaryColor(), Math.round(235 * opacity)), 1.8F);
+        drawOctahedron(out, pose, center, 0.37,
+                -time * 0.72, time * 0.54, time * 0.88,
+                withAlpha(RuffyConfig.secondaryColor(), Math.round(190 * opacity)), 1.35F);
+
+        Vec3[] cube = cubeVertices(center, 0.20, time * 0.8, time * 0.5, 0.0);
+        drawEdges(out, pose, cube, CUBE_EDGES,
+                withAlpha(0xFFFFF0F4, Math.round(155 * opacity)), 1.0F);
+
+        int[][] loops = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2}};
+        for (int loop = 0; loop < loops.length; loop++) {
+            double radius = 0.72 + loop * 0.055;
+            double tilt = (loop - 1) * 0.52;
+            Vec3 previous = coreLoopPoint(center, radius, tilt, time, 0.0);
+            for (int i = 1; i <= 42; i++) {
+                double angle = TAU * i / 42.0;
+                Vec3 next = coreLoopPoint(center, radius, tilt, time, angle);
+                int color = loop == 1 ? RuffyConfig.secondaryColor() : RuffyConfig.primaryColor();
+                drawLine(out, pose, previous, next,
+                        withAlpha(color, Math.round((92 - loop * 12) * opacity)), 1.0F);
+                previous = next;
+            }
+        }
+    }
+
+    /** Three small rotating 3D crystal drones follow different orbital paths. */
+    private static void drawOrbitDrones(VertexConsumer out, PoseStack.Pose pose,
+                                        LocalPlayer player) {
+        float opacity = amountForRender("orbit_drones");
+        if (opacity <= 0.01F) return;
+
+        Vec3 body = player.position().add(0.0, 1.00, 0.0);
+        double time = tick * 0.043;
+        for (int i = 0; i < 3; i++) {
+            double angle = time + TAU * i / 3.0;
+            double radius = 1.12 + Math.sin(time * 1.2 + i) * 0.08;
+            Vec3 center = body.add(Math.cos(angle) * radius,
+                    0.25 + Math.sin(angle * 1.8) * 0.30,
+                    Math.sin(angle) * radius);
+            int color = i == 0 ? RuffyConfig.primaryColor()
+                    : i == 1 ? RuffyConfig.secondaryColor() : 0xFFFFE8EF;
+            drawOctahedron(out, pose, center, 0.17 + i * 0.012,
+                    -angle * 1.6, angle * 0.8, time * (i % 2 == 0 ? 1.2 : -1.1),
+                    withAlpha(color, Math.round(225 * opacity)), 1.25F);
+            drawLine(out, pose, body, center,
+                    withAlpha(color, Math.round(48 * opacity)), 0.8F);
+        }
+    }
+
+    private static Vec3 coreLoopPoint(Vec3 center, double radius, double tilt,
+                                      double time, double angle) {
+        Vec3 local = new Vec3(Math.cos(angle) * radius,
+                Math.sin(angle * 2.0 + time) * 0.10,
+                Math.sin(angle) * radius);
+        return center.add(RuffyAnimation.rotate3D(local, time * 0.2, tilt, time * 0.08));
+    }
+
+    private static void drawOctahedron(VertexConsumer out, PoseStack.Pose pose,
+                                       Vec3 center, double radius,
+                                       double yaw, double pitch, double roll,
+                                       int color, float width) {
+        Vec3[] vertices = new Vec3[6];
+        vertices[0] = new Vec3(radius, 0.0, 0.0);
+        vertices[1] = new Vec3(-radius, 0.0, 0.0);
+        vertices[2] = new Vec3(0.0, radius, 0.0);
+        vertices[3] = new Vec3(0.0, -radius, 0.0);
+        vertices[4] = new Vec3(0.0, 0.0, radius);
+        vertices[5] = new Vec3(0.0, 0.0, -radius);
+        for (int i = 0; i < vertices.length; i++) {
+            vertices[i] = center.add(RuffyAnimation.rotate3D(
+                    vertices[i], yaw, pitch, roll));
+        }
+        drawEdges(out, pose, vertices, OCTAHEDRON_EDGES, color, width);
+    }
+
+    private static Vec3[] cubeVertices(Vec3 center, double radius,
+                                       double yaw, double pitch, double roll) {
+        Vec3[] vertices = new Vec3[8];
+        for (int i = 0; i < 8; i++) {
+            Vec3 local = new Vec3(
+                    (i & 1) == 0 ? -radius : radius,
+                    (i & 2) == 0 ? -radius : radius,
+                    (i & 4) == 0 ? -radius : radius);
+            vertices[i] = center.add(RuffyAnimation.rotate3D(local, yaw, pitch, roll));
+        }
+        return vertices;
+    }
+
+    private static void drawEdges(VertexConsumer out, PoseStack.Pose pose,
+                                  Vec3[] vertices, int[][] edges,
+                                  int color, float width) {
+        for (int[] edge : edges) {
+            drawLine(out, pose, vertices[edge[0]], vertices[edge[1]], color, width);
+        }
+    }
+
+    private static final int[][] OCTAHEDRON_EDGES = {
+            {0, 2}, {0, 3}, {0, 4}, {0, 5},
+            {1, 2}, {1, 3}, {1, 4}, {1, 5},
+            {2, 4}, {2, 5}, {3, 4}, {3, 5}
+    };
+
+    private static final int[][] CUBE_EDGES = {
+            {0, 1}, {0, 2}, {0, 4}, {1, 3}, {1, 5},
+            {2, 3}, {2, 6}, {3, 7}, {4, 5}, {4, 6}, {5, 7}, {6, 7}
+    };
+
     private static Vec3 orbitPoint(Vec3 base, double radius, double tilt,
                                    double time, double angle) {
         double a = angle + time;
@@ -436,16 +563,28 @@ public final class RuffyVisualEffects {
         float growth = 0.5F + 0.5F * easeOut(Math.min(1.0F, progress * 1.8F));
         int primary = withAlpha(slash.primary, Math.round(255 * fade));
         int secondary = withAlpha(slash.secondary, Math.round(200 * fade));
+        Vec3 depth = slash.right.cross(slash.up).normalize().scale(0.16 * growth);
         Vec3 last = slash.point(0.0, growth);
         Vec3 lastGlow = slash.point(0.0, growth * 1.10);
-        for (int i = 1; i <= 32; i++) {
-            double t = i / 32.0;
+        Vec3 lastBack = last.add(depth);
+        for (int i = 1; i <= 36; i++) {
+            double t = i / 36.0;
             Vec3 next = slash.point(t, growth);
             Vec3 glow = slash.point(t, growth * 1.10);
-            drawLine(out, pose, lastGlow, glow, withAlpha(secondary, Math.round(75 * fade)), 4.0F);
-            drawLine(out, pose, last, next, primary, 2.0F);
+            Vec3 nextBack = next.add(depth);
+            drawLine(out, pose, lastGlow, glow,
+                    withAlpha(secondary, Math.round(82 * fade)), 4.2F);
+            drawLine(out, pose, last, next, primary, 2.2F);
+
+            if (RuffyConfig.get("three_d_slash") && i % 3 == 0) {
+                int ribAlpha = Math.round(115 * fade);
+                drawLine(out, pose, last, lastBack, withAlpha(secondary, ribAlpha), 1.1F);
+                drawLine(out, pose, next, nextBack, withAlpha(secondary, ribAlpha), 1.1F);
+                drawLine(out, pose, lastBack, nextBack, withAlpha(secondary, ribAlpha), 1.0F);
+            }
             last = next;
             lastGlow = glow;
+            lastBack = nextBack;
         }
     }
 
