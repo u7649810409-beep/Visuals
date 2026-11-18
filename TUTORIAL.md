@@ -1,10 +1,18 @@
-# Ruffy Client (Minecraft 1.21.11) -> JAR ueber GitHub bauen
+# Ruffy Visuals 2.0.0 — Galaxy Edition (Minecraft 1.21.11)
 
-1. github.com -> New repository -> Name "ruffy-client" -> Create (leer lassen, keine README anlegen)
-2. Zip entpacken. Im Repo-Seite "uploading an existing file" klicken und ALLE Dateien/Ordner
-   aus dem entpackten Ordner hineinziehen (auch den versteckten Ordner .github!) -> Commit changes
-3. Tab "Actions" -> "Build" laeuft automatisch (ca. 3-5 Min). Gruener Haken = fertig.
-4. Auf den Run klicken -> unten bei "Artifacts" -> "ruffy-client-jar" herunterladen -> entpacken
-5. ruffy-client-1.0.0.jar in .minecraft/mods legen (Fabric Loader 0.18.4+ fuer 1.21.11 installiert)
-6. Fuer ein offizielles Release: Releases -> Create new release -> Tag "v1.0.0" -> Publish.
-   Die Action haengt die JAR dann automatisch an.
+## Install
+
+1. Open the repository's **Actions** tab.
+2. Select the latest successful **Ruffy Visuals Build** run.
+3. Download the `ruffy-visuals-1.21.11` artifact and extract it.
+4. Put `ruffy-visuals-2.0.0.jar` into `.minecraft/mods`.
+5. Start Minecraft 1.21.11 with Fabric Loader 0.18.4+ and Fabric API 0.141.1+1.21.11 installed.
+6. Press **Right Shift** in a world to open the Galaxy control center.
+
+## Style
+
+The Style tab contains ten palettes, HUD opacity and scale, menu opacity, effect quality, Smooth Animations and Smoothness. Nebula is the default. The full-screen galaxy background and all rounded panels are rendered by Ruffy's own client-side UI classes.
+
+## Build
+
+Install Java 21 and Gradle 9.2.1+, then run `gradle build`. The JAR is generated in `build/libs/`.

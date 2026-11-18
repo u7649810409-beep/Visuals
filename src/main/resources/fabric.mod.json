@@ -2,17 +2,20 @@
   "schemaVersion": 1,
   "id": "ruffyclient",
   "version": "${version}",
-  "name": "Ruffy Client",
-  "description": "Ersetzt den Menue-Hintergrund durch ein eigenes Bild.",
-  "authors": ["Du"],
+  "name": "Ruffy Visuals",
+  "description": "A Galaxy Edition client with a procedural nebula background, anti-aliased rounded glass controls, a Nebula HUD and custom 3D effects.",
+  "authors": ["Ruffy"],
   "license": "MIT",
-  "icon": "assets/ruffyclient/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["de.ruffy.client.RuffyClient"]
   },
+  "mixins": [
+    "ruffyclient.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.18.4",
+    "fabric-api": "*",
     "minecraft": "~1.21.11",
     "java": ">=21"
   }

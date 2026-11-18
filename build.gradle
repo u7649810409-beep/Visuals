@@ -10,10 +10,23 @@ base {
     archivesName = project.archives_base_name
 }
 
+repositories {
+    maven { url = 'https://maven.fabricmc.net/' }
+    mavenCentral()
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+loom {
+    mixin {
+        useLegacyMixinAp = true
+        defaultRefmapName = "ruffyclient.refmap.json"
+    }
 }
 
 processResources {
@@ -24,7 +37,8 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 21
+    options.release = 21
+    options.encoding = "UTF-8"
 }
 
 java {
