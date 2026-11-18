@@ -240,37 +240,12 @@ public final class RuffyHud {
 
     private static void fillRounded(GuiGraphics g, int x, int y, int w, int h,
                                     int color, int radius) {
-        if (w <= 0 || h <= 0) return;
-        int r = Math.max(0, Math.min(radius, Math.min(w, h) / 2));
-        if (r == 0) {
-            g.fill(x, y, x + w, y + h, color);
-            return;
-        }
-        g.fill(x + r, y, x + w - r, y + h, color);
-        for (int row = 0; row < r; row++) {
-            double dy = r - row - 0.5;
-            int inset = Math.max(0, r - (int) Math.floor(Math.sqrt(r * r - dy * dy)));
-            g.fill(x + inset, y + row, x + w - inset, y + row + 1, color);
-            g.fill(x + inset, y + h - row - 1, x + w - inset, y + h - row, color);
-        }
+        RuffyRoundedUi.fill(g, x, y, w, h, color, radius);
     }
 
     private static void outlineRounded(GuiGraphics g, int x, int y, int w, int h,
                                        int color, int radius) {
-        if (w <= 0 || h <= 0) return;
-        int r = Math.max(1, Math.min(radius, Math.min(w, h) / 2));
-        g.fill(x + r, y, x + w - r, y + 1, color);
-        g.fill(x + r, y + h - 1, x + w - r, y + h, color);
-        g.fill(x, y + r, x + 1, y + h - r, color);
-        g.fill(x + w - 1, y + r, x + w, y + h - r, color);
-        for (int row = 0; row < r; row++) {
-            double dy = r - row - 0.5;
-            int inset = Math.max(0, r - (int) Math.floor(Math.sqrt(r * r - dy * dy)));
-            g.fill(x + inset, y + row, x + inset + 1, y + row + 1, color);
-            g.fill(x + w - inset - 1, y + row, x + w - inset, y + row + 1, color);
-            g.fill(x + inset, y + h - row - 1, x + inset + 1, y + h - row, color);
-            g.fill(x + w - inset - 1, y + h - row - 1, x + w - inset, y + h - row, color);
-        }
+        RuffyRoundedUi.outline(g, x, y, w, h, color, radius);
     }
 
     private static float clamp01(float value) {
