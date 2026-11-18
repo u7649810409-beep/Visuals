@@ -21,7 +21,7 @@ import java.util.Map;
 public final class RuffyRoundedUi {
     private static final int SIZE = 256;
     private static final int SUPERSAMPLE = 4;
-    private static final int MAX_RADIUS = 24;
+    private static final int MAX_RADIUS = 30;
     private static final float OUTLINE_WIDTH = 1.15F;
 
     private static final Map<Integer, Identifier> FILLS = new HashMap<>();
