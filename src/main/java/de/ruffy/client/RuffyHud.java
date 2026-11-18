@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.Locale;
 
 /**
- * Matching violet control-center HUD: transparent charcoal chips,
+ * Matching Crimson Red control-center HUD: transparent charcoal chips,
  * fine neon outlines and compact input/status panels.
  */
 public final class RuffyHud {
@@ -66,8 +66,8 @@ public final class RuffyHud {
         if (RuffyConfig.get("health_hud")) {
             float health = player.getHealth();
             float maxHealth = Math.max(1.0F, player.getMaxHealth());
-            int healthColor = health / maxHealth <= 0.25F ? 0xFFFF647D
-                    : health / maxHealth <= 0.5F ? 0xFFFFB56B : RuffyConfig.primaryColor();
+            int healthColor = health / maxHealth <= 0.25F ? 0xFFFF365B
+                    : health / maxHealth <= 0.5F ? 0xFFFF9A65 : RuffyConfig.primaryColor();
             cursor.drawBar(graphics, client, "health",
                     String.format(Locale.ROOT, "HP  %.1f / %.0f", health, maxHealth),
                     healthColor, health / maxHealth);
