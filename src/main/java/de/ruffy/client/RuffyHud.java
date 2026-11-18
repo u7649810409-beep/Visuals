@@ -7,14 +7,18 @@ import net.minecraft.world.entity.player.Player;
 import java.util.Locale;
 
 /**
- * Matching Crimson Red control-center HUD: transparent charcoal chips,
- * fine neon outlines and compact input/status panels.
+ * Ruffy's compact status HUD.
+ *
+ * A single visual language is shared across the top status strip, vitals and
+ * movement keys: quiet translucent surfaces, small labels, consistent spacing
+ * and a single palette accent. Everything is drawn by Ruffy.
  */
 public final class RuffyHud {
-    private static final int WHITE = 0xFFF7F2FB;
-    private static final int MUTED = 0xFFC1B6C9;
-    private static final int CHIP_HEIGHT = 23;
-    private static final int CHIP_GAP = 5;
+    private static final int WHITE = 0xFFF5F4F7;
+    private static final int MUTED = 0xFF9E9AA5;
+    private static final int SOFT = 0xFFCAC5CF;
+    private static final int CHIP_HEIGHT = 31;
+    private static final int CHIP_GAP = 4;
 
     private RuffyHud() {}
 
@@ -23,65 +27,75 @@ public final class RuffyHud {
         Player player = client.player;
         if (player == null || client.options.hideGui) return;
 
-        int screenWidth = client.getWindow().getGuiScaledWidth();
-        HudCursor cursor = new HudCursor(12, 12, screenWidth - 12);
+        float scale = Math.max(0.75F,
+                Math.min(1.20F, RuffyConfig.getInt("hud_scale") / 100.0F));
+        graphics.pose().pushPose();
+        graphics.pose().scale(scale, scale, 1.0F);
 
+        int logicalWidth = Math.round(client.getWindow().getGuiScaledWidth() / scale);
+        int logicalHeight = Math.round(client.getWindow().getGuiScaledHeight() / scale);
+        HudCursor cursor = new HudCursor(12, 12, logicalWidth - 12);
+
+        // Primary status line: identity first, then only the values enabled by the user.
         if (RuffyConfig.get("watermark")) {
             cursor.drawBrand(graphics, client);
         }
-
         if (RuffyConfig.get("fps")) {
-            cursor.draw(graphics, client, "fps", "FPS  " + client.getFps(),
-                    RuffyConfig.secondaryColor());
+            cursor.drawMetric(graphics, client, "fps", "FPS",
+                    Integer.toString(client.getFps()), RuffyConfig.secondaryColor());
         }
-
-        if (RuffyConfig.get("coordinates")) {
-            String coords = "XYZ  " + player.blockPosition().getX() + "  "
-                    + player.blockPosition().getY() + "  " + player.blockPosition().getZ();
-            cursor.draw(graphics, client, "coordinates", coords, RuffyConfig.primaryColor());
-        }
-
         if (RuffyConfig.get("direction")) {
+            float yaw = player.getYRot();
+            int degrees = Math.floorMod(Math.round(yaw), 360);
             String[] directions = {"S", "W", "N", "E"};
-            int index = Math.floorMod(Math.round(player.getYRot() / 90.0F), 4);
-            cursor.draw(graphics, client, "direction", "DIR  " + directions[index],
-                    RuffyConfig.secondaryColor());
-        }
-
-        if (RuffyConfig.get("speed")) {
-            double speed = Math.sqrt(player.getDeltaMovement().horizontalDistanceSqr()) * 20.0;
-            cursor.draw(graphics, client, "speed", String.format(Locale.ROOT, "SPD  %.1f B/S", speed),
+            int index = Math.floorMod(Math.round(yaw / 90.0F), 4);
+            cursor.drawMetric(graphics, client, "direction", "FACING",
+                    directions[index] + "  " + String.format(Locale.ROOT, "%03d°", degrees),
                     RuffyConfig.primaryColor());
         }
-
+        if (RuffyConfig.get("speed")) {
+            double speed = Math.sqrt(player.getDeltaMovement().horizontalDistanceSqr()) * 20.0;
+            cursor.drawMetric(graphics, client, "speed", "SPEED",
+                    String.format(Locale.ROOT, "%.2f BLK/S", speed), RuffyConfig.secondaryColor());
+        }
         if (RuffyConfig.get("world_clock") && client.level != null) {
             long time = Math.floorMod(client.level.getDayTime() + 6000L, 24000L);
             int hours = (int) (time / 1000L);
             int minutes = (int) ((time % 1000L) * 60L / 1000L);
-            cursor.draw(graphics, client, "world-clock",
-                    String.format(Locale.ROOT, "WORLD  %02d:%02d", hours, minutes),
+            cursor.drawMetric(graphics, client, "world-clock", "WORLD TIME",
+                    String.format(Locale.ROOT, "%02d:%02d", hours, minutes),
                     RuffyConfig.secondaryColor());
         }
+        if (RuffyConfig.get("coordinates")) {
+            String coords = player.blockPosition().getX() + ", "
+                    + player.blockPosition().getY() + ", "
+                    + player.blockPosition().getZ();
+            cursor.drawMetric(graphics, client, "coordinates", "POSITION",
+                    coords, RuffyConfig.primaryColor());
+        }
 
+        // Vitals are separate from world telemetry, with eased proportional bars.
         if (RuffyConfig.get("health_hud")) {
             float health = player.getHealth();
-            float maxHealth = Math.max(1.0F, player.getMaxHealth());
-            int healthColor = health / maxHealth <= 0.25F ? 0xFFFF365B
-                    : health / maxHealth <= 0.5F ? 0xFFFF9A65 : RuffyConfig.primaryColor();
-            cursor.drawBar(graphics, client, "health",
-                    String.format(Locale.ROOT, "HP  %.1f / %.0f", health, maxHealth),
-                    healthColor, health / maxHealth);
+            float maximum = Math.max(1.0F, player.getMaxHealth());
+            float ratio = clamp01(health / maximum);
+            int healthColor = ratio <= 0.25F ? 0xFFFF4D68
+                    : ratio <= 0.50F ? 0xFFFFB45C : RuffyConfig.primaryColor();
+            cursor.drawVital(graphics, client, "health", "HEALTH",
+                    String.format(Locale.ROOT, "%.1f / %.0f", health, maximum),
+                    healthColor, ratio);
         }
-
         if (RuffyConfig.get("armor_hud")) {
-            cursor.draw(graphics, client, "armor", "ARMOR  " + player.getArmorValue(),
-                    RuffyConfig.secondaryColor());
+            int armor = Math.max(0, Math.min(20, player.getArmorValue()));
+            cursor.drawVital(graphics, client, "armor", "ARMOR",
+                    armor + " / 20", RuffyConfig.secondaryColor(), armor / 20.0F);
         }
 
         if (RuffyConfig.get("keystrokes")) {
-            int keyY = client.getWindow().getGuiScaledHeight() - 80;
-            drawKeystrokes(graphics, client, 12, keyY);
+            drawKeystrokes(graphics, client, 12, logicalHeight - 82);
         }
+
+        graphics.pose().popPose();
     }
 
     private static final class HudCursor {
@@ -94,11 +108,11 @@ public final class RuffyHud {
             this.x = x;
             this.y = y;
             this.startX = x;
-            this.rightLimit = Math.max(x + 70, rightLimit);
+            this.rightLimit = Math.max(x + 72, rightLimit);
         }
 
-        private void nextLineIfNeeded(int chipWidth) {
-            if (x + chipWidth > rightLimit && x > startX) {
+        private void nextLineIfNeeded(int width) {
+            if (x + width > rightLimit && x > startX) {
                 x = startX;
                 y += CHIP_HEIGHT + CHIP_GAP;
             }
@@ -106,129 +120,123 @@ public final class RuffyHud {
 
         private void drawBrand(GuiGraphics graphics, Minecraft client) {
             float opacity = RuffyAnimation.animate("hud.brand", 1.0F);
-            int width = 104;
+            int width = 78;
             nextLineIfNeeded(width);
             panel(graphics, x, y, width, CHIP_HEIGHT, RuffyConfig.primaryColor(), opacity);
-            fillRounded(graphics, x + 6, y + 4, 15, 15,
-                    withAlpha(RuffyConfig.primaryColor(), Math.round(55 * opacity)), 5);
-            outlineRounded(graphics, x + 6, y + 4, 15, 15,
-                    withAlpha(RuffyConfig.primaryColor(), Math.round(180 * opacity)), 5);
-            graphics.drawCenteredString(client.font, "R", x + 13, y + 7,
-                    RuffyAnimation.multiplyAlpha(RuffyConfig.primaryColor(), opacity));
-            graphics.drawString(client.font, "RUFFY", x + 27, y + 4,
+            fillRounded(graphics, x + 9, y + 9, 8, 8,
+                    RuffyAnimation.multiplyAlpha(RuffyConfig.primaryColor(), opacity), 4);
+            graphics.drawString(client.font, "RUFFY", x + 24, y + 6,
                     RuffyAnimation.multiplyAlpha(WHITE, opacity), false);
-            graphics.drawString(client.font, "VISUALS", x + 27, y + 14,
-                    RuffyAnimation.multiplyAlpha(RuffyConfig.primaryColor(), opacity), false);
+            graphics.drawString(client.font, "VISUALS", x + 24, y + 17,
+                    RuffyAnimation.multiplyAlpha(MUTED, opacity), false);
             x += width + CHIP_GAP;
         }
 
-        private void draw(GuiGraphics graphics, Minecraft client,
-                          String animationId, String text, int accent) {
-            float opacity = RuffyAnimation.animate("hud.chip." + animationId, 1.0F);
-            int maxTextWidth = Math.max(42, rightLimit - startX - 18);
-            String visible = text;
-            while (visible.length() > 3 && client.font.width(visible) > maxTextWidth) {
-                visible = visible.substring(0, visible.length() - 1);
-            }
-            int width = client.font.width(visible) + 18;
+        private void drawMetric(GuiGraphics graphics, Minecraft client,
+                                String id, String label, String value, int accent) {
+            float opacity = RuffyAnimation.animate("hud.metric." + id, 1.0F);
+            int available = Math.max(44, rightLimit - startX - 18);
+            String shown = fit(client, value, available - 18);
+            int width = Math.max(49,
+                    Math.max(client.font.width(label), client.font.width(shown)) + 18);
             nextLineIfNeeded(width);
             panel(graphics, x, y, width, CHIP_HEIGHT, accent, opacity);
-            graphics.drawString(client.font, visible, x + 9, y + 7,
+            graphics.drawString(client.font, label, x + 9, y + 5,
+                    RuffyAnimation.multiplyAlpha(MUTED, opacity), false);
+            graphics.drawString(client.font, shown, x + 9, y + 17,
                     RuffyAnimation.multiplyAlpha(WHITE, opacity), false);
             x += width + CHIP_GAP;
         }
 
-        private void drawBar(GuiGraphics graphics, Minecraft client, String animationId,
-                             String text, int accent, float progress) {
-            float opacity = RuffyAnimation.animate("hud.chip." + animationId, 1.0F);
-            float smoothProgress = RuffyAnimation.animate("hud.bar." + animationId,
-                    Math.max(0.0F, Math.min(1.0F, progress)));
-            int width = client.font.width(text) + 20;
+        private void drawVital(GuiGraphics graphics, Minecraft client,
+                               String id, String label, String value,
+                               int accent, float ratio) {
+            float opacity = RuffyAnimation.animate("hud.vital." + id, 1.0F);
+            float progress = RuffyAnimation.animate("hud.vital.bar." + id, clamp01(ratio));
+            int width = Math.max(86, client.font.width(value) + 22);
             nextLineIfNeeded(width);
             panel(graphics, x, y, width, CHIP_HEIGHT, accent, opacity);
-            graphics.drawString(client.font, text, x + 9, y + 4,
+            graphics.drawString(client.font, label, x + 9, y + 4,
+                    RuffyAnimation.multiplyAlpha(MUTED, opacity), false);
+            graphics.drawString(client.font, value, x + 9, y + 14,
                     RuffyAnimation.multiplyAlpha(WHITE, opacity), false);
-            int barLeft = x + 9;
-            int barRight = x + width - 9;
-            fillRounded(graphics, barLeft, y + 16, barRight - barLeft, 4,
-                    RuffyAnimation.multiplyAlpha(0x99534A5C, opacity), 2);
-            int fill = Math.max(0, Math.min(barRight - barLeft,
-                    Math.round((barRight - barLeft) * smoothProgress)));
-            fillRounded(graphics, barLeft, y + 16, fill, 4,
-                    RuffyAnimation.multiplyAlpha(withAlpha(accent, 245), opacity), 2);
+            int left = x + 9;
+            int barWidth = width - 18;
+            fillRounded(graphics, left, y + 25, barWidth, 3,
+                    RuffyAnimation.multiplyAlpha(0xFF3B343F, opacity), 2);
+            int filled = Math.max(0, Math.min(barWidth, Math.round(barWidth * progress)));
+            fillRounded(graphics, left, y + 25, filled, 3,
+                    RuffyAnimation.multiplyAlpha(accent, opacity), 2);
             x += width + CHIP_GAP;
         }
+    }
+
+    private static String fit(Minecraft client, String value, int maxWidth) {
+        if (client.font.width(value) <= maxWidth) return value;
+        String clipped = value;
+        while (clipped.length() > 2 && client.font.width(clipped + "…") > maxWidth) {
+            clipped = clipped.substring(0, clipped.length() - 1);
+        }
+        return clipped.length() > 2 ? clipped + "…" : clipped;
     }
 
     private static void panel(GuiGraphics graphics, int x, int y,
                               int width, int height, int accent, float opacity) {
-        fillRounded(graphics, x - 2, y - 1, width + 4, height + 2,
-                withAlpha(accent, Math.round(15 * opacity)), 8);
-        fillRounded(graphics, x, y, width, height,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), opacity), 7);
-        outlineRounded(graphics, x, y, width, height,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), opacity), 7);
-        fillRounded(graphics, x + 1, y + 4, 2, height - 8,
-                withAlpha(accent, Math.round(220 * opacity)), 1);
-        fillRounded(graphics, x + 4, y + 1, width - 8, 1,
-                withAlpha(accent, Math.round(75 * opacity)), 1);
+        int fill = RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), opacity);
+        int border = RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), opacity);
+        fillRounded(graphics, x, y, width, height, fill, 7);
+        outlineRounded(graphics, x, y, width, height, border, 7);
+        // A short, quiet accent mark replaces the old full-height neon rail.
+        fillRounded(graphics, x + 8, y + 1, Math.min(15, width - 16), 1,
+                withAlpha(accent, Math.round(110 * opacity)), 1);
     }
 
     private static void drawKeystrokes(GuiGraphics graphics, Minecraft client, int x, int y) {
-        int keyW = 24;
-        int keyH = 20;
+        int keyW = 22;
+        int keyH = 18;
         int gap = 3;
         int panelW = keyW * 3 + gap * 2;
-        int panelH = keyH * 3 + gap * 2 + 18;
+        int panelH = 71;
+        float opacity = RuffyAnimation.animate("hud.input.panel", 1.0F);
 
-        float inputOpacity = RuffyAnimation.animate("hud.input.panel", 1.0F);
-        fillRounded(graphics, x - 5, y - 5, panelW + 10, panelH + 9,
-                withAlpha(RuffyConfig.primaryColor(), Math.round(15 * inputOpacity)), 10);
-        fillRounded(graphics, x - 3, y - 3, panelW + 6, panelH + 5,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), inputOpacity), 9);
-        outlineRounded(graphics, x - 3, y - 3, panelW + 6, panelH + 5,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), inputOpacity), 9);
-        graphics.drawString(client.font, "INPUT", x + 2, y - 1,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.primaryColor(), inputOpacity), false);
+        fillRounded(graphics, x - 3, y - 3, panelW + 6, panelH + 6,
+                RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), opacity), 9);
+        outlineRounded(graphics, x - 3, y - 3, panelW + 6, panelH + 6,
+                RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), opacity), 9);
+        graphics.drawString(client.font, "MOVEMENT", x + 2, y + 1,
+                RuffyAnimation.multiplyAlpha(MUTED, opacity), false);
 
-        int keysY = y + 12;
+        int keysY = y + 13;
         drawKey(graphics, client, "key.w", "W", x + keyW + gap, keysY,
                 keyW, keyH, client.options.keyUp.isDown());
         drawKey(graphics, client, "key.a", "A", x, keysY + keyH + gap,
                 keyW, keyH, client.options.keyLeft.isDown());
         drawKey(graphics, client, "key.s", "S", x + keyW + gap, keysY + keyH + gap,
                 keyW, keyH, client.options.keyDown.isDown());
-        drawKey(graphics, client, "key.d", "D", x + (keyW + gap) * 2, keysY + keyH + gap,
-                keyW, keyH, client.options.keyRight.isDown());
+        drawKey(graphics, client, "key.d", "D", x + (keyW + gap) * 2,
+                keysY + keyH + gap, keyW, keyH, client.options.keyRight.isDown());
 
-        drawKey(graphics, client, "key.jump", "JUMP", x, keysY + (keyH + gap) * 2,
-                keyW * 2 + gap, 16, client.options.keyJump.isDown());
+        int lowerY = keysY + (keyH + gap) * 2;
+        drawKey(graphics, client, "key.jump", "JUMP", x,
+                lowerY, keyW * 2 + gap, 14, client.options.keyJump.isDown());
         drawKey(graphics, client, "key.sprint", "SPR", x + (keyW + gap) * 2,
-                keysY + (keyH + gap) * 2, keyW, 16,
-                client.options.keySprint.isDown());
+                lowerY, keyW, 14, client.options.keySprint.isDown());
     }
 
     private static void drawKey(GuiGraphics graphics, Minecraft client, String animationId,
                                 String label, int x, int y, int width, int height, boolean pressed) {
         float active = RuffyAnimation.animate("hud.input." + animationId, pressed ? 1.0F : 0.0F);
         int accent = RuffyConfig.primaryColor();
-        if (active > 0.01F) {
-            graphics.fill(x - 2, y - 2, x + width + 2, y + height + 2,
-                    withAlpha(accent, Math.round(40 * active)));
-        }
-        int fill = RuffyAnimation.blendColor(RuffyConfig.hudPanelColor(),
-                withAlpha(accent, 175), active);
-        fillRounded(graphics, x, y, width, height, fill, 6);
-        outlineRounded(graphics, x, y, width, height,
-                RuffyAnimation.blendColor(RuffyConfig.hudBorderColor(),
-                        withAlpha(RuffyConfig.secondaryColor(), 230), active), 6);
-        if (active > 0.01F) {
-            fillRounded(graphics, x + 4, y + 2, width - 8, 2,
-                    withAlpha(accent, Math.round(230 * active)), 1);
-        }
-        int textColor = RuffyAnimation.blendColor(MUTED, WHITE, active);
+        int idle = RuffyConfig.hudPanelColor();
+        int activeFill = withAlpha(accent, 150);
+        int fill = RuffyAnimation.blendColor(idle, activeFill, active);
+        fillRounded(graphics, x, y, width, height, fill, 5);
+        int border = RuffyAnimation.blendColor(RuffyConfig.hudBorderColor(),
+                withAlpha(RuffyConfig.secondaryColor(), 220), active);
+        outlineRounded(graphics, x, y, width, height, border, 5);
         graphics.drawCenteredString(client.font, label,
-                x + width / 2, y + Math.max(3, (height - 8) / 2), textColor);
+                x + width / 2, y + Math.max(2, (height - 8) / 2),
+                RuffyAnimation.blendColor(MUTED, WHITE, active));
     }
 
     private static void fillRounded(GuiGraphics g, int x, int y, int w, int h,
@@ -264,6 +272,10 @@ public final class RuffyHud {
             g.fill(x + inset, y + h - row - 1, x + inset + 1, y + h - row, color);
             g.fill(x + w - inset - 1, y + h - row - 1, x + w - inset, y + h - row, color);
         }
+    }
+
+    private static float clamp01(float value) {
+        return Math.max(0.0F, Math.min(1.0F, value));
     }
 
     private static int withAlpha(int color, int alpha) {
