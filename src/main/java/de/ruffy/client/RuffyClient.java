@@ -43,7 +43,7 @@ public final class RuffyClient implements ClientModInitializer {
         WorldRenderEvents.AFTER_ENTITIES.register(RuffyVisualEffects::render);
         ClientTickEvents.END_CLIENT_TICK.register(RuffyClient::tick);
 
-        LOGGER.info("Ruffy Visuals 1.7.0 initialized: rounded Crimson control center and custom 3D FX ready");
+        LOGGER.info("Ruffy Visuals 1.8.0 initialized: clean telemetry HUD and custom 3D FX ready");
     }
 
     private static void tick(Minecraft client) {
