@@ -37,25 +37,25 @@ public record RuffyFeature(String key, String title, String description, Section
             new RuffyFeature("health_hud", "Health", "Compact health value and status bar", Section.HUD, Group.GENERAL),
             new RuffyFeature("armor_hud", "Armor", "Show equipped armor points", Section.HUD, Group.GENERAL),
 
-            new RuffyFeature("nebula_particles", "Ambient Particles", "Soft purple particles around you", Section.MOTION, Group.MOTION),
-            new RuffyFeature("orbit_particles", "Orbit Shards", "Slow particles orbiting your player", Section.MOTION, Group.MOTION),
-            new RuffyFeature("movement_trail", "Movement Trail", "Subtle light trail while moving", Section.MOTION, Group.MOTION),
-            new RuffyFeature("jump_burst", "Jump Burst", "Energy burst when leaving the ground", Section.MOTION, Group.MOTION),
-            new RuffyFeature("sprint_dust", "Sprint Dust", "Soft dust puffs while sprinting", Section.MOTION, Group.MOTION),
-            new RuffyFeature("landing_ring", "Landing Ring", "Energy ring when touching down", Section.MOTION, Group.MOTION),
-            new RuffyFeature("step_sparks", "Footstep Sparks", "Small stepside sparks while walking", Section.MOTION, Group.MOTION),
-            new RuffyFeature("starfall", "Starfall", "A faint falling-star particle effect", Section.MOTION, Group.MOTION),
-            new RuffyFeature("palette_sparks", "Palette Sparks", "Use your selected accent colors in particle effects", Section.MOTION, Group.MOTION),
+            new RuffyFeature("nebula_particles", "Ambient Glints", "Custom drifting glow geometry around you", Section.MOTION, Group.MOTION),
+            new RuffyFeature("orbit_particles", "Orbit Rings", "Custom animated geometry loops around your player", Section.MOTION, Group.MOTION),
+            new RuffyFeature("movement_trail", "Motion Ribbon", "Custom velocity ribbon that follows your movement", Section.MOTION, Group.MOTION),
+            new RuffyFeature("jump_burst", "Jump Shockwave", "Custom expanding rings and radial light geometry", Section.MOTION, Group.MOTION),
+            new RuffyFeature("sprint_dust", "Sprint Streaks", "Custom streaks that trail behind your sprint", Section.MOTION, Group.MOTION),
+            new RuffyFeature("landing_ring", "Landing Pulse", "Layered custom shock rings when landing", Section.MOTION, Group.MOTION),
+            new RuffyFeature("step_sparks", "Footstep Glints", "Custom alternating glints at each step", Section.MOTION, Group.MOTION),
+            new RuffyFeature("starfall", "Starfall Streaks", "Custom falling light streaks around you", Section.MOTION, Group.MOTION),
+            new RuffyFeature("palette_sparks", "Palette FX", "Use selected Crimson palette colors in custom geometry", Section.MOTION, Group.MOTION),
 
-            new RuffyFeature("hit_sparks", "Impact Slash", "Sweep and sparks on each hand swing", Section.ENTITIES, Group.ENTITIES),
+            new RuffyFeature("hit_sparks", "Slash Arc", "Custom curved line geometry when you swing", Section.ENTITIES, Group.ENTITIES),
             new RuffyFeature("swing_animation", "Smooth Swing", "Refined first-person swing timing", Section.ENTITIES, Group.ENTITIES),
-            new RuffyFeature("critical_sparks", "Air Sparks", "Light particles while descending", Section.ENTITIES, Group.ENTITIES),
-            new RuffyFeature("low_health_aura", "Low Health Aura", "Warning aura when health is critical", Section.ENTITIES, Group.ENTITIES),
-            new RuffyFeature("potion_glow", "Potion Glow", "Enchant particles while effects are active", Section.ENTITIES, Group.ENTITIES),
+            new RuffyFeature("critical_sparks", "Air Streaks", "Custom velocity glints while descending", Section.ENTITIES, Group.ENTITIES),
+            new RuffyFeature("low_health_aura", "Critical Aura", "Custom rising helix when health is low", Section.ENTITIES, Group.ENTITIES),
+            new RuffyFeature("potion_glow", "Effect Orbit", "Custom double helix while potion effects are active", Section.ENTITIES, Group.ENTITIES),
             new RuffyFeature("damage_pulse", "Damage Pulse", "A brief visual pulse after taking damage", Section.ENTITIES, Group.ENTITIES),
 
-            new RuffyFeature("underwater_bubbles", "Water Bubbles", "Bubbles around you underwater", Section.WORLD, Group.MOTION),
-            new RuffyFeature("weather_fx", "Weather FX", "Local rain particles in rainy biomes", Section.WORLD, Group.MOTION),
-            new RuffyFeature("cave_dust", "Cave Dust", "Ambient dust in very dark areas", Section.WORLD, Group.MOTION)
+            new RuffyFeature("underwater_bubbles", "Bubble Rings", "Custom rising outlined circles underwater", Section.WORLD, Group.MOTION),
+            new RuffyFeature("weather_fx", "Rain Streaks", "Custom falling line geometry during rain", Section.WORLD, Group.MOTION),
+            new RuffyFeature("cave_dust", "Cave Glints", "Custom drifting light geometry in caves", Section.WORLD, Group.MOTION)
     );
 }
