@@ -218,12 +218,12 @@ public final class RuffyClickGui extends Screen {
                     withAlpha(0xFF2A1119, 0), withAlpha(RuffyConfig.primaryColor(), 48), active);
             background = RuffyAnimation.blendColor(background, 0x6C2A1119, hover * (1.0F - active));
             if (active > 0.001F || hover > 0.001F) {
-                fillRounded(g, x, y + 3, item.width - 3, 24, background, 8);
-                outlineRounded(g, x, y + 3, item.width - 3, 24,
+                fillRounded(g, x, y + 3, itemWidth - 3, 24, background, 8);
+                outlineRounded(g, x, y + 3, itemWidth - 3, 24,
                         withAlpha(RuffyConfig.primaryColor(), Math.round(95 * active + 35 * hover)), 8);
             }
 
-            int underlineWidth = Math.max(0, Math.round((item.width - 15) * active));
+            int underlineWidth = Math.max(0, Math.round((itemWidth - 15) * active));
             if (underlineWidth > 0) {
                 g.fill(x + 6, y + 25, x + 6 + underlineWidth, y + 27,
                         RuffyConfig.primaryColor());
@@ -778,7 +778,7 @@ public final class RuffyClickGui extends Screen {
                 if (searchBox != null) searchBox.setVisible(tab == Tab.VISUALS);
                 return true;
             }
-            x += item.width;
+            x += itemWidth;
         }
         return false;
     }
