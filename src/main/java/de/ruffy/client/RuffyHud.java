@@ -14,8 +14,8 @@ import java.util.Locale;
  * and a single palette accent. Everything is drawn by Ruffy.
  */
 public final class RuffyHud {
-    private static final int WHITE = 0xFFF5F4F7;
-    private static final int MUTED = 0xFF9E9AA5;
+    private static final int WHITE = 0xFFF5F1FF;
+    private static final int MUTED = 0xFFB4A7CA;
     private static final int CHIP_HEIGHT = 31;
     private static final int CHIP_GAP = 4;
 
@@ -183,11 +183,11 @@ public final class RuffyHud {
                               int width, int height, int accent, float opacity) {
         int fill = RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), opacity);
         int border = RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), opacity);
-        fillRounded(graphics, x, y, width, height, fill, 7);
-        outlineRounded(graphics, x, y, width, height, border, 7);
+        fillRounded(graphics, x, y, width, height, fill, 12);
+        outlineRounded(graphics, x, y, width, height, border, 12);
         // A short, quiet accent mark replaces the old full-height neon rail.
         fillRounded(graphics, x + 8, y + 1, Math.min(15, width - 16), 1,
-                withAlpha(accent, Math.round(110 * opacity)), 1);
+                withAlpha(accent, Math.round(96 * opacity)), 1);
     }
 
     private static void drawKeystrokes(GuiGraphics graphics, Minecraft client, int x, int y) {
@@ -229,10 +229,10 @@ public final class RuffyHud {
         int idle = RuffyConfig.hudPanelColor();
         int activeFill = withAlpha(accent, 150);
         int fill = RuffyAnimation.blendColor(idle, activeFill, active);
-        fillRounded(graphics, x, y, width, height, fill, 5);
+        fillRounded(graphics, x, y, width, height, fill, 9);
         int border = RuffyAnimation.blendColor(RuffyConfig.hudBorderColor(),
                 withAlpha(RuffyConfig.secondaryColor(), 220), active);
-        outlineRounded(graphics, x, y, width, height, border, 5);
+        outlineRounded(graphics, x, y, width, height, border, 9);
         graphics.drawCenteredString(client.font, label,
                 x + width / 2, y + Math.max(2, (height - 8) / 2),
                 RuffyAnimation.blendColor(MUTED, WHITE, active));
