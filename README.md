@@ -1,62 +1,52 @@
-# Ruffy Visuals 1.6.0 — Crimson Red
+# Ruffy Visuals 1.7.0 — Crimson Red / Rounded 3D
 
 A client-side visual mod for **Minecraft Java 1.21.11** using Fabric.
 
-## Crimson Red Control Center
+## Crimson Control Center
 
-The compact ClickGUI and HUD use a consistent dark-wine / charcoal surface with crimson neon borders, red active switches and matching red status accents.
+The ClickGUI has a smaller 472 × 318 GUI-pixel target size (automatically adapts to smaller screens), with a dark charcoal/crimson skin:
 
-- Seven tabs: **Visuals, Presets, World, HUD, Style, Configs and Setup**.
-- Searchable module browser with **All, Entities, Motion and Starred** filters.
-- Favorites, active toggles, animated rows and a dedicated module inspector.
-- Six palettes: **Crimson, Orchid, Emerald, Solar, Arctic and Mono**.
+- Custom rounded outer frame, rounded navigation tabs, search field, filters, module cards, preset cards, action buttons and pill switches.
+- Animated on/off toggles and rounded hover surfaces.
+- Compact module list with a right-hand settings inspector.
+- **10 selectable palettes:** Crimson, Rose, Magenta, Violet, Azure, Ice, Mint, Emerald, Amber and Solar.
 - Open with **Right Shift**.
 
-## Ruffy's own animation and render engine
+## Rebuilt animation engine
 
-World effects no longer call Minecraft's `ParticleTypes` or `ClientLevel.addParticle`.
+`RuffyAnimation` is rewritten around a frame-rate-independent critically damped spring, with a configurable smoothness control. It includes custom cubic timing curves, shortest-path angle interpolation, color blending and 3D vector rotation helpers. The same engine drives GUI transitions, HUD state, and world geometry.
 
-The new `RuffyVisualEffects` engine stores and updates its own Java effect objects (position, velocity, damping, gravity, lifetime, shape and color), then draws custom line geometry through Fabric's world-render event. Effects include:
+## Custom 3D effects — no vanilla particle calls
 
-- Custom curved sword/hand slash arcs.
-- Expanding jump and landing shock rings.
-- Orbiting double-helix loops.
-- Velocity-following movement ribbons and sprint streaks.
-- Air glints, footstep glints, critical-health aura and potion-effect helix.
-- Custom damage pulses, underwater outline rings, rain streaks, cave glints and starfall streaks.
-- Primary/secondary colors follow the selected palette.
+`RuffyVisualEffects` owns the animation state (position, velocity, gravity, damping, lifetime, shape and color) and submits its own geometry in Fabric's world-render pass. It does not call Minecraft's `ParticleTypes` or `ClientLevel.addParticle`.
 
-Rendering is submitted with Fabric's world-render API after entities are rendered. The visual engine uses Ruffy-owned simulation and geometry; it does not spawn vanilla Minecraft particles.
+3D visuals include:
+- **3D Prism Core:** two interlocked rotating octahedra, a wireframe inner cube and three tilted orbital rings.
+- **3D Orbit Drones:** three independent rotating crystal/octahedron meshes following the player.
+- **3D Slash Volume:** a curved slash with parallel depth ribbons and connecting ribs.
+- Smooth animated orbit rings, custom motion ribbons, jump/landing shockwaves, air glints, sprint streaks, critical aura, potion helix, damage pulse, rain streaks, cave glints, bubbles and starfall streaks.
 
-## Smooth animation controls
-
-The **Style** tab has a global **Smooth Animations** switch and **Smoothness** slider (0–100%). They drive:
-
-- Menu entrance, tab selection, module hover/selection and active switches.
-- HUD chip opacity, health bar interpolation and WASD/Jump/Sprint states.
-- Custom effect enable/disable fades and the first-person swing easing.
-
-Low/Medium/High effect quality adjusts the amount and detail of custom geometry.
+3D mesh rotations use monotonic real time rather than game-tick-only stepping, so the models keep moving smoothly at high frame rates. Effect quality (Low/Medium/High) controls geometry density.
 
 ## HUD
 
-The HUD follows the Crimson Red theme: translucent charcoal chips, fine crimson outlines, a Ruffy brand badge, FPS, coordinates, direction, speed, world clock, optional health/armor displays and an animated input panel.
+The HUD now matches the rounded Crimson visual language: translucent charcoal status chips, rounded outlines, rounded key panels and eased WASD/Jump/Sprint states. It includes Ruffy branding, FPS, coordinates, direction, speed, world clock, optional health bar and armor.
 
-## Visual modules (27)
+## Modules (30)
 
 **HUD:** Watermark, Performance (FPS), Coordinates, Keystrokes, Direction, Movement Speed, World Clock, Health and Armor.
 
-**Motion:** Ambient Glints, Orbit Rings, Motion Ribbon, Jump Shockwave, Sprint Streaks, Landing Pulse, Footstep Glints, Starfall Streaks and Palette FX.
+**Motion:** Ambient Glints, Orbit Rings, 3D Prism Core, 3D Orbit Drones, Motion Ribbon, Jump Shockwave, Sprint Streaks, Landing Pulse, Footstep Glints, Starfall Streaks and Palette FX.
 
-**Entities:** Slash Arc, Smooth Swing, Air Streaks, Critical Aura, Effect Orbit and Damage Pulse.
+**Entities:** Slash Arc, 3D Slash Volume, Smooth Swing, Air Streaks, Critical Aura, Effect Orbit and Damage Pulse.
 
 **World:** Bubble Rings, Rain Streaks and Cave Glints.
 
-Settings are saved to `config/ruffyclient.properties`.
+Settings are saved in `config/ruffyclient.properties`.
 
-## Combat and compatibility
+## Smoothness and combat behaviour
 
-The custom swing curve affects only local first-person rendering. Slash arcs and other effects are cosmetic. Attack cooldowns, hit registration, reach, damage, packets and server-side behaviour are not modified.
+The global **Smooth Animations** setting and **Smoothness** slider (0–100%) control GUI, HUD and custom 3D transitions. Smooth Swing only changes local first-person rendering; no attack cooldowns, reach, damage, hit registration, packets or server-side behaviour are altered.
 
 ## Requirements
 
@@ -71,12 +61,12 @@ The custom swing curve affects only local first-person rendering. Slash arcs and
 gradle build
 ```
 
-GitHub Actions builds and verifies the remapped JAR with Java 21 and Gradle 9.2.1. Output: `build/libs/ruffy-visuals-1.6.0.jar`.
+GitHub Actions builds and verifies `build/libs/ruffy-visuals-1.7.0.jar` with Java 21 and Gradle 9.2.1.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 1.21.11.
 2. Install Fabric API for 1.21.11.
-3. Put `ruffy-visuals-1.6.0.jar` into `.minecraft/mods`.
+3. Put `ruffy-visuals-1.7.0.jar` into `.minecraft/mods`.
 4. Launch the Fabric 1.21.11 profile.
 5. Press **Right Shift** in a world.
