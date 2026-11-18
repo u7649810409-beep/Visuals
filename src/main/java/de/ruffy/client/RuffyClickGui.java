@@ -530,13 +530,19 @@ public final class RuffyClickGui extends Screen {
                     cx + 34, cy + 9, RuffyAnimation.blendColor(MUTED, WHITE, active), false);
         }
 
-        int sliderY = y + 83;
+        int opacityY = y + 83;
         g.drawString(font, "HUD OPACITY  " + RuffyConfig.getInt("hud_opacity") + "%",
-                x, sliderY, MUTED, false);
-        drawSlider(g, x, sliderY + 10, panelW - 42,
+                x, opacityY, MUTED, false);
+        drawSlider(g, x, opacityY + 10, panelW - 42,
                 RuffyConfig.getInt("hud_opacity"), 12, 90);
 
-        int menuY = sliderY + 22;
+        int scaleY = opacityY + 22;
+        g.drawString(font, "HUD SIZE  " + RuffyConfig.getInt("hud_scale") + "%",
+                x, scaleY, MUTED, false);
+        drawSlider(g, x, scaleY + 10, panelW - 42,
+                RuffyConfig.getInt("hud_scale"), 75, 120);
+
+        int menuY = scaleY + 22;
         g.drawString(font, "MENU OPACITY  " + RuffyConfig.getInt("menu_opacity") + "%",
                 x, menuY, MUTED, false);
         drawSlider(g, x, menuY + 10, panelW - 42,
@@ -938,14 +944,21 @@ public final class RuffyClickGui extends Screen {
             }
         }
 
-        int sliderY = y + 83;
-        if (inside(mx, my, x, sliderY + 7, panelW - 42, 17)) {
+        int opacityY = y + 83;
+        if (inside(mx, my, x, opacityY + 7, panelW - 42, 17)) {
             RuffyConfig.setInt("hud_opacity",
                     12 + Math.round((mx - x) * 78.0F / (panelW - 42)));
             return true;
         }
 
-        int menuY = sliderY + 22;
+        int scaleY = opacityY + 22;
+        if (inside(mx, my, x, scaleY + 7, panelW - 42, 17)) {
+            RuffyConfig.setInt("hud_scale",
+                    75 + Math.round((mx - x) * 45.0F / (panelW - 42)));
+            return true;
+        }
+
+        int menuY = scaleY + 22;
         if (inside(mx, my, x, menuY + 7, panelW - 42, 17)) {
             RuffyConfig.setInt("menu_opacity",
                     60 + Math.round((mx - x) * 40.0F / (panelW - 42)));
