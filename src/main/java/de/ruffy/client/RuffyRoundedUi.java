@@ -19,9 +19,9 @@ import java.util.Map;
  * ring instead of a pixel staircase made from one-pixel rectangles.
  */
 public final class RuffyRoundedUi {
-    private static final int SIZE = 128;
+    private static final int SIZE = 256;
     private static final int SUPERSAMPLE = 4;
-    private static final int MAX_RADIUS = 13;
+    private static final int MAX_RADIUS = 24;
     private static final float OUTLINE_WIDTH = 1.15F;
 
     private static final Map<Integer, Identifier> FILLS = new HashMap<>();
@@ -47,7 +47,7 @@ public final class RuffyRoundedUi {
         int radius = Math.max(1, Math.min(MAX_RADIUS,
                 Math.min(requestedRadius, Math.min(width, height) / 2)));
         Identifier texture = texture(radius, outline);
-        int sourceCorner = radius;
+        int sourceCorner = radius * SUPERSAMPLE;
         int sourceMiddle = SIZE - sourceCorner * 2;
         int destCorner = radius;
         int destMiddleW = Math.max(0, width - destCorner * 2);
