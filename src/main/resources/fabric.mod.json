@@ -3,7 +3,7 @@
   "id": "ruffyclient",
   "version": "${version}",
   "name": "Ruffy Visuals",
-  "description": "A futuristic client-side visual client with a clean ClickGUI, HUD widgets, hit effects and a custom swing animation.",
+  "description": "A Crimson Red client-side visual client with a custom Java-rendered effects engine, animated ClickGUI, HUD widgets and smooth swing animation.",
   "authors": ["Ruffy"],
   "license": "MIT",
   "environment": "client",
