@@ -28,6 +28,7 @@ public final class RuffyVisualEffects {
 
     private static final int MAX_POINTS = 420;
     private static final double TAU = Math.PI * 2.0;
+    private static final long CLIENT_TICK_NANOS = 50_000_000L;
 
     private static long tick;
     private static boolean wasGrounded = true;
@@ -258,20 +259,21 @@ public final class RuffyVisualEffects {
             spawnSlash(player, detail);
         }
 
-        // Integrate all custom points using a damped, frame-independent tick step.
+        // Simulate on the game tick, but timestamp each step for render-frame interpolation.
+        long stepNanos = System.nanoTime();
         for (Iterator<GlowPoint> it = POINTS.iterator(); it.hasNext();) {
             GlowPoint point = it.next();
-            point.step();
+            point.step(stepNanos);
             if (point.age >= point.life) it.remove();
         }
         for (Iterator<PulseRing> it = RINGS.iterator(); it.hasNext();) {
             PulseRing ring = it.next();
-            ring.age++;
+            ring.step(stepNanos);
             if (ring.age >= ring.life) it.remove();
         }
         for (Iterator<SlashArc> it = SLASHES.iterator(); it.hasNext();) {
             SlashArc slash = it.next();
-            slash.age++;
+            slash.step(stepNanos);
             if (slash.age >= slash.life) it.remove();
         }
 
@@ -296,15 +298,16 @@ public final class RuffyVisualEffects {
         matrices.translate(-camera.x, -camera.y, -camera.z);
         PoseStack.Pose pose = matrices.last();
         VertexConsumer lines = context.consumers().getBuffer(RenderTypes.LINES_TRANSLUCENT);
+        long renderNanos = System.nanoTime();
 
         for (PulseRing ring : RINGS) {
-            drawRing(lines, pose, ring);
+            drawRing(lines, pose, ring, renderNanos);
         }
         for (SlashArc slash : SLASHES) {
-            drawSlash(lines, pose, slash);
+            drawSlash(lines, pose, slash, renderNanos);
         }
         for (GlowPoint point : POINTS) {
-            drawPoint(lines, pose, point);
+            drawPoint(lines, pose, point, renderNanos);
         }
         if (RuffyConfig.get("orbit_particles")) {
             drawOrbit(lines, pose, client.player);
@@ -539,12 +542,13 @@ public final class RuffyVisualEffects {
                 RuffyConfig.get(key) ? 1.0F : 0.0F);
     }
 
-    private static void drawRing(VertexConsumer out, PoseStack.Pose pose, PulseRing ring) {
-        float progress = ring.age / (float) ring.life;
-        float eased = easeOut(progress);
+    private static void drawRing(VertexConsumer out, PoseStack.Pose pose,
+                                 PulseRing ring, long now) {
+        float progress = lifeProgress(ring.age, ring.life, ring.lastStepNanos, now);
+        float eased = RuffyAnimation.easeOut(progress);
         float radius = (float) (ring.startRadius
                 + (ring.endRadius - ring.startRadius) * eased);
-        float fade = 1.0F - smoothStep(progress);
+        float fade = 1.0F - RuffyAnimation.easeInOut(progress);
         int alpha = Math.round(((ring.color >>> 24) & 0xFF) * fade);
         int color = (ring.color & 0x00FFFFFF) | (alpha << 24);
         Vec3 previous = ring.center.add(radius, ring.verticalDrift(progress), 0.0);
@@ -557,10 +561,10 @@ public final class RuffyVisualEffects {
         }
     }
 
-    private static void drawSlash(VertexConsumer out, PoseStack.Pose pose, SlashArc slash) {
-        float progress = slash.age / (float) slash.life;
-        float fade = 1.0F - smoothStep(progress);
-        float growth = 0.5F + 0.5F * easeOut(Math.min(1.0F, progress * 1.8F));
+    private static void drawSlash(VertexConsumer out, PoseStack.Pose pose, SlashArc slash, long now) {
+        float progress = lifeProgress(slash.age, slash.life, slash.lastStepNanos, now);
+        float fade = 1.0F - RuffyAnimation.easeInOut(progress);
+        float growth = 0.5F + 0.5F * RuffyAnimation.easeOut(Math.min(1.0F, progress * 1.8F));
         int primary = withAlpha(slash.primary, Math.round(255 * fade));
         int secondary = withAlpha(slash.secondary, Math.round(200 * fade));
         Vec3 depth = slash.right.cross(slash.up).normalize().scale(0.16 * growth);
@@ -588,19 +592,23 @@ public final class RuffyVisualEffects {
         }
     }
 
-    private static void drawPoint(VertexConsumer out, PoseStack.Pose pose, GlowPoint point) {
-        float progress = point.age / (float) point.life;
-        float fade = 1.0F - smoothStep(progress);
-        float pulse = 0.72F + 0.28F * (float) Math.sin((point.age * 0.48F) + point.phase);
-        float size = point.size * (0.75F + 0.25F * easeOut(progress));
+    private static void drawPoint(VertexConsumer out, PoseStack.Pose pose, GlowPoint point, long now) {
+        float progress = lifeProgress(point.age, point.life, point.lastStepNanos, now);
+        float fade = 1.0F - RuffyAnimation.easeInOut(progress);
+        float pulse = 0.72F + 0.28F * RuffyAnimation.breathe(
+                now / 1_000_000_000.0, 0.9, point.phase);
+        float size = point.size * (0.75F + 0.25F * RuffyAnimation.easeOut(progress));
         int alpha = Math.round(((point.color >>> 24) & 0xFF) * fade * pulse);
         int color = (point.color & 0x00FFFFFF) | (alpha << 24);
+        double frameBlend = interpolation(point.lastStepNanos, now);
+        Vec3 position = point.previousPosition.add(
+                point.position.subtract(point.previousPosition).scale(frameBlend));
 
         if (point.shape == Shape.RING) {
-            Vec3 last = point.position.add(size, 0.0, 0.0);
+            Vec3 last = position.add(size, 0.0, 0.0);
             for (int i = 1; i <= 12; i++) {
                 double angle = TAU * i / 12.0;
-                Vec3 next = point.position.add(Math.cos(angle) * size, 0.0,
+                Vec3 next = position.add(Math.cos(angle) * size, 0.0,
                         Math.sin(angle) * size);
                 drawLine(out, pose, last, next, color, 1.1F);
                 last = next;
@@ -608,11 +616,11 @@ public final class RuffyVisualEffects {
             return;
         }
 
-        Vec3 tail = point.position.subtract(point.velocity.scale(2.8));
-        drawLine(out, pose, tail, point.position, withAlpha(color, alpha), 1.2F);
+        Vec3 tail = position.subtract(point.velocity.scale(2.8));
+        drawLine(out, pose, tail, position, withAlpha(color, alpha), 1.2F);
         if (point.shape == Shape.STREAK) return;
 
-        Vec3 p = point.position;
+        Vec3 p = position;
         drawLine(out, pose, p.add(-size, 0.0, 0.0), p.add(size, 0.0, 0.0), color, 1.0F);
         drawLine(out, pose, p.add(0.0, -size, 0.0), p.add(0.0, size, 0.0), color, 1.0F);
         drawLine(out, pose, p.add(0.0, 0.0, -size), p.add(0.0, 0.0, size), color, 1.0F);
@@ -627,19 +635,19 @@ public final class RuffyVisualEffects {
                 .setColor(color).setNormal(0.0F, 1.0F, 0.0F).setLineWidth(width);
     }
 
+    private static float interpolation(long lastStepNanos, long now) {
+        return RuffyAnimation.clamp01((float) ((now - lastStepNanos)
+                / (double) CLIENT_TICK_NANOS));
+    }
+
+    private static float lifeProgress(int age, int life, long lastStepNanos, long now) {
+        float partial = interpolation(lastStepNanos, now);
+        return RuffyAnimation.clamp01((age + partial) / Math.max(1.0F, life));
+    }
+
     private static int withAlpha(int color, int alpha) {
         int clamped = Math.max(0, Math.min(255, alpha));
         return (color & 0x00FFFFFF) | (clamped << 24);
-    }
-
-    private static float easeOut(float value) {
-        float t = Math.max(0.0F, Math.min(1.0F, value));
-        return 1.0F - (float) Math.pow(1.0F - t, 3.0F);
-    }
-
-    private static float smoothStep(float value) {
-        float t = Math.max(0.0F, Math.min(1.0F, value));
-        return t * t * (3.0F - 2.0F * t);
     }
 
     private enum Shape { GLINT, RING, STREAK }
@@ -653,13 +661,17 @@ public final class RuffyVisualEffects {
         private final Shape shape;
         private final float phase;
         private Vec3 position;
+        private Vec3 previousPosition;
         private Vec3 velocity;
         private int age;
+        private long lastStepNanos;
 
         private GlowPoint(Vec3 position, Vec3 velocity, int color,
                           float size, int life, float drag, float gravity, Shape shape) {
             this.position = position;
+            this.previousPosition = position;
             this.velocity = velocity;
+            this.lastStepNanos = System.nanoTime();
             this.color = color;
             this.size = size;
             this.life = life;
@@ -669,10 +681,12 @@ public final class RuffyVisualEffects {
             this.phase = RANDOM.nextFloat() * (float) TAU;
         }
 
-        private void step() {
+        private void step(long now) {
+            previousPosition = position;
             position = position.add(velocity);
             velocity = velocity.scale(drag).add(0.0, -gravity, 0.0);
             age++;
+            lastStepNanos = now;
         }
     }
 
@@ -684,6 +698,7 @@ public final class RuffyVisualEffects {
         private final int color;
         private final float width;
         private int age;
+        private long lastStepNanos;
 
         private PulseRing(Vec3 center, double startRadius, double endRadius,
                           int life, int color, float width) {
@@ -693,6 +708,12 @@ public final class RuffyVisualEffects {
             this.life = life;
             this.color = color;
             this.width = width;
+            this.lastStepNanos = System.nanoTime();
+        }
+
+        private void step(long now) {
+            age++;
+            lastStepNanos = now;
         }
 
         private double verticalDrift(float progress) {
@@ -710,6 +731,7 @@ public final class RuffyVisualEffects {
         private final int secondary;
         private final int life;
         private int age;
+        private long lastStepNanos;
 
         private SlashArc(Vec3 center, Vec3 right, Vec3 up, double radius,
                          double bend, int primary, int secondary, int life) {
@@ -721,6 +743,12 @@ public final class RuffyVisualEffects {
             this.primary = primary;
             this.secondary = secondary;
             this.life = life;
+            this.lastStepNanos = System.nanoTime();
+        }
+
+        private void step(long now) {
+            age++;
+            lastStepNanos = now;
         }
 
         private Vec3 point(double progress, double growth) {
