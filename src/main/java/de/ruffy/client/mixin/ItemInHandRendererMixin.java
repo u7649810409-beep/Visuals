@@ -35,11 +35,10 @@ public abstract class ItemInHandRendererMixin {
             return vanillaProgress;
         }
 
-        float progress = Math.max(0.0F, Math.min(1.0F, vanillaProgress));
-        float smoothStep = progress * progress * (3.0F - 2.0F * progress);
+        float progress = RuffyAnimation.clamp01(vanillaProgress);
+        float eased = RuffyAnimation.easeInOut(progress);
         float smoothness = RuffyConfig.getInt("animation_smoothness") / 100.0F;
-        float influence = 0.30F + smoothness * 0.62F;
-        return Math.max(0.0F, Math.min(1.0F,
-                progress + (smoothStep - progress) * influence));
+        float influence = 0.24F + smoothness * 0.68F;
+        return RuffyAnimation.clamp01(progress + (eased - progress) * influence);
     }
 }
