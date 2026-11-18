@@ -47,7 +47,7 @@ public final class RuffyRoundedUi {
         int radius = Math.max(1, Math.min(MAX_RADIUS,
                 Math.min(requestedRadius, Math.min(width, height) / 2)));
         Identifier texture = texture(radius, outline);
-        int sourceCorner = radius * SUPERSAMPLE;
+        int sourceCorner = radius;
         int sourceMiddle = SIZE - sourceCorner * 2;
         int destCorner = radius;
         int destMiddleW = Math.max(0, width - destCorner * 2);
@@ -106,21 +106,28 @@ public final class RuffyRoundedUi {
 
         for (int py = 0; py < SIZE; py++) {
             for (int px = 0; px < SIZE; px++) {
-                float outer = roundedCoverage(px + 0.5F, py + 0.5F,
-                        SIZE * 0.5F, SIZE * 0.5F,
-                        SIZE * 0.5F, SIZE * 0.5F, corner);
-                float coverage = outer;
+                int covered = 0;
+                for (int sy = 0; sy < SUPERSAMPLE; sy++) {
+                    for (int sx = 0; sx < SUPERSAMPLE; sx++) {
+                        float sampleX = px + (sx + 0.5F) / SUPERSAMPLE;
+                        float sampleY = py + (sy + 0.5F) / SUPERSAMPLE;
+                        boolean outer = insideRounded(sampleX, sampleY,
+                                SIZE * 0.5F, SIZE * 0.5F,
+                                SIZE * 0.5F, SIZE * 0.5F, corner);
+                        if (!outer) continue;
 
-                if (outline) {
-                    float inner = roundedCoverage(px + 0.5F, py + 0.5F,
-                            SIZE * 0.5F, SIZE * 0.5F,
-                            SIZE * 0.5F - stroke, SIZE * 0.5F - stroke,
-                            Math.max(1.0F, corner - stroke));
-                    coverage = Math.max(0.0F, outer - inner);
+                        if (!outline || !insideRounded(sampleX, sampleY,
+                                SIZE * 0.5F, SIZE * 0.5F,
+                                SIZE * 0.5F - stroke, SIZE * 0.5F - stroke,
+                                Math.max(1.0F, corner - stroke))) {
+                            covered++;
+                        }
+                    }
                 }
 
-                int alpha = Math.max(0, Math.min(255, Math.round(coverage * 255.0F)));
-                image.setColorArgb(px, py, (alpha << 24) | 0x00FFFFFF);
+                int alpha = Math.round(covered * 255.0F
+                        / (SUPERSAMPLE * SUPERSAMPLE));
+                image.setPixel(px, py, (alpha << 24) | 0x00FFFFFF);
             }
         }
 
@@ -129,21 +136,20 @@ public final class RuffyRoundedUi {
         DynamicTexture dynamic = new DynamicTexture(
                 () -> "Ruffy anti-aliased rounded " + (outline ? "outline " : "fill ") + radius,
                 image);
-        dynamic.setFilter(true, false);
         minecraft.getTextureManager().register(id, dynamic);
         dynamic.upload();
         return id;
     }
 
-    /** Signed-distance coverage with a one-texel antialias transition. */
-    private static float roundedCoverage(float px, float py, float centerX, float centerY,
-                                         float halfWidth, float halfHeight, float radius) {
+    /** Signed-distance test sampled 4x4 times per final UI pixel. */
+    private static boolean insideRounded(float px, float py, float centerX, float centerY,
+                                          float halfWidth, float halfHeight, float radius) {
         float dx = Math.abs(px - centerX) - (halfWidth - radius);
         float dy = Math.abs(py - centerY) - (halfHeight - radius);
         float outsideX = Math.max(dx, 0.0F);
         float outsideY = Math.max(dy, 0.0F);
         float signedDistance = (float) Math.sqrt(outsideX * outsideX + outsideY * outsideY)
                 + Math.min(Math.max(dx, dy), 0.0F) - radius;
-        return Math.max(0.0F, Math.min(1.0F, 0.5F - signedDistance));
+        return signedDistance <= 0.0F;
     }
 }
