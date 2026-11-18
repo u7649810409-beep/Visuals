@@ -40,10 +40,11 @@ jobs:
           unzip -l "$jar_path" | grep -q 'ruffyclient.mixins.json'
           unzip -l "$jar_path" | grep -q 'ruffyclient.refmap.json'
           unzip -l "$jar_path" | grep -q 'de/ruffy/client/RuffyAnimation.class'
+          unzip -l "$jar_path" | grep -q 'de/ruffy/client/RuffyRoundedUi.class'
           unzip -l "$jar_path" | grep -q 'de/ruffy/client/RuffyVisualEffects.class'
           unzip -l "$jar_path" | grep -q 'de/ruffy/client/RuffyFeature.class'
           unzip -p "$jar_path" fabric.mod.json | grep -q '"minecraft": "~1.21.11"'
-          unzip -p "$jar_path" fabric.mod.json | grep -q '"version": "1.8.0"'
+          unzip -p "$jar_path" fabric.mod.json | grep -q '"version": "1.9.0"'
           echo "Verified mod archive: $jar_path"
 
       - name: Upload mod JAR
