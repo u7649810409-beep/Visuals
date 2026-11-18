@@ -75,7 +75,7 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void calculateLayout() {
-        panelW = Math.min(600, Math.max(430, width - 24));
+        panelW = Math.min(600, Math.max(440, width - 24));
         panelW = Math.min(panelW, width - 12);
         panelH = Math.min(392, Math.max(320, height - 24));
         panelH = Math.min(panelH, height - 12);
@@ -228,8 +228,12 @@ public final class RuffyClickGui extends Screen {
             int iconColor = RuffyAnimation.blendColor(DIM, RuffyConfig.primaryColor(), active);
             int labelColor = RuffyAnimation.blendColor(MUTED, WHITE, active);
             labelColor = RuffyAnimation.blendColor(labelColor, WHITE, hover * 0.25F);
-            g.drawString(font, tabIcon(item), x + 7, y + 10, iconColor, false);
-            g.drawString(font, item.label, x + 22, y + 10, labelColor, false);
+            if (navScale < 0.98F) {
+                g.drawCenteredString(font, item.label, x + itemWidth / 2, y + 10, labelColor);
+            } else {
+                g.drawString(font, tabIcon(item), x + 7, y + 10, iconColor, false);
+                g.drawString(font, item.label, x + 22, y + 10, labelColor, false);
+            }
             x += itemWidth;
         }
         fillRounded(g, panelX + 18, y + 29, panelW - 36, 1, withAlpha(RuffyConfig.secondaryColor(), 40), 1);
@@ -365,14 +369,15 @@ public final class RuffyClickGui extends Screen {
                 withAlpha(enabled ? primary : 0xFF8B8193, enabled ? 118 : 52), 10);
         g.drawCenteredString(font, iconFor(feature), iconX + 10, iconY + 6,
                 enabled ? primary : DIM);
-        g.drawString(font, feature.title(), x + 41, y + 4,
+        int starX = x + w - 112;
+        int textMaxWidth = Math.max(1, starX - (x + 41) - 7);
+        String title = trimToWidth(feature.title(), textMaxWidth);
+        String description = trimToWidth(feature.description(), textMaxWidth);
+        g.drawString(font, title, x + 41, y + 4,
                 selected ? WHITE : 0xFFE7E1F1, false);
-        String description = feature.description();
-        if (description.length() > 36) description = description.substring(0, 33) + "...";
         g.drawString(font, description, x + 41, y + 16, DIM, false);
 
         // Favorite and settings actions are soft pills before the animated toggle.
-        int starX = x + w - 112;
         int editX = x + w - 84;
         boolean starHover = inside(mouseX, mouseY, starX - 2, y + 3, 21, h - 6);
         boolean editHover = inside(mouseX, mouseY, editX - 2, y + 3, 21, h - 6);
@@ -393,6 +398,16 @@ public final class RuffyClickGui extends Screen {
                 y + (h - 8) / 2, RuffyAnimation.blendColor(MUTED, primary, editMotion));
         drawSwitch(g, x + w - 44, y + (h - 18) / 2, enabled, 34, 18,
                 "module." + feature.key());
+    }
+
+    private String trimToWidth(String value, int maxWidth) {
+        if (value == null || value.isEmpty()) return "";
+        String trimmed = value;
+        while (trimmed.length() > 1 && font.width(trimmed + "…") > maxWidth) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        return trimmed.equals(value) ? value
+                : (font.width("…") <= maxWidth ? trimmed + "…" : "");
     }
 
     private String iconFor(RuffyFeature feature) {
