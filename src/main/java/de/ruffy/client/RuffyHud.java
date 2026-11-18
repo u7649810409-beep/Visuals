@@ -150,11 +150,12 @@ public final class RuffyHud {
                     RuffyAnimation.multiplyAlpha(WHITE, opacity), false);
             int barLeft = x + 9;
             int barRight = x + width - 9;
-            graphics.fill(barLeft, y + 17, barRight, y + 19, RuffyAnimation.multiplyAlpha(0x80534A5C, opacity));
+            fillRounded(graphics, barLeft, y + 16, barRight - barLeft, 4,
+                    RuffyAnimation.multiplyAlpha(0x99534A5C, opacity), 2);
             int fill = Math.max(0, Math.min(barRight - barLeft,
                     Math.round((barRight - barLeft) * smoothProgress)));
-            graphics.fill(barLeft, y + 17, barLeft + fill, y + 19,
-                    RuffyAnimation.multiplyAlpha(withAlpha(accent, 235), opacity));
+            fillRounded(graphics, barLeft, y + 16, fill, 4,
+                    RuffyAnimation.multiplyAlpha(withAlpha(accent, 245), opacity), 2);
             x += width + CHIP_GAP;
         }
     }
