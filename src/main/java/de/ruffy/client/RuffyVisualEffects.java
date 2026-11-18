@@ -390,7 +390,7 @@ public final class RuffyVisualEffects {
         float opacity = amountForRender("orbit_particles");
         if (opacity <= 0.01F) return;
         Vec3 base = player.position().add(0.0, 0.95, 0.0);
-        double time = tick * 0.075;
+        double time = System.nanoTime() * 1.0E-9;
         for (int ring = 0; ring < 2; ring++) {
             double radius = ring == 0 ? 0.72 : 0.54;
             double tilt = ring == 0 ? 0.28 : -0.42;
@@ -414,7 +414,7 @@ public final class RuffyVisualEffects {
         float opacity = amountForRender("prism_core");
         if (opacity <= 0.01F) return;
 
-        double time = tick * 0.031;
+        double time = System.nanoTime() * 1.0E-9;
         Vec3 center = player.position().add(0.0, 1.13, 0.0);
         drawOctahedron(out, pose, center, 0.52,
                 time, 0.48 + Math.sin(time * 0.7) * 0.16, -time * 0.62,
@@ -450,7 +450,7 @@ public final class RuffyVisualEffects {
         if (opacity <= 0.01F) return;
 
         Vec3 body = player.position().add(0.0, 1.00, 0.0);
-        double time = tick * 0.043;
+        double time = System.nanoTime() * 1.0E-9;
         for (int i = 0; i < 3; i++) {
             double angle = time + TAU * i / 3.0;
             double radius = 1.12 + Math.sin(time * 1.2 + i) * 0.08;
