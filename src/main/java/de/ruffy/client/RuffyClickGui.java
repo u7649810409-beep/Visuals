@@ -22,7 +22,7 @@ public final class RuffyClickGui extends Screen {
 
     private enum Tab {
         VISUALS("Visuals", 68), PRESETS("Presets", 62), WORLD("World", 56),
-        HUD("HUD", 44), STYLE("Style", 48), CONFIGS("Configs", 58), SETUP("Setup", 48);
+        HUD("HUD", 44), STYLE("Style", 48), CONFIGS("Configs", 58), SETUP("Setup", 48), MUSIC("Music", 52);
         private final String label;
         private final int width;
         Tab(String label, int width) { this.label = label; this.width = width; }
@@ -75,9 +75,9 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void calculateLayout() {
-        panelW = Math.min(620, Math.max(440, width - 24));
+        panelW = Math.min(600, Math.max(430, width - 24));
         panelW = Math.min(panelW, width - 12);
-        panelH = Math.min(410, Math.max(320, height - 24));
+        panelH = Math.min(392, Math.max(320, height - 24));
         panelH = Math.min(panelH, height - 12);
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
@@ -118,14 +118,14 @@ public final class RuffyClickGui extends Screen {
 
         // Galaxy glass shell with a soft two-tone halo and large anti-aliased corners.
         fillRounded(g, panelX - 8, panelY - 8, panelW + 16, panelH + 16,
-                withAlpha(secondary, 28), 24);
+                withAlpha(secondary, 30), 30);
         fillRounded(g, panelX - 4, panelY - 4, panelW + 8, panelH + 8,
-                withAlpha(accent, 36), 24);
-        fillRounded(g, panelX, panelY, panelW, panelH, body, 22);
+                withAlpha(accent, 36), 30);
+        fillRounded(g, panelX, panelY, panelW, panelH, body, 28);
         outlineRounded(g, panelX - 1, panelY - 1, panelW + 2, panelH + 2,
-                withAlpha(accent, 172), 23);
+                withAlpha(accent, 172), 29);
         outlineRounded(g, panelX + 2, panelY + 2, panelW - 4, panelH - 4,
-                withAlpha(secondary, 70), 20);
+                withAlpha(secondary, 70), 26);
 
         drawHeader(g, header);
         drawNavigation(g, mouseX, mouseY);
@@ -138,6 +138,7 @@ public final class RuffyClickGui extends Screen {
             case STYLE -> drawStyle(g, mouseX, mouseY);
             case CONFIGS -> drawConfigs(g, mouseX, mouseY);
             case SETUP -> drawSetup(g);
+            case MUSIC -> drawSetup(g);
         }
 
         drawFooter(g);
@@ -201,7 +202,7 @@ public final class RuffyClickGui extends Screen {
     private void drawNavigation(GuiGraphics g, int mouseX, int mouseY) {
         int y = panelY + 42;
         fillRounded(g, panelX + 10, y, panelW - 20, 31, 0x8D090817, 15);
-        float navScale = Math.min(1.0F, (panelW - 20) / 384.0F);
+        float navScale = Math.min(1.0F, (panelW - 20) / 436.0F);
         int x = panelX + 10;
         for (Tab item : Tab.values()) {
             int itemWidth = Math.max(26, Math.round(item.width * navScale));
@@ -243,6 +244,7 @@ public final class RuffyClickGui extends Screen {
             case STYLE -> "◈";
             case CONFIGS -> "⚙";
             case SETUP -> "⌘";
+            case MUSIC -> "♫";
         };
     }
 
@@ -759,6 +761,10 @@ public final class RuffyClickGui extends Screen {
         for (Tab item : Tab.values()) {
             int itemWidth = Math.max(26, Math.round(item.width * navScale));
             if (inside(mx, my, x, y + 3, itemWidth - 3, 24)) {
+                if (item == Tab.MUSIC) {
+                    if (minecraft != null) minecraft.setScreen(new RuffySpotifyScreen(this));
+                    return true;
+                }
                 tab = item;
                 modulePage = 0;
                 if (searchBox != null) searchBox.setVisible(tab == Tab.VISUALS);
