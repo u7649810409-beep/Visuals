@@ -3,7 +3,7 @@
   "id": "ruffyclient",
   "version": "${version}",
   "name": "Ruffy Visuals",
-  "description": "A clean modern Crimson client with GPU-filtered anti-aliased rounded controls, smoother spring animations, a telemetry HUD and custom 3D effects.",
+  "description": "A Galaxy Edition client with a procedural nebula background, anti-aliased rounded glass controls, a Nebula HUD and custom 3D effects.",
   "authors": ["Ruffy"],
   "license": "MIT",
   "environment": "client",
