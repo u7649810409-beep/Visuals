@@ -461,11 +461,11 @@ public final class RuffyClickGui extends Screen {
         drawSwitch(g, x + w - pad - 38, toggleY + 11, active, 29, 16,
                 "inspector." + selected.key());
 
-        int detailY = toggleY + 49;
+        int detailY = toggleY + (compact ? 44 : 49);
         if (compact) {
             g.drawString(font, "CLIENT-SIDE VISUAL", x + pad, detailY, DIM, false);
             g.drawString(font, "STYLE TAB: COLORS / OPACITY", x + pad,
-                    detailY + 13, DIM, false);
+                    detailY + 11, DIM, false);
         } else {
             g.drawString(font, "CLIENT-SIDE VISUAL", x + pad, detailY, DIM, false);
             if (selected.section() == RuffyFeature.Section.HUD) {
