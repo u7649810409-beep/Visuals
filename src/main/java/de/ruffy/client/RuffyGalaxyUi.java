@@ -33,6 +33,28 @@ public final class RuffyGalaxyUi {
         NativeImage image = new NativeImage(NativeImage.Format.RGBA,
                 TEX_WIDTH, TEX_HEIGHT, false);
 
+        // Precompute deterministic star glow so texture generation needs no image readback.
+        float[] stars = new float[TEX_WIDTH * TEX_HEIGHT];
+        Random random = new Random(0x525546465947414CL);
+        for (int i = 0; i < 1050; i++) {
+            int sx = random.nextInt(TEX_WIDTH);
+            int sy = random.nextInt(TEX_HEIGHT);
+            int radius = random.nextInt(3) == 0 ? 3 : 1;
+            float strength = (70 + random.nextInt(185)) / 255.0F;
+            for (int oy = -radius; oy <= radius; oy++) {
+                for (int ox = -radius; ox <= radius; ox++) {
+                    int px = sx + ox;
+                    int py = sy + oy;
+                    if (px < 0 || py < 0 || px >= TEX_WIDTH || py >= TEX_HEIGHT) continue;
+                    double distance = Math.sqrt(ox * ox + oy * oy);
+                    if (distance > radius + 0.25) continue;
+                    float glow = (float) (strength * (1.0 - distance / (radius + 0.75)));
+                    int index = py * TEX_WIDTH + px;
+                    stars[index] = Math.max(stars[index], glow);
+                }
+            }
+        }
+
         // Generate soft, overlapping nebula clouds with no tiled or pixel-noise pattern.
         for (int y = 0; y < TEX_HEIGHT; y++) {
             double v = y / (double) TEX_HEIGHT;
@@ -64,44 +86,14 @@ public final class RuffyGalaxyUi {
                         + cloudTwo * 0.50 + cloudThree * 0.48) * turbulence
                         + Math.max(0.0, wave) * band * 0.15);
 
-                // A nearly black indigo base keeps UI labels readable.
-                int red = clampColor(4 + nebula * 94 + cloudThree * 36);
-                int green = clampColor(3 + nebula * 13 + cloudTwo * 10);
+                float star = stars[y * TEX_WIDTH + x];
+                int red = clampColor(4 + nebula * 94 + cloudThree * 36 + star * 118);
+                int green = clampColor(3 + nebula * 13 + cloudTwo * 10 + star * 92);
                 int blue = clampColor(13 + nebula * 108 + cloudOne * 32
-                        + Math.max(0.0, wave) * band * 24);
+                        + Math.max(0.0, wave) * band * 24 + star * 138);
                 image.setPixel(x, y, 0xFF000000 | (red << 16) | (green << 8) | blue);
             }
         }
-
-        // Deterministic, soft star glows, with a few brighter pinpoints.
-        Random random = new Random(0x525546465947414CL);
-        for (int i = 0; i < 1050; i++) {
-            int sx = random.nextInt(TEX_WIDTH);
-            int sy = random.nextInt(TEX_HEIGHT);
-            int radius = random.nextInt(3) == 0 ? 3 : 1;
-            int strength = 70 + random.nextInt(185);
-            for (int oy = -radius; oy <= radius; oy++) {
-                for (int ox = -radius; ox <= radius; ox++) {
-                    int px = sx + ox;
-                    int py = sy + oy;
-                    if (px < 0 || py < 0 || px >= TEX_WIDTH || py >= TEX_HEIGHT) continue;
-                    double distance = Math.sqrt(ox * ox + oy * oy);
-                    if (distance > radius + 0.25) continue;
-                    double glow = 1.0 - distance / (radius + 0.75);
-                    int old = image.getPixel(px, py);
-                    int oldR = (old >>> 16) & 0xFF;
-                    int oldG = (old >>> 8) & 0xFF;
-                    int oldB = old & 0xFF;
-                    int add = (int) Math.round(strength * glow);
-                    int starR = Math.min(255, oldR + add);
-                    int starG = Math.min(255, oldG + add / 2);
-                    int starB = Math.min(255, oldB + add);
-                    image.setPixel(px, py, 0xFF000000
-                            | (starR << 16) | (starG << 8) | starB);
-                }
-            }
-        }
-
         DynamicTexture texture = new DynamicTexture(() -> "Ruffy procedural nebula", image);
         Minecraft.getInstance().getTextureManager().register(TEXTURE, texture);
         texture.upload();
