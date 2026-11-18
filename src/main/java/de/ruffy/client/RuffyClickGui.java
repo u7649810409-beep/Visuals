@@ -191,8 +191,8 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, "CLIENT", panelX + 103, panelY + 15, DIM, false);
         g.fill(panelX + 142, panelY + 11, panelX + 143, panelY + 29,
                 withAlpha(secondary, 90));
-        g.drawString(font, "VISUAL CONTROL CENTER", panelX + 151,
-                panelY + 16, MUTED, false);
+        g.drawString(font, panelW < 420 ? "CONTROL" : "VISUAL CONTROL CENTER",
+                panelX + 151, panelY + 16, MUTED, false);
 
         fillRounded(g, panelX + panelW - 76, panelY + 8, 64, 23,
                 0xA412060A, 8);
@@ -205,10 +205,12 @@ public final class RuffyClickGui extends Screen {
     private void drawNavigation(GuiGraphics g, int mouseX, int mouseY) {
         int y = panelY + 40;
         g.fill(panelX, y, panelX + panelW, y + 30, 0x80100C17);
+        float navScale = Math.min(1.0F, (panelW - 20) / 384.0F);
         int x = panelX + 10;
         for (Tab item : Tab.values()) {
+            int itemWidth = Math.max(26, Math.round(item.width * navScale));
             boolean selected = item == tab;
-            boolean hovered = inside(mouseX, mouseY, x, y + 3, item.width - 3, 24);
+            boolean hovered = inside(mouseX, mouseY, x, y + 3, itemWidth - 3, 24);
             float active = RuffyAnimation.animate("gui.tab." + item.name(), selected ? 1.0F : 0.0F);
             float hover = RuffyAnimation.animate("gui.tab.hover." + item.name(), hovered ? 1.0F : 0.0F);
 
@@ -231,7 +233,7 @@ public final class RuffyClickGui extends Screen {
             labelColor = RuffyAnimation.blendColor(labelColor, WHITE, hover * 0.25F);
             g.drawString(font, tabIcon(item), x + 7, y + 10, iconColor, false);
             g.drawString(font, item.label, x + 22, y + 10, labelColor, false);
-            x += item.width;
+            x += itemWidth;
         }
         g.fill(panelX, y + 29, panelX + panelW, y + 30, BORDER);
     }
@@ -491,7 +493,7 @@ public final class RuffyClickGui extends Screen {
             boolean hover = inside(mouseX, mouseY, cx, cy, w, 74);
             fillRounded(g, cx, cy, w, 74, hover ? CARD_HOVER : CARD, 9);
             outlineRounded(g, cx, cy, w, 74, hover ? withAlpha(c, 180) : BORDER, 9);
-            g.fill(cx, cy, cx + w, cy + 2, c);
+            fillRounded(g, cx + 3, cy + 1, w - 6, 2, c, 1);
             g.drawString(font, names[i], cx + 10, cy + 13, WHITE, false);
             g.drawString(font, desc[i], cx + 10, cy + 30, MUTED, false);
             g.drawString(font, "APPLY  →", cx + 10, cy + 51, c, false);
@@ -766,9 +768,11 @@ public final class RuffyClickGui extends Screen {
     private boolean handleNavigation(int mx, int my) {
         int y = panelY + 40;
         if (my < y + 3 || my > y + 27) return false;
+        float navScale = Math.min(1.0F, (panelW - 20) / 384.0F);
         int x = panelX + 10;
         for (Tab item : Tab.values()) {
-            if (inside(mx, my, x, y + 3, item.width - 3, 24)) {
+            int itemWidth = Math.max(26, Math.round(item.width * navScale));
+            if (inside(mx, my, x, y + 3, itemWidth - 3, 24)) {
                 tab = item;
                 modulePage = 0;
                 if (searchBox != null) searchBox.setVisible(tab == Tab.VISUALS);
