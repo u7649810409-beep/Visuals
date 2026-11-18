@@ -18,7 +18,7 @@ public final class RuffyClickGui extends Screen {
     private static final int CARD = 0xA30A0C1A;
     private static final int CARD_HOVER = 0xCF25183A;
     private static final int BORDER = 0x666F5B9C;
-    private static final int GREEN = 0xFFFF365B;
+    private static final int GREEN = 0xFFB45CFF;
 
     private enum Tab {
         VISUALS("Visuals", 68), PRESETS("Presets", 62), WORLD("World", 56),
@@ -110,7 +110,7 @@ public final class RuffyClickGui extends Screen {
         applyFrameLayout();
         drawBackdrop(g);
 
-        int alpha = 132 + RuffyConfig.getInt("menu_opacity") * 96 / 100;
+        int alpha = 90 + RuffyConfig.getInt("menu_opacity") * 90 / 100;
         int body = (Math.min(235, alpha) << 24) | 0x000A0A18;
         int header = (Math.min(244, alpha + 12) << 24) | 0x00110D20;
         int accent = RuffyConfig.primaryColor();
@@ -695,14 +695,14 @@ public final class RuffyClickGui extends Screen {
     }
 
     private static int palettePrimary(int palette) {
-        int[] colors = {0xFFFF365B, 0xFFFF4D8D, 0xFFEC4CFF, 0xFF995CFF,
+        int[] colors = {0xFFB45CFF, 0xFFFF4D8D, 0xFFEC4CFF, 0xFF995CFF,
                 0xFF38BDF8, 0xFF7DD3FC, 0xFF41D9B0, 0xFF45C779,
                 0xFFFFB547, 0xFFFFE16A};
         return colors[Math.max(0, Math.min(colors.length - 1, palette))];
     }
 
     private static int paletteSecondary(int palette) {
-        int[] colors = {0xFF9E1837, 0xFFA92254, 0xFF7A2FA3, 0xFF4E2A9C,
+        int[] colors = {0xFF6034AE, 0xFFA92254, 0xFF7A2FA3, 0xFF4E2A9C,
                 0xFF17678C, 0xFF326A90, 0xFF1D826A, 0xFF21764B,
                 0xFFA7651E, 0xFFA98A2E};
         return colors[Math.max(0, Math.min(colors.length - 1, palette))];
