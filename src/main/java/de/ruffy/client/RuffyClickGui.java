@@ -43,7 +43,7 @@ public final class RuffyClickGui extends Screen {
     private Filter filter = Filter.ALL;
     private EditBox searchBox;
     private String searchText = "";
-    private String selectedKey = "prism_core";
+    private String selectedKey = "watermark";
     private int modulePage;
     private int panelX, panelY, panelW, panelH;
     private int leftX, leftW, rightX, rightW;
@@ -371,12 +371,23 @@ public final class RuffyClickGui extends Screen {
         // Row actions mirror the reference: favorite, settings/edit, then active switch.
         int starX = x + w - 78;
         int editX = x + w - 55;
-        boolean starHover = inside(mouseX, mouseY, starX - 2, y + 2, 16, h - 4);
-        boolean editHover = inside(mouseX, mouseY, editX - 2, y + 2, 16, h - 4);
+        boolean starHover = inside(mouseX, mouseY, starX - 2, y + 2, 18, h - 4);
+        boolean editHover = inside(mouseX, mouseY, editX - 2, y + 2, 18, h - 4);
+        float starMotion = RuffyAnimation.animate("gui.row.star." + feature.key(), starHover ? 1.0F : 0.0F);
+        float editMotion = RuffyAnimation.animate("gui.row.edit." + feature.key(), editHover ? 1.0F : 0.0F);
+        if (starMotion > 0.01F) {
+            fillRounded(g, starX - 2, y + 2, 18, h - 4,
+                    withAlpha(primary, Math.round(38 * starMotion)), 6);
+        }
+        if (editMotion > 0.01F) {
+            fillRounded(g, editX - 2, y + 2, 18, h - 4,
+                    withAlpha(primary, Math.round(38 * editMotion)), 6);
+        }
         g.drawCenteredString(font, favorite ? "★" : "☆", starX + 6,
-                y + (h - 8) / 2, favorite ? 0xFFFFD47A : starHover ? primary : DIM);
+                y + (h - 8) / 2, favorite ? 0xFFFFD47A
+                        : RuffyAnimation.blendColor(DIM, primary, starMotion));
         g.drawCenteredString(font, editHover ? "⚙" : "✎", editX + 6,
-                y + (h - 8) / 2, editHover ? primary : MUTED);
+                y + (h - 8) / 2, RuffyAnimation.blendColor(MUTED, primary, editMotion));
         drawSwitch(g, x + w - 30, y + (h - 15) / 2, enabled, 25, 15,
                 "module." + feature.key());
     }
