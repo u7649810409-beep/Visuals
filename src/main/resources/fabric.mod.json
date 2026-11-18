@@ -3,7 +3,7 @@
   "id": "ruffyclient",
   "version": "${version}",
   "name": "Ruffy Visuals",
-  "description": "A compact rounded Crimson Red client with ten color palettes, a rebuilt spring animation engine and custom 3D prism, drone and slash geometry.",
+  "description": "A clean modern Crimson client with a redesigned transparent telemetry HUD, adjustable HUD scale, ten palettes and custom 3D effects.",
   "authors": ["Ruffy"],
   "license": "MIT",
   "environment": "client",
