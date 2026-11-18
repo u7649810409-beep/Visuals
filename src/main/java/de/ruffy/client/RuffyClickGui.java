@@ -57,6 +57,7 @@ public final class RuffyClickGui extends Screen {
     @Override
     protected void init() {
         super.init();
+        RuffyAnimation.set("gui.open", 0.0F);
         calculateLayout();
         searchBox = new EditBox(font, searchX, searchY + 3, searchW, 18,
                 Component.literal("Search"));
@@ -92,9 +93,19 @@ public final class RuffyClickGui extends Screen {
         rowHeight = Math.max(18, Math.min(25, (panelH - (listTop - panelY) - 50) / 8));
     }
 
+    private void applyFrameLayout() {
+        calculateLayout();
+        float opening = RuffyAnimation.animate("gui.open", 1.0F);
+        int slide = Math.round((1.0F - opening) * 10.0F);
+        panelY += slide;
+        searchY += slide;
+        listTop += slide;
+        if (searchBox != null) searchBox.setPosition(searchX, searchY + 3);
+    }
+
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
-        calculateLayout();
+        applyFrameLayout();
         drawBackdrop(g);
 
         int alpha = 120 + RuffyConfig.getInt("menu_opacity") * 115 / 100;
@@ -197,22 +208,28 @@ public final class RuffyClickGui extends Screen {
         for (Tab item : Tab.values()) {
             boolean selected = item == tab;
             boolean hovered = inside(mouseX, mouseY, x, y + 3, item.width - 3, 24);
-            if (selected) {
-                g.fill(x, y + 3, x + item.width - 3, y + 27,
-                        withAlpha(RuffyConfig.primaryColor(), 42));
+            float active = RuffyAnimation.animate("gui.tab." + item.name(), selected ? 1.0F : 0.0F);
+            float hover = RuffyAnimation.animate("gui.tab.hover." + item.name(), hovered ? 1.0F : 0.0F);
+
+            int background = RuffyAnimation.blendColor(
+                    withAlpha(0xFF2A2232, 0), withAlpha(RuffyConfig.primaryColor(), 48), active);
+            background = RuffyAnimation.blendColor(background, 0x6C2A2232, hover * (1.0F - active));
+            if (active > 0.001F || hover > 0.001F) {
+                g.fill(x, y + 3, x + item.width - 3, y + 27, background);
                 g.renderOutline(x, y + 3, item.width - 3, 24,
-                        withAlpha(RuffyConfig.primaryColor(), 95));
-            } else if (hovered) {
-                g.fill(x, y + 3, x + item.width - 3, y + 27, 0x5C2A2232);
+                        withAlpha(RuffyConfig.primaryColor(), Math.round(95 * active + 35 * hover)));
             }
-            if (selected) {
-                g.fill(x + 6, y + 25, x + item.width - 9, y + 27,
+
+            int underlineWidth = Math.max(0, Math.round((item.width - 15) * active));
+            if (underlineWidth > 0) {
+                g.fill(x + 6, y + 25, x + 6 + underlineWidth, y + 27,
                         RuffyConfig.primaryColor());
             }
-            g.drawString(font, tabIcon(item), x + 7, y + 10,
-                    selected ? RuffyConfig.primaryColor() : DIM, false);
-            g.drawString(font, item.label, x + 22, y + 10,
-                    selected ? WHITE : MUTED, false);
+            int iconColor = RuffyAnimation.blendColor(DIM, RuffyConfig.primaryColor(), active);
+            int labelColor = RuffyAnimation.blendColor(MUTED, WHITE, active);
+            labelColor = RuffyAnimation.blendColor(labelColor, WHITE, hover * 0.25F);
+            g.drawString(font, tabIcon(item), x + 7, y + 10, iconColor, false);
+            g.drawString(font, item.label, x + 22, y + 10, labelColor, false);
             x += item.width;
         }
         g.fill(panelX, y + 29, panelX + panelW, y + 30, BORDER);
@@ -321,13 +338,22 @@ public final class RuffyClickGui extends Screen {
         boolean favorite = RuffyConfig.get("favorite_" + feature.key());
         int primary = RuffyConfig.primaryColor();
 
-        int rowFill = selected ? 0xD02B2035 : hovered ? CARD_HOVER : CARD;
+        float selectedMotion = RuffyAnimation.animate(
+                "gui.row.selected." + feature.key(), selected ? 1.0F : 0.0F);
+        float hoverMotion = RuffyAnimation.animate(
+                "gui.row.hover." + feature.key(), hovered ? 1.0F : 0.0F);
+        int rowFill = RuffyAnimation.blendColor(CARD, CARD_HOVER, hoverMotion);
+        rowFill = RuffyAnimation.blendColor(rowFill, 0xD02B2035, selectedMotion);
+        int rowBorder = RuffyAnimation.blendColor(BORDER, withAlpha(primary, 95), hoverMotion);
+        rowBorder = RuffyAnimation.blendColor(rowBorder, withAlpha(primary, 220), selectedMotion);
         g.fill(x, y, x + w, y + h, rowFill);
-        g.renderOutline(x, y, w, h,
-                selected ? withAlpha(primary, 220) : hovered ? withAlpha(primary, 95) : BORDER);
-        if (selected || enabled) {
+        g.renderOutline(x, y, w, h, rowBorder);
+        float enabledMotion = RuffyAnimation.animate(
+                "gui.row.enabled." + feature.key(), enabled ? 1.0F : 0.0F);
+        if (selectedMotion > 0.001F || enabledMotion > 0.001F) {
             g.fill(x, y + 4, x + 2, y + h - 4,
-                    enabled ? primary : withAlpha(primary, 105));
+                    RuffyAnimation.blendColor(withAlpha(primary, 0), primary,
+                            Math.max(selectedMotion, enabledMotion)));
         }
 
         int iconX = x + 7;
@@ -350,7 +376,8 @@ public final class RuffyClickGui extends Screen {
                 y + (h - 8) / 2, favorite ? 0xFFFFD47A : starHover ? primary : DIM);
         g.drawCenteredString(font, editHover ? "⚙" : "✎", editX + 6,
                 y + (h - 8) / 2, editHover ? primary : MUTED);
-        drawSwitch(g, x + w - 30, y + (h - 15) / 2, enabled, 25, 15);
+        drawSwitch(g, x + w - 30, y + (h - 15) / 2, enabled, 25, 15,
+                "module." + feature.key());
     }
 
     private String iconFor(RuffyFeature feature) {
@@ -414,7 +441,8 @@ public final class RuffyClickGui extends Screen {
         boolean active = RuffyConfig.get(selected.key());
         g.drawString(font, active ? "ENABLED" : "DISABLED",
                 x + pad + 8, toggleY + 21, active ? primary : DIM, false);
-        drawSwitch(g, x + w - pad - 38, toggleY + 11, active, 29, 16);
+        drawSwitch(g, x + w - pad - 38, toggleY + 11, active, 29, 16,
+                "inspector." + selected.key());
 
         int detailY = toggleY + 49;
         g.drawString(font, "CLIENT-SIDE VISUAL", x + pad, detailY, DIM, false);
@@ -467,31 +495,51 @@ public final class RuffyClickGui extends Screen {
             int primary = palettePrimary(i);
             boolean selected = RuffyConfig.getInt("palette") == i;
             boolean hover = inside(mouseX, mouseY, cx, cy, sw, 36);
-            g.fill(cx, cy, cx + sw, cy + 36, hover ? CARD_HOVER : CARD);
-            g.renderOutline(cx, cy, sw, 36, selected ? withAlpha(primary, 220) : BORDER);
+            float active = RuffyAnimation.animate("style.palette." + i, selected ? 1.0F : 0.0F);
+            float hovered = RuffyAnimation.animate("style.palette.hover." + i, hover ? 1.0F : 0.0F);
+            int fill = RuffyAnimation.blendColor(CARD, CARD_HOVER, hovered);
+            fill = RuffyAnimation.blendColor(fill, withAlpha(primary, 48), active);
+            g.fill(cx, cy, cx + sw, cy + 36, fill);
+            int outline = RuffyAnimation.blendColor(BORDER,
+                    withAlpha(primary, 220), active);
+            g.renderOutline(cx, cy, sw, 36, outline);
             g.fill(cx + 7, cy + 8, cx + 19, cy + 20, primary);
             g.fill(cx + 22, cy + 8, cx + 34, cy + 20, paletteSecondary(i));
             g.drawString(font, PALETTE_NAMES[i].toUpperCase(Locale.ROOT),
-                    cx + 41, cy + 12, selected ? WHITE : MUTED, false);
+                    cx + 41, cy + 12, RuffyAnimation.blendColor(MUTED, WHITE, active), false);
         }
 
-        int sliderY = y + 100;
+        int sliderY = y + 96;
         g.drawString(font, "HUD PANEL OPACITY  " + RuffyConfig.getInt("hud_opacity") + "%",
                 x, sliderY, MUTED, false);
-        drawSlider(g, x, sliderY + 13, panelW - 42,
+        drawSlider(g, x, sliderY + 12, panelW - 42,
                 RuffyConfig.getInt("hud_opacity"), 12, 90);
 
-        int menuY = sliderY + 40;
+        int menuY = sliderY + 33;
         g.drawString(font, "MENU OPACITY  " + RuffyConfig.getInt("menu_opacity") + "%",
                 x, menuY, MUTED, false);
-        drawSlider(g, x, menuY + 13, panelW - 42,
+        drawSlider(g, x, menuY + 12, panelW - 42,
                 RuffyConfig.getInt("menu_opacity"), 60, 100);
 
-        int qualityY = menuY + 40;
+        int qualityY = menuY + 33;
         g.drawString(font, "EFFECT QUALITY  " + qualityName(RuffyConfig.getInt("effect_quality")),
                 x, qualityY, MUTED, false);
-        drawSlider(g, x, qualityY + 13, panelW - 42,
+        drawSlider(g, x, qualityY + 12, panelW - 42,
                 RuffyConfig.getInt("effect_quality"), 0, 2);
+
+        int smoothY = qualityY + 22;
+        boolean smoothEnabled = RuffyConfig.get("smooth_animations");
+        g.drawString(font, "SMOOTH ANIMATIONS", x, smoothY, WHITE, false);
+        g.drawString(font, smoothEnabled ? "ON" : "OFF",
+                x + panelW - 87, smoothY, smoothEnabled ? RuffyConfig.primaryColor() : DIM, false);
+        drawSwitch(g, x + panelW - 49, smoothY - 1,
+                smoothEnabled, 31, 16, "style.global_smooth");
+
+        int strengthY = smoothY + 20;
+        g.drawString(font, "SMOOTHNESS  " + RuffyConfig.getInt("animation_smoothness") + "%",
+                x, strengthY, MUTED, false);
+        drawSlider(g, x, strengthY + 12, panelW - 42,
+                RuffyConfig.getInt("animation_smoothness"), 0, 100);
     }
 
     private void drawHudSettings(GuiGraphics g, int x, int y, int w) {
@@ -543,25 +591,32 @@ public final class RuffyClickGui extends Screen {
     private void drawSlider(GuiGraphics g, int x, int y, int w, int value, int min, int max) {
         int barY = y + 5;
         float ratio = (value - min) / (float) (max - min);
-        int fill = Math.max(0, Math.min(w, Math.round(ratio * w)));
-        g.fill(x, barY, x + w, barY + 3, 0xFF2B3948);
+        float animated = RuffyAnimation.animate("gui.slider." + x + "." + y, ratio);
+        int fill = Math.max(0, Math.min(w, Math.round(animated * w)));
+        g.fill(x, barY, x + w, barY + 3, 0xFF332B3B);
         g.fill(x, barY, x + fill, barY + 3, RuffyConfig.primaryColor());
         g.fill(x + fill - 2, barY - 2, x + fill + 2, barY + 5, WHITE);
     }
 
-    private void drawSwitch(GuiGraphics g, int x, int y, boolean enabled, int w, int h) {
-        if (enabled) {
+    private void drawSwitch(GuiGraphics g, int x, int y, boolean enabled,
+                            int w, int h, String animationKey) {
+        float progress = RuffyAnimation.animate("gui.switch." + animationKey,
+                enabled ? 1.0F : 0.0F);
+        int track = RuffyAnimation.blendColor(0xFF34313B,
+                withAlpha(RuffyConfig.primaryColor(), 218), progress);
+        int outline = RuffyAnimation.blendColor(0xFF625B68,
+                withAlpha(RuffyConfig.secondaryColor(), 225), progress);
+        int knobColor = RuffyAnimation.blendColor(0xFFAAA3B0, WHITE, progress);
+        if (progress > 0.01F) {
             g.fill(x - 3, y - 2, x + w + 3, y + h + 2,
-                    withAlpha(RuffyConfig.primaryColor(), 38));
+                    withAlpha(RuffyConfig.primaryColor(), Math.round(38 * progress)));
         }
-        int track = enabled ? withAlpha(RuffyConfig.primaryColor(), 218) : 0xFF34313B;
         g.fill(x, y, x + w, y + h, track);
-        g.renderOutline(x, y, w, h, enabled
-                ? withAlpha(RuffyConfig.secondaryColor(), 225) : 0xFF625B68);
+        g.renderOutline(x, y, w, h, outline);
         int knob = Math.max(7, h - 6);
-        int knobX = enabled ? x + w - knob - 3 : x + 3;
-        g.fill(knobX, y + 3, knobX + knob, y + h - 3,
-                enabled ? WHITE : 0xFFAAA3B0);
+        int travel = Math.max(0, w - knob - 6);
+        int knobX = x + 3 + Math.round(travel * progress);
+        g.fill(knobX, y + 3, knobX + knob, y + h - 3, knobColor);
     }
 
     private void drawSmallButton(GuiGraphics g, int x, int y, int w, int h,
@@ -634,7 +689,7 @@ public final class RuffyClickGui extends Screen {
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) return true;
         if (event.button() != 0) return false;
-        calculateLayout();
+        applyFrameLayout();
         int mx = (int) event.x();
         int my = (int) event.y();
 
@@ -816,24 +871,37 @@ public final class RuffyClickGui extends Screen {
             }
         }
 
-        int sliderY = y + 100;
-        if (inside(mx, my, x, sliderY + 11, panelW - 42, 18)) {
+        int sliderY = y + 96;
+        if (inside(mx, my, x, sliderY + 10, panelW - 42, 18)) {
             RuffyConfig.setInt("hud_opacity",
                     12 + Math.round((mx - x) * 78.0F / (panelW - 42)));
             return true;
         }
 
-        int menuY = sliderY + 40;
-        if (inside(mx, my, x, menuY + 11, panelW - 42, 18)) {
+        int menuY = sliderY + 33;
+        if (inside(mx, my, x, menuY + 10, panelW - 42, 18)) {
             RuffyConfig.setInt("menu_opacity",
                     60 + Math.round((mx - x) * 40.0F / (panelW - 42)));
             return true;
         }
 
-        int qualityY = menuY + 40;
-        if (inside(mx, my, x, qualityY + 11, panelW - 42, 18)) {
+        int qualityY = menuY + 33;
+        if (inside(mx, my, x, qualityY + 10, panelW - 42, 18)) {
             RuffyConfig.setInt("effect_quality",
                     Math.round((mx - x) * 2.0F / (panelW - 42)));
+            return true;
+        }
+
+        int smoothY = qualityY + 22;
+        if (inside(mx, my, x + panelW - 55, smoothY - 3, 55, 22)) {
+            RuffyConfig.set("smooth_animations", !RuffyConfig.get("smooth_animations"));
+            return true;
+        }
+
+        int strengthY = smoothY + 20;
+        if (inside(mx, my, x, strengthY + 10, panelW - 42, 18)) {
+            RuffyConfig.setInt("animation_smoothness",
+                    Math.round((mx - x) * 100.0F / (panelW - 42)));
             return true;
         }
         return false;
