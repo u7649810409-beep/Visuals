@@ -509,25 +509,25 @@ public final class RuffyClickGui extends Screen {
                     cx + 41, cy + 12, RuffyAnimation.blendColor(MUTED, WHITE, active), false);
         }
 
-        int sliderY = y + 96;
+        int sliderY = y + 97;
         g.drawString(font, "HUD PANEL OPACITY  " + RuffyConfig.getInt("hud_opacity") + "%",
                 x, sliderY, MUTED, false);
         drawSlider(g, x, sliderY + 12, panelW - 42,
                 RuffyConfig.getInt("hud_opacity"), 12, 90);
 
-        int menuY = sliderY + 33;
+        int menuY = sliderY + 27;
         g.drawString(font, "MENU OPACITY  " + RuffyConfig.getInt("menu_opacity") + "%",
                 x, menuY, MUTED, false);
         drawSlider(g, x, menuY + 12, panelW - 42,
                 RuffyConfig.getInt("menu_opacity"), 60, 100);
 
-        int qualityY = menuY + 33;
+        int qualityY = menuY + 27;
         g.drawString(font, "EFFECT QUALITY  " + qualityName(RuffyConfig.getInt("effect_quality")),
                 x, qualityY, MUTED, false);
         drawSlider(g, x, qualityY + 12, panelW - 42,
                 RuffyConfig.getInt("effect_quality"), 0, 2);
 
-        int smoothY = qualityY + 22;
+        int smoothY = qualityY + 37;
         boolean smoothEnabled = RuffyConfig.get("smooth_animations");
         g.drawString(font, "SMOOTH ANIMATIONS", x, smoothY, WHITE, false);
         g.drawString(font, smoothEnabled ? "ON" : "OFF",
@@ -535,7 +535,7 @@ public final class RuffyClickGui extends Screen {
         drawSwitch(g, x + panelW - 49, smoothY - 1,
                 smoothEnabled, 31, 16, "style.global_smooth");
 
-        int strengthY = smoothY + 20;
+        int strengthY = smoothY + 21;
         g.drawString(font, "SMOOTHNESS  " + RuffyConfig.getInt("animation_smoothness") + "%",
                 x, strengthY, MUTED, false);
         drawSlider(g, x, strengthY + 12, panelW - 42,
