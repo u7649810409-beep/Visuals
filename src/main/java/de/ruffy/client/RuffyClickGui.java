@@ -871,35 +871,35 @@ public final class RuffyClickGui extends Screen {
             }
         }
 
-        int sliderY = y + 96;
-        if (inside(mx, my, x, sliderY + 10, panelW - 42, 18)) {
+        int sliderY = y + 97;
+        if (inside(mx, my, x, sliderY + 9, panelW - 42, 19)) {
             RuffyConfig.setInt("hud_opacity",
                     12 + Math.round((mx - x) * 78.0F / (panelW - 42)));
             return true;
         }
 
-        int menuY = sliderY + 33;
-        if (inside(mx, my, x, menuY + 10, panelW - 42, 18)) {
+        int menuY = sliderY + 27;
+        if (inside(mx, my, x, menuY + 9, panelW - 42, 19)) {
             RuffyConfig.setInt("menu_opacity",
                     60 + Math.round((mx - x) * 40.0F / (panelW - 42)));
             return true;
         }
 
-        int qualityY = menuY + 33;
-        if (inside(mx, my, x, qualityY + 10, panelW - 42, 18)) {
+        int qualityY = menuY + 27;
+        if (inside(mx, my, x, qualityY + 9, panelW - 42, 19)) {
             RuffyConfig.setInt("effect_quality",
                     Math.round((mx - x) * 2.0F / (panelW - 42)));
             return true;
         }
 
-        int smoothY = qualityY + 22;
+        int smoothY = qualityY + 37;
         if (inside(mx, my, x + panelW - 55, smoothY - 3, 55, 22)) {
             RuffyConfig.set("smooth_animations", !RuffyConfig.get("smooth_animations"));
             return true;
         }
 
-        int strengthY = smoothY + 20;
-        if (inside(mx, my, x, strengthY + 10, panelW - 42, 18)) {
+        int strengthY = smoothY + 21;
+        if (inside(mx, my, x, strengthY + 9, panelW - 42, 19)) {
             RuffyConfig.setInt("animation_smoothness",
                     Math.round((mx - x) * 100.0F / (panelW - 42)));
             return true;
