@@ -439,6 +439,7 @@ public final class RuffyClickGui extends Screen {
 
         int pad = 11;
         int primary = RuffyConfig.primaryColor();
+        boolean compact = h < 180;
         g.drawString(font, "MODULE SETTINGS", x + pad, y + 13, DIM, false);
         fillRounded(g, x + pad, y + 32, 27, 27, withAlpha(primary, 35), 8);
         outlineRounded(g, x + pad, y + 32, 27, 27, withAlpha(primary, 140), 8);
@@ -448,9 +449,9 @@ public final class RuffyClickGui extends Screen {
                 x + pad + 34, y + 48, primary, false);
 
         drawWrapped(g, selected.description(), x + pad, y + 69,
-                w - pad * 2, MUTED, 12);
+                w - pad * 2, MUTED, 11);
 
-        int toggleY = y + 104;
+        int toggleY = y + (compact ? 86 : 104);
         fillRounded(g, x + pad, toggleY, w - pad * 2, 39, 0x641E0D14, 8);
         outlineRounded(g, x + pad, toggleY, w - pad * 2, 39, BORDER, 8);
         g.drawString(font, "MODULE STATE", x + pad + 8, toggleY + 7, MUTED, false);
@@ -461,19 +462,24 @@ public final class RuffyClickGui extends Screen {
                 "inspector." + selected.key());
 
         int detailY = toggleY + 49;
-        g.drawString(font, "CLIENT-SIDE VISUAL", x + pad, detailY, DIM, false);
-
-        if (selected.section() == RuffyFeature.Section.HUD) {
-            int sliderY = detailY + 27;
-            g.drawString(font, "HUD OPACITY  " + RuffyConfig.getInt("hud_opacity") + "%",
-                    x + pad, sliderY, MUTED, false);
-            drawSlider(g, x + pad, sliderY + 16, w - pad * 2,
-                    RuffyConfig.getInt("hud_opacity"), 12, 90);
+        if (compact) {
+            g.drawString(font, "CLIENT-SIDE VISUAL", x + pad, detailY, DIM, false);
+            g.drawString(font, "STYLE TAB: COLORS / OPACITY", x + pad,
+                    detailY + 13, DIM, false);
         } else {
-            g.drawString(font, "NO GAMEPLAY MODIFICATION", x + pad,
-                    detailY + 25, DIM, false);
-            g.drawString(font, "RIGHT SHIFT TO CLOSE", x + pad,
-                    detailY + 40, DIM, false);
+            g.drawString(font, "CLIENT-SIDE VISUAL", x + pad, detailY, DIM, false);
+            if (selected.section() == RuffyFeature.Section.HUD) {
+                int sliderY = detailY + 27;
+                g.drawString(font, "HUD OPACITY  " + RuffyConfig.getInt("hud_opacity") + "%",
+                        x + pad, sliderY, MUTED, false);
+                drawSlider(g, x + pad, sliderY + 16, w - pad * 2,
+                        RuffyConfig.getInt("hud_opacity"), 12, 90);
+            } else {
+                g.drawString(font, "NO GAMEPLAY MODIFICATION", x + pad,
+                        detailY + 25, DIM, false);
+                g.drawString(font, "RIGHT SHIFT TO CLOSE", x + pad,
+                        detailY + 40, DIM, false);
+            }
         }
     }
 
@@ -564,14 +570,14 @@ public final class RuffyClickGui extends Screen {
 
     private void drawConfigs(GuiGraphics g, int mouseX, int mouseY) {
         int x = panelX + 18;
-        int y = panelY + 83;
+        int y = panelY + 76;
         g.drawString(font, "CONFIGURATION", x, y, WHITE, false);
-        g.drawString(font, "Options are saved automatically.", x, y + 17, MUTED, false);
-        drawActionCard(g, mouseX, mouseY, x, y + 45, panelW - 36, 49,
+        g.drawString(font, "Options are saved automatically.", x, y + 16, MUTED, false);
+        drawActionCard(g, mouseX, mouseY, x, y + 38, panelW - 36, 44,
                 "RESET MODULES", "Restore default module states");
-        drawActionCard(g, mouseX, mouseY, x, y + 102, panelW - 36, 49,
-                "RESET STYLE", "Crimson palette and rounded neon controls");
-        drawActionCard(g, mouseX, mouseY, x, y + 159, panelW - 36, 49,
+        drawActionCard(g, mouseX, mouseY, x, y + 89, panelW - 36, 44,
+                "RESET STYLE", "Ten palettes and rounded neon controls");
+        drawActionCard(g, mouseX, mouseY, x, y + 140, panelW - 36, 44,
                 "RESET EVERYTHING", "Restore all client options");
     }
 
@@ -836,13 +842,15 @@ public final class RuffyClickGui extends Screen {
                 .filter(feature -> feature.key().equals(selectedKey)).findFirst().orElse(null);
         if (selected == null) return false;
 
-        int toggleY = y + 104;
+        int inspectorHeight = panelY + panelH - 38 - y;
+        boolean compact = inspectorHeight < 180;
+        int toggleY = y + (compact ? 86 : 104);
         if (inside(mx, my, x + 8, toggleY, rightW - 16, 39)) {
             RuffyConfig.set(selected.key(), !RuffyConfig.get(selected.key()));
             return true;
         }
 
-        if (selected.section() == RuffyFeature.Section.HUD) {
+        if (!compact && selected.section() == RuffyFeature.Section.HUD) {
             int sliderY = toggleY + 49 + 27 + 16;
             if (inside(mx, my, x + 10, sliderY, rightW - 20, 16)) {
                 int value = 12 + Math.round((mx - (x + 10)) * 78.0F / Math.max(1, rightW - 20));
@@ -968,14 +976,14 @@ public final class RuffyClickGui extends Screen {
 
     private boolean handleConfigClick(int mx, int my) {
         int x = panelX + 18;
-        int y = panelY + 128;
-        if (inside(mx, my, x, y, panelW - 36, 49)) {
+        int y = panelY + 114;
+        if (inside(mx, my, x, y, panelW - 36, 44)) {
             for (RuffyFeature feature : RuffyFeature.ALL) {
                 RuffyConfig.set(feature.key(), defaultModuleState(feature.key()));
             }
             return true;
         }
-        if (inside(mx, my, x, y + 57, panelW - 36, 49)) {
+        if (inside(mx, my, x, y + 51, panelW - 36, 44)) {
             RuffyConfig.setInt("palette", 0);
             RuffyConfig.setInt("hud_opacity", 44);
             RuffyConfig.setInt("menu_opacity", 94);
@@ -984,7 +992,7 @@ public final class RuffyClickGui extends Screen {
             RuffyConfig.setInt("animation_smoothness", 78);
             return true;
         }
-        if (inside(mx, my, x, y + 114, panelW - 36, 49)) {
+        if (inside(mx, my, x, y + 102, panelW - 36, 44)) {
             RuffyConfig.reset();
             return true;
         }
