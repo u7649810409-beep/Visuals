@@ -28,8 +28,8 @@ public final class RuffyHud {
 
         float scale = Math.max(0.75F,
                 Math.min(1.20F, RuffyConfig.getInt("hud_scale") / 100.0F));
-        graphics.pose().pushPose();
-        graphics.pose().scale(scale, scale, 1.0F);
+        graphics.pose().pushMatrix();
+        graphics.pose().scale(scale, scale);
 
         int logicalWidth = Math.round(client.getWindow().getGuiScaledWidth() / scale);
         int logicalHeight = Math.round(client.getWindow().getGuiScaledHeight() / scale);
@@ -94,7 +94,7 @@ public final class RuffyHud {
             drawKeystrokes(graphics, client, 12, Math.max(12, logicalHeight - 82));
         }
 
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 
     private static final class HudCursor {
