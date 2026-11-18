@@ -1,6 +1,7 @@
 package de.ruffy.client.mixin;
 
 import de.ruffy.client.RuffyConfig;
+import de.ruffy.client.RuffyAnimation;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
