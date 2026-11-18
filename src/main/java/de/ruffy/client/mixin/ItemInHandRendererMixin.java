@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
+/** Smooths both the empty arm and held-item swing using the shared animation settings. */
 @Mixin(ItemInHandRenderer.class)
 public abstract class ItemInHandRendererMixin {
     @ModifyVariable(
@@ -29,13 +30,16 @@ public abstract class ItemInHandRendererMixin {
     }
 
     private static float ruffy$curve(float vanillaProgress) {
-        if (!RuffyConfig.get("swing_animation")) {
+        if (!RuffyConfig.get("swing_animation")
+                || !RuffyConfig.get("smooth_animations")) {
             return vanillaProgress;
         }
 
         float progress = Math.max(0.0F, Math.min(1.0F, vanillaProgress));
-        float easeOut = 1.0F - (float) Math.pow(1.0F - progress, 2.35);
-        float snap = (float) Math.sin(progress * Math.PI) * 0.055F;
-        return Math.max(0.0F, Math.min(1.0F, easeOut + snap));
+        float smoothStep = progress * progress * (3.0F - 2.0F * progress);
+        float smoothness = RuffyConfig.getInt("animation_smoothness") / 100.0F;
+        float influence = 0.30F + smoothness * 0.62F;
+        return Math.max(0.0F, Math.min(1.0F,
+                progress + (smoothStep - progress) * influence));
     }
 }
