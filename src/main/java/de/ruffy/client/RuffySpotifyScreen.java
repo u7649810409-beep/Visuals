@@ -60,7 +60,7 @@ public final class RuffySpotifyScreen extends Screen {
         rightW = panelX + panelW - 18 - rightX;
         clientIdY = panelY + 92;
         actionY = panelY + 126;
-        controlY = panelY + panelH - 55;
+        controlY = panelY + panelH - 95;
         if (clientIdBox != null) clientIdBox.setPosition(leftX + 10, clientIdY + 3);
     }
 
@@ -81,6 +81,8 @@ public final class RuffySpotifyScreen extends Screen {
         RuffyRoundedUi.outline(g, panelX, panelY, panelW, panelH,
                 withAlpha(primary, 190), 28);
 
+        renderMouseX = mouseX;
+        renderMouseY = mouseY;
         drawHeader(g, primary, secondary);
         drawConnectionCard(g, mouseX, mouseY, primary);
         drawLyricsCard(g, primary);
@@ -204,11 +206,7 @@ public final class RuffySpotifyScreen extends Screen {
         List<FormattedCharSequence> lines = new ArrayList<>();
         for (String sourceLine : source.split("\\R")) {
             List<FormattedCharSequence> wrapped = font.split(Component.literal(sourceLine), maxWidth);
-            if (wrapped.isEmpty()) {
-                lines.add(FormattedCharSequence.EMPTY);
-            } else {
-                lines.addAll(wrapped);
-            }
+            if (!wrapped.isEmpty()) lines.addAll(wrapped);
         }
         if (lines.isEmpty()) {
             lines.addAll(font.split(Component.literal("Lyrics will appear here when a match is found."),
