@@ -43,7 +43,7 @@ public final class RuffyClickGui extends Screen {
     private Filter filter = Filter.ALL;
     private EditBox searchBox;
     private String searchText = "";
-    private String selectedKey = "nebula_particles";
+    private String selectedKey = "prism_core";
     private int modulePage;
     private int panelX, panelY, panelW, panelH;
     private int leftX, leftW, rightX, rightW;
@@ -172,17 +172,18 @@ public final class RuffyClickGui extends Screen {
     private void drawHeader(GuiGraphics g, int header) {
         int primary = RuffyConfig.primaryColor();
         int secondary = RuffyConfig.secondaryColor();
-        g.fill(panelX, panelY, panelX + panelW, panelY + 39, header);
-        g.fill(panelX, panelY, panelX + panelW, panelY + 2, primary);
-        g.fill(panelX, panelY + 37, panelX + panelW, panelY + 39,
+        fillRounded(g, panelX, panelY, panelW, 39, header, 11);
+        g.fill(panelX, panelY + 11, panelX + panelW, panelY + 39, header);
+        fillRounded(g, panelX, panelY, panelW, 3, primary, 2);
+        g.fill(panelX + 3, panelY + 37, panelX + panelW - 3, panelY + 39,
                 withAlpha(secondary, 70));
 
         int logoX = panelX + 12;
         int logoY = panelY + 7;
-        g.fill(logoX - 2, logoY - 2, logoX + 27, logoY + 27,
-                withAlpha(primary, 28));
-        g.fill(logoX, logoY, logoX + 24, logoY + 24, 0xE8200B12);
-        g.renderOutline(logoX, logoY, 24, 24, withAlpha(primary, 210));
+        fillRounded(g, logoX - 2, logoY - 2, 29, 29,
+                withAlpha(primary, 28), 10);
+        fillRounded(g, logoX, logoY, 24, 24, 0xE8200B12, 8);
+        outlineRounded(g, logoX, logoY, 24, 24, withAlpha(primary, 210), 8);
         g.drawCenteredString(font, "R", logoX + 12, logoY + 6, primary);
 
         g.drawString(font, "RUFFY", panelX + 43, panelY + 8, WHITE, false);
@@ -193,10 +194,10 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, "VISUAL CONTROL CENTER", panelX + 151,
                 panelY + 16, MUTED, false);
 
-        g.fill(panelX + panelW - 76, panelY + 8,
-                panelX + panelW - 12, panelY + 31, 0xA412060A);
-        g.renderOutline(panelX + panelW - 76, panelY + 8, 64, 23,
-                withAlpha(primary, 105));
+        fillRounded(g, panelX + panelW - 76, panelY + 8, 64, 23,
+                0xA412060A, 8);
+        outlineRounded(g, panelX + panelW - 76, panelY + 8, 64, 23,
+                withAlpha(primary, 125), 8);
         g.drawCenteredString(font, "ESC  ×", panelX + panelW - 44,
                 panelY + 15, MUTED);
     }
@@ -410,9 +411,10 @@ public final class RuffyClickGui extends Screen {
         int y = listTop;
         int w = rightW;
         int h = panelY + panelH - 38 - y;
-        g.fill(x, y, x + w, y + h, 0x7A0E1723);
-        g.renderOutline(x, y, w, h, BORDER);
-        g.fill(x, y, x + w, y + 2, withAlpha(RuffyConfig.primaryColor(), 100));
+        fillRounded(g, x, y, w, h, 0x7A10080D, 8);
+        outlineRounded(g, x, y, w, h, BORDER, 8);
+        fillRounded(g, x + 3, y + 2, Math.max(0, w - 6), 2,
+                withAlpha(RuffyConfig.primaryColor(), 120), 1);
 
         RuffyFeature selected = RuffyFeature.ALL.stream()
                 .filter(feature -> feature.key().equals(selectedKey)).findFirst().orElse(null);
@@ -425,8 +427,8 @@ public final class RuffyClickGui extends Screen {
         int pad = 11;
         int primary = RuffyConfig.primaryColor();
         g.drawString(font, "MODULE SETTINGS", x + pad, y + 13, DIM, false);
-        g.fill(x + pad, y + 32, x + pad + 27, y + 59, 0xAA1D3040);
-        g.renderOutline(x + pad, y + 32, 27, 27, withAlpha(primary, 140));
+        fillRounded(g, x + pad, y + 32, 27, 27, withAlpha(primary, 35), 8);
+        outlineRounded(g, x + pad, y + 32, 27, 27, withAlpha(primary, 140), 8);
         g.drawCenteredString(font, iconFor(selected), x + pad + 13, y + 41, primary);
         g.drawString(font, selected.title(), x + pad + 34, y + 35, WHITE, false);
         g.drawString(font, selected.section().title().toUpperCase(Locale.ROOT),
@@ -436,7 +438,8 @@ public final class RuffyClickGui extends Screen {
                 w - pad * 2, MUTED, 12);
 
         int toggleY = y + 104;
-        g.fill(x + pad, toggleY, x + w - pad, toggleY + 39, 0x641A2B3B);
+        fillRounded(g, x + pad, toggleY, w - pad * 2, 39, 0x641E0D14, 8);
+        outlineRounded(g, x + pad, toggleY, w - pad * 2, 39, BORDER, 8);
         g.drawString(font, "MODULE STATE", x + pad + 8, toggleY + 7, MUTED, false);
         boolean active = RuffyConfig.get(selected.key());
         g.drawString(font, active ? "ENABLED" : "DISABLED",
@@ -468,7 +471,7 @@ public final class RuffyClickGui extends Screen {
         String[] names = {"CRIMSON", "CINEMATIC", "PERFORMANCE", "CLEAN"};
         String[] desc = {"Crimson glow and trails", "Soft pink glow and trails",
                 "Reduced particle load", "Minimal overlay"};
-        int[] palettes = {0, 1, 4, 5};
+        int[] palettes = {0, 3, 4, 9};
         int w = (panelW - 50) / 2;
         for (int i = 0; i < 4; i++) {
             int cx = x + (i % 2) * (w + 10);
@@ -554,7 +557,7 @@ public final class RuffyClickGui extends Screen {
         drawActionCard(g, mouseX, mouseY, x, y + 45, panelW - 36, 49,
                 "RESET MODULES", "Restore default module states");
         drawActionCard(g, mouseX, mouseY, x, y + 102, panelW - 36, 49,
-                "RESET STYLE", "Nebula palette and default opacity");
+                "RESET STYLE", "Crimson palette and rounded neon controls");
         drawActionCard(g, mouseX, mouseY, x, y + 159, panelW - 36, 49,
                 "RESET EVERYTHING", "Restore all client options");
     }
@@ -573,16 +576,19 @@ public final class RuffyClickGui extends Screen {
     private void drawActionCard(GuiGraphics g, int mouseX, int mouseY,
                                 int x, int y, int w, int h, String title, String subtitle) {
         boolean hovered = inside(mouseX, mouseY, x, y, w, h);
-        g.fill(x, y, x + w, y + h, hovered ? CARD_HOVER : CARD);
-        g.renderOutline(x, y, w, h,
-                hovered ? withAlpha(RuffyConfig.primaryColor(), 170) : BORDER);
-        g.fill(x, y, x + 2, y + h, RuffyConfig.primaryColor());
+        float hover = RuffyAnimation.animate("gui.action." + title, hovered ? 1.0F : 0.0F);
+        int fill = RuffyAnimation.blendColor(CARD, CARD_HOVER, hover);
+        fillRounded(g, x, y, w, h, fill, 9);
+        outlineRounded(g, x, y, w, h,
+                RuffyAnimation.blendColor(BORDER, withAlpha(RuffyConfig.primaryColor(), 185), hover), 9);
+        fillRounded(g, x + 1, y + 5, 3, h - 10, RuffyConfig.primaryColor(), 2);
         g.drawString(font, title, x + 12, y + 8, WHITE, false);
         g.drawString(font, subtitle, x + 12, y + 25, MUTED, false);
     }
 
     private void drawInfoRow(GuiGraphics g, int x, int y, String left, String right) {
-        g.fill(x, y, x + panelW - 36, y + 25, 0x57172230);
+        fillRounded(g, x, y, panelW - 36, 25, 0x571A0D13, 7);
+        outlineRounded(g, x, y, panelW - 36, 25, BORDER, 7);
         g.drawString(font, left, x + 8, y + 8, RuffyConfig.primaryColor(), false);
         g.drawString(font, right, x + 112, y + 8, MUTED, false);
     }
@@ -592,9 +598,9 @@ public final class RuffyClickGui extends Screen {
         float ratio = (value - min) / (float) (max - min);
         float animated = RuffyAnimation.animate("gui.slider." + x + "." + y, ratio);
         int fill = Math.max(0, Math.min(w, Math.round(animated * w)));
-        g.fill(x, barY, x + w, barY + 3, 0xFF332B3B);
-        g.fill(x, barY, x + fill, barY + 3, RuffyConfig.primaryColor());
-        g.fill(x + fill - 2, barY - 2, x + fill + 2, barY + 5, WHITE);
+        fillRounded(g, x, barY, w, 4, 0xFF39232D, 2);
+        fillRounded(g, x, barY, Math.max(0, fill), 4, RuffyConfig.primaryColor(), 2);
+        fillRounded(g, x + fill - 3, barY - 3, 7, 10, WHITE, 4);
     }
 
     private void drawSwitch(GuiGraphics g, int x, int y, boolean enabled,
@@ -899,11 +905,11 @@ public final class RuffyClickGui extends Screen {
     private boolean handleStyleClick(int mx, int my) {
         int x = panelX + 18;
         int y = panelY + 72;
-        int sw = (panelW - 64) / 3;
+        int sw = (panelW - 64) / 5;
         for (int i = 0; i < PALETTE_NAMES.length; i++) {
-            int cx = x + (i % 3) * (sw + 8);
-            int cy = y + 18 + (i / 3) * 42;
-            if (inside(mx, my, cx, cy, sw, 36)) {
+            int cx = x + (i % 5) * (sw + 6);
+            int cy = y + 18 + (i / 5) * 32;
+            if (inside(mx, my, cx, cy, sw, 27)) {
                 RuffyConfig.setInt("palette", i);
                 return true;
             }
@@ -975,7 +981,8 @@ public final class RuffyClickGui extends Screen {
             case "watermark", "fps", "keystrokes", "direction",
                     "nebula_particles", "jump_burst", "landing_ring",
                     "hit_sparks", "swing_animation", "critical_sparks",
-                    "damage_pulse", "underwater_bubbles", "palette_sparks", "health_hud" -> true;
+                    "damage_pulse", "underwater_bubbles", "palette_sparks", "health_hud",
+                    "prism_core", "three_d_slash" -> true;
             default -> false;
         };
     }
