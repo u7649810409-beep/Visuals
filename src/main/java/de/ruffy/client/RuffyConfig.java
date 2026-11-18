@@ -57,7 +57,8 @@ public final class RuffyConfig {
             "hud_opacity", 44,
             "menu_opacity", 94,
             "effect_quality", 2,
-            "animation_smoothness", 78
+            "animation_smoothness", 78,
+            "hud_scale", 96
     );
 
     private static final int[] PRIMARY = {
@@ -120,6 +121,7 @@ public final class RuffyConfig {
             case "menu_opacity" -> Math.max(60, Math.min(100, value));
             case "effect_quality" -> Math.max(0, Math.min(2, value));
             case "animation_smoothness" -> Math.max(0, Math.min(100, value));
+            case "hud_scale" -> Math.max(75, Math.min(120, value));
             default -> value;
         };
         VALUES.setProperty(key, Integer.toString(clamped));
@@ -140,7 +142,7 @@ public final class RuffyConfig {
     }
 
     public static int hudBorderColor() {
-        int alpha = 36 + (getInt("hud_opacity") * 110 / 100);
+        int alpha = 26 + (getInt("hud_opacity") * 82 / 100);
         return (alpha << 24) | (primaryColor() & 0x00FFFFFF);
     }
 
