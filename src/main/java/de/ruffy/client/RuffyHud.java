@@ -16,7 +16,6 @@ import java.util.Locale;
 public final class RuffyHud {
     private static final int WHITE = 0xFFF5F4F7;
     private static final int MUTED = 0xFF9E9AA5;
-    private static final int SOFT = 0xFFCAC5CF;
     private static final int CHIP_HEIGHT = 31;
     private static final int CHIP_GAP = 4;
 
@@ -92,7 +91,7 @@ public final class RuffyHud {
         }
 
         if (RuffyConfig.get("keystrokes")) {
-            drawKeystrokes(graphics, client, 12, logicalHeight - 82);
+            drawKeystrokes(graphics, client, 12, Math.max(12, logicalHeight - 82));
         }
 
         graphics.pose().popPose();
