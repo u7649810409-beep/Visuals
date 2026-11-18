@@ -81,8 +81,26 @@ public final class RuffyClient implements ClientModInitializer {
         int detail = quality == 0 ? 1 : quality == 1 ? 2 : 3;
         int lowFrequency = quality == 0 ? 14 : quality == 1 ? 9 : 6;
 
+        // Every continuous particle module fades in/out by easing its emission rate.
+        float nebula = effectAmount("nebula_particles");
+        float orbit = effectAmount("orbit_particles");
+        float trail = effectAmount("movement_trail");
+        float jump = effectAmount("jump_burst");
+        float landing = effectAmount("landing_ring");
+        float sprintDust = effectAmount("sprint_dust");
+        float footsteps = effectAmount("step_sparks");
+        float airSparks = effectAmount("critical_sparks");
+        float lowHealth = effectAmount("low_health_aura");
+        float potionGlow = effectAmount("potion_glow");
+        float damagePulse = effectAmount("damage_pulse");
+        float bubbles = effectAmount("underwater_bubbles");
+        float weather = effectAmount("weather_fx");
+        float caveDust = effectAmount("cave_dust");
+        float starfall = effectAmount("starfall");
+        float impact = effectAmount("hit_sparks");
+
         // Ambient nebula: slow drifting points with a faint enchanted shimmer.
-        if (RuffyConfig.get("nebula_particles") && tick % lowFrequency == 0) {
+        if (shouldEmit(nebula, tick, lowFrequency)) {
             double angle = RANDOM.nextDouble() * Math.PI * 2.0;
             double radius = 0.95 + RANDOM.nextDouble() * 1.45;
             double x = player.getX() + Math.cos(angle) * radius;
@@ -101,7 +119,7 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Two counter-rotating orbit points create a more stable halo than a single particle.
-        if (RuffyConfig.get("orbit_particles") && tick % 2 == 0) {
+        if (shouldEmit(orbit, tick, 2)) {
             double angle = tick * 0.095;
             double radius = 0.66;
             for (int i = 0; i < detail; i++) {
@@ -118,8 +136,8 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Smooth trailing ribbons: three small points are spaced behind the motion vector.
-        if (RuffyConfig.get("movement_trail") && horizontalSpeedSq > 0.006
-                && tick % (quality == 0 ? 4 : 2) == 0) {
+        if (trail > 0.01F && horizontalSpeedSq > 0.006
+                && shouldEmit(trail, tick, quality == 0 ? 4 : 2)) {
             double speed = Math.sqrt(horizontalSpeedSq);
             double backX = -velocity.x / Math.max(0.001, speed);
             double backZ = -velocity.z / Math.max(0.001, speed);
@@ -138,31 +156,31 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Jump: expanding ground ring plus a small upward core burst.
-        if (RuffyConfig.get("jump_burst") && wasOnGround && !onGround) {
-            spawnRing(client, player, ParticleTypes.END_ROD, 12 * detail, 0.46, 0.025, 0.08);
-            spawnRing(client, player, ParticleTypes.ELECTRIC_SPARK, 8 * detail, 0.25, 0.045, 0.13);
-            spawnPaletteRing(client, player, 12 * detail, 0.38, 0.035, 0.1);
-            spawnVerticalBurst(client, player, detail);
+        if (jump > 0.01F && wasOnGround && !onGround) {
+            spawnRing(client, player, ParticleTypes.END_ROD, scaledCount(12 * detail, jump), 0.46, 0.025, 0.08);
+            spawnRing(client, player, ParticleTypes.ELECTRIC_SPARK, scaledCount(8 * detail, jump), 0.25, 0.045, 0.13);
+            spawnPaletteRing(client, player, scaledCount(12 * detail, jump), 0.38, 0.035, 0.1);
+            spawnVerticalBurst(client, player, Math.max(1, scaledCount(detail, jump)));
         }
 
         // Landing: two offset rings and a short dust puff produce a layered impact.
-        if (RuffyConfig.get("landing_ring") && !wasOnGround && onGround) {
-            spawnRing(client, player, ParticleTypes.ELECTRIC_SPARK, 14 * detail, 0.72, 0.012, 0.06);
-            spawnRing(client, player, ParticleTypes.CLOUD, 10 * detail, 0.48, 0.009, 0.04);
-            spawnPaletteRing(client, player, 16 * detail, 0.62, 0.012, 0.055);
+        if (landing > 0.01F && !wasOnGround && onGround) {
+            spawnRing(client, player, ParticleTypes.ELECTRIC_SPARK, scaledCount(14 * detail, landing), 0.72, 0.012, 0.06);
+            spawnRing(client, player, ParticleTypes.CLOUD, scaledCount(10 * detail, landing), 0.48, 0.009, 0.04);
+            spawnPaletteRing(client, player, scaledCount(16 * detail, landing), 0.62, 0.012, 0.055);
             client.level.addParticle(ParticleTypes.POOF,
                     player.getX(), player.getY() + 0.06, player.getZ(),
                     0.0, 0.018, 0.0);
         }
 
         // Sprint dust sits behind the player and spreads slightly to both sides.
-        if (RuffyConfig.get("sprint_dust") && player.isSprinting()
-                && horizontalSpeedSq > 0.004 && tick % (quality == 0 ? 5 : 3) == 0) {
+        if (sprintDust > 0.01F && player.isSprinting()
+                && horizontalSpeedSq > 0.004 && shouldEmit(sprintDust, tick, quality == 0 ? 5 : 3)) {
             double speed = Math.max(0.001, Math.sqrt(horizontalSpeedSq));
             double backX = -velocity.x / speed;
             double backZ = -velocity.z / speed;
-            for (int i = 0; i < detail; i++) {
-                double side = (i - (detail - 1) / 2.0) * 0.23;
+            for (int i = 0; i < scaledCount(detail, sprintDust); i++) {
+                double side = (i - (scaledCount(detail, sprintDust) - 1) / 2.0) * 0.23;
                 double px = player.getX() + backX * 0.32 - backZ * side;
                 double py = player.getY() + 0.06;
                 double pz = player.getZ() + backZ * 0.32 + backX * side;
@@ -174,8 +192,8 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Tiny directional footstep sparks at alternating sides.
-        if (RuffyConfig.get("step_sparks") && onGround
-                && horizontalSpeedSq > 0.004 && tick % (quality == 0 ? 9 : 5) == 0) {
+        if (footsteps > 0.01F && onGround
+                && horizontalSpeedSq > 0.004 && shouldEmit(footsteps, tick, quality == 0 ? 9 : 5)) {
             double side = ((tick / 5) % 2 == 0 ? 1.0 : -1.0) * 0.19;
             double yaw = Math.toRadians(player.getYRot() + 90.0F);
             double px = player.getX() + Math.cos(yaw) * side;
@@ -188,9 +206,9 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Falling/critical sparks drift around the player's lower body.
-        if (RuffyConfig.get("critical_sparks") && !onGround
-                && velocity.y < -0.04 && tick % (quality == 0 ? 7 : 4) == 0) {
-            for (int i = 0; i < detail; i++) {
+        if (airSparks > 0.01F && !onGround
+                && velocity.y < -0.04 && shouldEmit(airSparks, tick, quality == 0 ? 7 : 4)) {
+            for (int i = 0; i < scaledCount(detail, airSparks); i++) {
                 double angle = RANDOM.nextDouble() * Math.PI * 2.0;
                 double radius = 0.18 + RANDOM.nextDouble() * 0.34;
                 client.level.addParticle(ParticleTypes.CRIT,
@@ -202,8 +220,8 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Low health halo climbs in a narrow spiral around the player.
-        if (RuffyConfig.get("low_health_aura") && player.getHealth() <= 6.0F
-                && tick % (quality == 0 ? 8 : 5) == 0) {
+        if (lowHealth > 0.01F && player.getHealth() <= 6.0F
+                && shouldEmit(lowHealth, tick, quality == 0 ? 8 : 5)) {
             double angle = tick * 0.18;
             double radius = 0.58 + Math.sin(angle * 1.4) * 0.08;
             double px = player.getX() + Math.cos(angle) * radius;
@@ -215,8 +233,8 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Potion glow: little enchant particles orbit the torso instead of random positions.
-        if (RuffyConfig.get("potion_glow") && !player.getActiveEffects().isEmpty()
-                && tick % (quality == 0 ? 10 : 6) == 0) {
+        if (potionGlow > 0.01F && !player.getActiveEffects().isEmpty()
+                && shouldEmit(potionGlow, tick, quality == 0 ? 10 : 6)) {
             double angle = tick * 0.16;
             double radius = 0.43;
             double px = player.getX() + Math.cos(angle) * radius;
@@ -228,9 +246,10 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Damage pulse: short radial burst only when health actually decreases.
-        if (RuffyConfig.get("damage_pulse") && player.getHealth() < previousHealth) {
-            for (int i = 0; i < 10 * detail; i++) {
-                double angle = (Math.PI * 2.0 * i) / (10 * detail);
+        if (damagePulse > 0.01F && player.getHealth() < previousHealth) {
+            int pulseCount = scaledCount(10 * detail, damagePulse);
+            for (int i = 0; i < pulseCount; i++) {
+                double angle = (Math.PI * 2.0 * i) / pulseCount;
                 double px = player.getX() + Math.cos(angle) * 0.58;
                 double py = player.getY() + 0.72 + Math.sin(angle * 2.0) * 0.08;
                 double pz = player.getZ() + Math.sin(angle) * 0.58;
@@ -242,8 +261,7 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Underwater bubbles rise from around the player at a restrained interval.
-        if (RuffyConfig.get("underwater_bubbles") && player.isUnderWater()
-                && tick % (quality == 0 ? 6 : 3) == 0) {
+        if (shouldEmit(bubbles, tick, quality == 0 ? 6 : 3) && player.isUnderWater()) {
             client.level.addParticle(ParticleTypes.BUBBLE,
                     player.getX() + (RANDOM.nextDouble() - 0.5) * 0.8,
                     player.getY() + 0.25 + RANDOM.nextDouble() * 1.0,
@@ -253,8 +271,8 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Local weather detail; vanilla weather itself is left untouched.
-        if (RuffyConfig.get("weather_fx") && client.level.isRainingAt(player.blockPosition())
-                && tick % (quality == 0 ? 6 : 3) == 0) {
+        if (shouldEmit(weather, tick, quality == 0 ? 6 : 3)
+                && client.level.isRainingAt(player.blockPosition())) {
             client.level.addParticle(ParticleTypes.DRIPPING_WATER,
                     player.getX() + (RANDOM.nextDouble() - 0.5) * 5.0,
                     player.getY() + 2.0 + RANDOM.nextDouble(),
@@ -263,8 +281,7 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Dust is faint and sparse so it does not flood dark scenes.
-        if (RuffyConfig.get("cave_dust") && player.getY() < 32.0
-                && tick % (quality == 0 ? 14 : 9) == 0) {
+        if (shouldEmit(caveDust, tick, quality == 0 ? 14 : 9) && player.getY() < 32.0) {
             client.level.addParticle(ParticleTypes.ASH,
                     player.getX() + (RANDOM.nextDouble() - 0.5) * 4.0,
                     player.getY() + 0.5 + RANDOM.nextDouble() * 1.6,
@@ -274,11 +291,11 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Starfall: short multi-point streaks outside the player's immediate field.
-        if (RuffyConfig.get("starfall") && tick % (quality == 0 ? 18 : 12) == 0) {
+        if (shouldEmit(starfall, tick, quality == 0 ? 18 : 12)) {
             double sx = player.getX() + (RANDOM.nextDouble() - 0.5) * 8.0;
             double sy = player.getY() + 3.0 + RANDOM.nextDouble() * 3.0;
             double sz = player.getZ() + (RANDOM.nextDouble() - 0.5) * 8.0;
-            for (int i = 0; i < detail; i++) {
+            for (int i = 0; i < scaledCount(detail, starfall); i++) {
                 client.level.addParticle(ParticleTypes.END_ROD,
                         sx - i * 0.08, sy + i * 0.14, sz,
                         0.012, -0.06, 0.0);
@@ -286,14 +303,30 @@ public final class RuffyClient implements ClientModInitializer {
         }
 
         // Client-side slash particles trigger on the start of a swing animation.
-        if (RuffyConfig.get("hit_sparks") && swinging && !wasSwinging) {
-            spawnImpactSlash(client, player, detail);
+        if (impact > 0.01F && swinging && !wasSwinging) {
+            spawnImpactSlash(client, player, Math.max(1, scaledCount(detail, impact)));
         }
 
         previousHealth = player.getHealth();
         wasOnGround = onGround;
         wasSwinging = swinging;
         tick++;
+    }
+
+    private static float effectAmount(String key) {
+        return RuffyAnimation.animate("effect." + key,
+                RuffyConfig.get(key) ? 1.0F : 0.0F);
+    }
+
+    private static boolean shouldEmit(float amount, int currentTick, int baseInterval) {
+        if (amount <= 0.01F) return false;
+        int interval = Math.max(baseInterval,
+                Math.round(baseInterval / Math.max(0.01F, amount)));
+        return currentTick % interval == 0;
+    }
+
+    private static int scaledCount(int baseCount, float amount) {
+        return Math.max(1, Math.round(baseCount * Math.max(0.0F, Math.min(1.0F, amount))));
     }
 
     private static void spawnImpactSlash(Minecraft client, LocalPlayer player, int detail) {
@@ -337,14 +370,18 @@ public final class RuffyClient implements ClientModInitializer {
     private static void spawnPaletteDust(Minecraft client, double x, double y, double z,
                                          double vx, double vy, double vz,
                                          float scale, boolean secondary) {
-        if (!RuffyConfig.get("palette_sparks")) return;
+        float paletteAmount = effectAmount("palette_sparks");
+        if (paletteAmount <= 0.01F) return;
+        scale *= paletteAmount;
         int color = (secondary ? RuffyConfig.secondaryColor() : RuffyConfig.primaryColor()) & 0x00FFFFFF;
         client.level.addParticle(new DustParticleOptions(color, scale), x, y, z, vx, vy, vz);
     }
 
     private static void spawnPaletteRing(Minecraft client, LocalPlayer player, int count,
                                          double radius, double velocity, double lift) {
-        if (!RuffyConfig.get("palette_sparks")) return;
+        float paletteAmount = effectAmount("palette_sparks");
+        if (paletteAmount <= 0.01F) return;
+        count = scaledCount(count, paletteAmount);
         for (int i = 0; i < count; i++) {
             double angle = Math.PI * 2.0 * i / count;
             double dx = Math.cos(angle);
