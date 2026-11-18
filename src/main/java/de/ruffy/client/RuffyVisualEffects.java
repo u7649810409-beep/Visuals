@@ -289,7 +289,7 @@ public final class RuffyVisualEffects {
             return;
         }
 
-        Vec3 camera = context.gameRenderer().getMainCamera().getPosition();
+        Vec3 camera = context.gameRenderer().getMainCamera().position();
         PoseStack matrices = context.matrices();
         matrices.pushPose();
         matrices.translate(-camera.x, -camera.y, -camera.z);
