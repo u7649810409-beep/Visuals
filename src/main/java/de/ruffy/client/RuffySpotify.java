@@ -191,11 +191,7 @@ public final class RuffySpotify {
 
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 43821), 0);
         server.createContext("/callback", exchange -> handleCallback(exchange, localState, localVerifier));
-        server.setExecutor(Executors.newSingleThreadExecutor(task -> {
-            Thread thread = new Thread(task, "Ruffy Spotify OAuth Callback");
-            thread.setDaemon(true);
-            return thread;
-        }));
+        server.setExecutor(Runnable::run);
         callbackServer = server;
         server.start();
 
@@ -208,10 +204,11 @@ public final class RuffySpotify {
                 + "&code_challenge=" + encode(challenge)
                 + "&state=" + encode(localState);
         status = "Waiting for Spotify authorization…";
-        if (Desktop.isDesktopSupported()) {
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             Desktop.getDesktop().browse(URI.create(authorizationUrl));
         } else {
-            status = "Open the Spotify login link shown below";
+            net.minecraft.client.Minecraft.getInstance().keyboardHandler.setClipboard(authorizationUrl);
+            status = "Login link copied to clipboard";
         }
     }
 
@@ -355,6 +352,9 @@ public final class RuffySpotify {
             artistName = "";
             albumName = "";
             trackId = "";
+            progressMs = 0L;
+            durationMs = 0L;
+            progressUpdatedNanos = 0L;
             lyrics = "Start playing a song in Spotify to load its lyrics.";
             status = "Connected · no active playback";
             return;
