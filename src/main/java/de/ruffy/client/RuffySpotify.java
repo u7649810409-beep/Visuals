@@ -4,8 +4,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpServer;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.InetAddress;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.awt.Desktop;
@@ -68,7 +72,7 @@ public final class RuffySpotify {
     private static volatile long expiresAt;
     private static volatile String state = "";
     private static volatile String verifier = "";
-    private static volatile HttpServer callbackServer;
+    private static volatile ServerSocket callbackServer;
 
     private static volatile String status = "Not connected";
     private static volatile String trackId = "";
@@ -189,11 +193,15 @@ public final class RuffySpotify {
         state = localState;
         verifier = localVerifier;
 
-        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 43821), 0);
-        server.createContext("/callback", exchange -> handleCallback(exchange, localState, localVerifier));
-        server.setExecutor(Runnable::run);
+        ServerSocket server = new ServerSocket();
+        server.setReuseAddress(true);
+        server.bind(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 43821));
         callbackServer = server;
-        server.start();
+        Thread callbackThread = new Thread(
+                () -> acceptCallback(server, localState, localVerifier),
+                "Ruffy Spotify OAuth Callback");
+        callbackThread.setDaemon(true);
+        callbackThread.start();
 
         authorizationUrl = "https://accounts.spotify.com/authorize"
                 + "?client_id=" + encode(clientId)
@@ -212,37 +220,54 @@ public final class RuffySpotify {
         }
     }
 
-    private static void handleCallback(HttpExchange exchange,
-                                       String expectedState,
-                                       String codeVerifier) throws IOException {
-        try {
-            Map<String, String> query = parseQuery(exchange.getRequestURI().getRawQuery());
+    private static void acceptCallback(ServerSocket server, String expectedState,
+                                       String codeVerifier) {
+        try (Socket socket = server.accept()) {
+            socket.setSoTimeout(10_000);
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+            String requestLine = reader.readLine();
+            String header;
+            while ((header = reader.readLine()) != null && !header.isEmpty()) {
+                // Consume the HTTP headers before writing the callback response.
+            }
+            if (requestLine == null || !requestLine.startsWith("GET /callback?")) {
+                sendCallbackPage(socket, 404, "Unknown callback. Return to Minecraft.");
+                return;
+            }
+
+            String[] parts = requestLine.split(" ");
+            if (parts.length < 2) {
+                sendCallbackPage(socket, 400, "Invalid callback request.");
+                return;
+            }
+            URI requestUri = URI.create("http://127.0.0.1" + parts[1]);
+            Map<String, String> query = parseQuery(requestUri.getRawQuery());
             String returnedState = query.getOrDefault("state", "");
             String code = query.get("code");
             String error = query.get("error");
 
             if (!expectedState.equals(returnedState)) {
                 status = "Spotify login rejected: state did not match";
-                sendCallbackPage(exchange, 400, "Login rejected. You can close this tab.");
+                sendCallbackPage(socket, 400, "Login rejected. You can close this tab.");
                 return;
             }
             if (error != null) {
                 status = "Spotify authorization was cancelled";
-                sendCallbackPage(exchange, 400, "Spotify authorization was not granted.");
+                sendCallbackPage(socket, 400, "Spotify authorization was not granted.");
                 return;
             }
             if (code == null || code.isBlank()) {
                 status = "Spotify callback did not contain an authorization code";
-                sendCallbackPage(exchange, 400, "No authorization code was received.");
+                sendCallbackPage(socket, 400, "No authorization code was received.");
                 return;
             }
 
             exchangeAuthorizationCode(code, codeVerifier);
             status = "Spotify connected";
-            sendCallbackPage(exchange, 200, "Spotify is connected to Ruffy Visuals. You can close this tab.");
+            sendCallbackPage(socket, 200, "Spotify is connected to Ruffy Visuals. You can close this tab.");
         } catch (Exception exception) {
             status = "Spotify login failed: " + safeMessage(exception);
-            sendCallbackPage(exchange, 500, "Connection failed. Return to Minecraft for details.");
         } finally {
             stopCallbackServer();
             state = "";
@@ -250,17 +275,25 @@ public final class RuffySpotify {
         }
     }
 
-    private static void sendCallbackPage(HttpExchange exchange, int code, String message)
+    private static void sendCallbackPage(Socket socket, int code, String message)
             throws IOException {
         byte[] body = ("<!doctype html><html><head><meta charset=\"utf-8\">"
                 + "<title>Ruffy Visuals</title></head><body style=\"background:#100b20;color:#f7f2ff;"
                 + "font:16px sans-serif;padding:48px\"><h2>Ruffy Visuals</h2><p>"
                 + message + "</p></body></html>").getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
-        exchange.sendResponseHeaders(code, body.length);
-        try (var output = exchange.getResponseBody()) {
-            output.write(body);
-        }
+        OutputStream output = socket.getOutputStream();
+        String reason = switch (code) {
+            case 200 -> "OK";
+            case 400 -> "Bad Request";
+            default -> "Not Found";
+        };
+        String headers = "HTTP/1.1 " + code + " " + reason + "\r\n"
+                + "Content-Type: text/html; charset=utf-8\r\n"
+                + "Content-Length: " + body.length + "\r\n"
+                + "Connection: close\r\n\r\n";
+        output.write(headers.getBytes(StandardCharsets.US_ASCII));
+        output.write(body);
+        output.flush();
     }
 
     private static void exchangeAuthorizationCode(String code, String codeVerifier) throws Exception {
@@ -570,9 +603,15 @@ public final class RuffySpotify {
     }
 
     private static void stopCallbackServer() {
-        HttpServer server = callbackServer;
+        ServerSocket server = callbackServer;
         callbackServer = null;
-        if (server != null) server.stop(0);
+        if (server != null) {
+            try {
+                server.close();
+            } catch (IOException ignored) {
+                // The callback socket may already have closed after a successful login.
+            }
+        }
     }
 
     private static String randomUrlSafe(int bytes) {
