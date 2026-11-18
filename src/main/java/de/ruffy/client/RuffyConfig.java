@@ -46,7 +46,10 @@ public final class RuffyConfig {
             Map.entry("palette_sparks", true),
             Map.entry("health_hud", true),
             Map.entry("armor_hud", false),
-            Map.entry("smooth_animations", true)
+            Map.entry("smooth_animations", true),
+            Map.entry("prism_core", true),
+            Map.entry("orbit_drones", false),
+            Map.entry("three_d_slash", true)
     );
 
     private static final Map<String, Integer> INTEGER_DEFAULTS = Map.of(
@@ -58,16 +61,21 @@ public final class RuffyConfig {
     );
 
     private static final int[] PRIMARY = {
-            0xFFFF365B, // Crimson Red
-            0xFFFF75CF, // Orchid pink
-            0xFF67E4B6, // Emerald mint
-            0xFFFFC36B, // Solar amber
-            0xFF91BFFF, // Arctic blue
-            0xFFE1E8F2  // Mono silver
+            0xFFFF365B, // Crimson
+            0xFFFF4D8D, // Rose
+            0xFFEC4CFF, // Magenta
+            0xFF995CFF, // Violet
+            0xFF38BDF8, // Azure
+            0xFF7DD3FC, // Ice
+            0xFF41D9B0, // Mint
+            0xFF45C779, // Emerald
+            0xFFFFB547, // Amber
+            0xFFFFE16A  // Solar
     };
     private static final int[] SECONDARY = {
-            0xFF9E1837, 0xFF9D85FF, 0xFF65CFFF,
-            0xFFFF826F, 0xFFB6D5FF, 0xFF9AA8BA
+            0xFF9E1837, 0xFFA92254, 0xFF7A2FA3, 0xFF4E2A9C,
+            0xFF17678C, 0xFF326A90, 0xFF1D826A, 0xFF21764B,
+            0xFFA7651E, 0xFFA98A2E
     };
 
     private RuffyConfig() {}
@@ -107,7 +115,7 @@ public final class RuffyConfig {
     public static synchronized void setInt(String key, int value) {
         if (!INTEGER_DEFAULTS.containsKey(key)) return;
         int clamped = switch (key) {
-            case "palette" -> Math.max(0, Math.min(5, value));
+            case "palette" -> Math.max(0, Math.min(PRIMARY.length - 1, value));
             case "hud_opacity" -> Math.max(12, Math.min(90, value));
             case "menu_opacity" -> Math.max(60, Math.min(100, value));
             case "effect_quality" -> Math.max(0, Math.min(2, value));
