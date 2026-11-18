@@ -45,14 +45,16 @@ public final class RuffyConfig {
             Map.entry("starfall", false),
             Map.entry("palette_sparks", true),
             Map.entry("health_hud", true),
-            Map.entry("armor_hud", false)
+            Map.entry("armor_hud", false),
+            Map.entry("smooth_animations", true)
     );
 
     private static final Map<String, Integer> INTEGER_DEFAULTS = Map.of(
             "palette", 0,
             "hud_opacity", 44,
             "menu_opacity", 94,
-            "effect_quality", 2
+            "effect_quality", 2,
+            "animation_smoothness", 78
     );
 
     private static final int[] PRIMARY = {
@@ -109,6 +111,7 @@ public final class RuffyConfig {
             case "hud_opacity" -> Math.max(12, Math.min(90, value));
             case "menu_opacity" -> Math.max(60, Math.min(100, value));
             case "effect_quality" -> Math.max(0, Math.min(2, value));
+            case "animation_smoothness" -> Math.max(0, Math.min(100, value));
             default -> value;
         };
         VALUES.setProperty(key, Integer.toString(clamped));
