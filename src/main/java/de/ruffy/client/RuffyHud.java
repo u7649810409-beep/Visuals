@@ -109,10 +109,10 @@ public final class RuffyHud {
             int width = 104;
             nextLineIfNeeded(width);
             panel(graphics, x, y, width, CHIP_HEIGHT, RuffyConfig.primaryColor(), opacity);
-            graphics.fill(x + 6, y + 4, x + 21, y + 19,
-                    withAlpha(RuffyConfig.primaryColor(), Math.round(55 * opacity)));
-            graphics.renderOutline(x + 6, y + 4, 15, 15,
-                    withAlpha(RuffyConfig.primaryColor(), Math.round(180 * opacity)));
+            fillRounded(graphics, x + 6, y + 4, 15, 15,
+                    withAlpha(RuffyConfig.primaryColor(), Math.round(55 * opacity)), 5);
+            outlineRounded(graphics, x + 6, y + 4, 15, 15,
+                    withAlpha(RuffyConfig.primaryColor(), Math.round(180 * opacity)), 5);
             graphics.drawCenteredString(client.font, "R", x + 13, y + 7,
                     RuffyAnimation.multiplyAlpha(RuffyConfig.primaryColor(), opacity));
             graphics.drawString(client.font, "RUFFY", x + 27, y + 4,
@@ -161,16 +161,16 @@ public final class RuffyHud {
 
     private static void panel(GuiGraphics graphics, int x, int y,
                               int width, int height, int accent, float opacity) {
-        graphics.fill(x - 2, y - 1, x + width + 2, y + height + 1,
-                withAlpha(accent, Math.round(15 * opacity)));
-        graphics.fill(x, y, x + width, y + height,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), opacity));
-        graphics.renderOutline(x, y, width, height,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), opacity));
-        graphics.fill(x, y + 4, x + 2, y + height - 4,
-                withAlpha(accent, Math.round(220 * opacity)));
-        graphics.fill(x + 3, y, x + width - 3, y + 1,
-                withAlpha(accent, Math.round(75 * opacity)));
+        fillRounded(graphics, x - 2, y - 1, width + 4, height + 2,
+                withAlpha(accent, Math.round(15 * opacity)), 8);
+        fillRounded(graphics, x, y, width, height,
+                RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), opacity), 7);
+        outlineRounded(graphics, x, y, width, height,
+                RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), opacity), 7);
+        fillRounded(graphics, x + 1, y + 4, 2, height - 8,
+                withAlpha(accent, Math.round(220 * opacity)), 1);
+        fillRounded(graphics, x + 4, y + 1, width - 8, 1,
+                withAlpha(accent, Math.round(75 * opacity)), 1);
     }
 
     private static void drawKeystrokes(GuiGraphics graphics, Minecraft client, int x, int y) {
@@ -181,12 +181,12 @@ public final class RuffyHud {
         int panelH = keyH * 3 + gap * 2 + 18;
 
         float inputOpacity = RuffyAnimation.animate("hud.input.panel", 1.0F);
-        graphics.fill(x - 5, y - 5, x + panelW + 5, y + panelH + 4,
-                withAlpha(RuffyConfig.primaryColor(), Math.round(15 * inputOpacity)));
-        graphics.fill(x - 3, y - 3, x + panelW + 3, y + panelH + 2,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), inputOpacity));
-        graphics.renderOutline(x - 3, y - 3, panelW + 6, panelH + 5,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), inputOpacity));
+        fillRounded(graphics, x - 5, y - 5, panelW + 10, panelH + 9,
+                withAlpha(RuffyConfig.primaryColor(), Math.round(15 * inputOpacity)), 10);
+        fillRounded(graphics, x - 3, y - 3, panelW + 6, panelH + 5,
+                RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), inputOpacity), 9);
+        outlineRounded(graphics, x - 3, y - 3, panelW + 6, panelH + 5,
+                RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), inputOpacity), 9);
         graphics.drawString(client.font, "INPUT", x + 2, y - 1,
                 RuffyAnimation.multiplyAlpha(RuffyConfig.primaryColor(), inputOpacity), false);
 
@@ -217,17 +217,52 @@ public final class RuffyHud {
         }
         int fill = RuffyAnimation.blendColor(RuffyConfig.hudPanelColor(),
                 withAlpha(accent, 175), active);
-        graphics.fill(x, y, x + width, y + height, fill);
-        graphics.renderOutline(x, y, width, height,
+        fillRounded(graphics, x, y, width, height, fill, 6);
+        outlineRounded(graphics, x, y, width, height,
                 RuffyAnimation.blendColor(RuffyConfig.hudBorderColor(),
-                        withAlpha(RuffyConfig.secondaryColor(), 230), active));
+                        withAlpha(RuffyConfig.secondaryColor(), 230), active), 6);
         if (active > 0.01F) {
-            graphics.fill(x + 3, y + 2, x + width - 3, y + 3,
-                    withAlpha(accent, Math.round(230 * active)));
+            fillRounded(graphics, x + 4, y + 2, width - 8, 2,
+                    withAlpha(accent, Math.round(230 * active)), 1);
         }
         int textColor = RuffyAnimation.blendColor(MUTED, WHITE, active);
         graphics.drawCenteredString(client.font, label,
                 x + width / 2, y + Math.max(3, (height - 8) / 2), textColor);
+    }
+
+    private static void fillRounded(GuiGraphics g, int x, int y, int w, int h,
+                                    int color, int radius) {
+        if (w <= 0 || h <= 0) return;
+        int r = Math.max(0, Math.min(radius, Math.min(w, h) / 2));
+        if (r == 0) {
+            g.fill(x, y, x + w, y + h, color);
+            return;
+        }
+        g.fill(x + r, y, x + w - r, y + h, color);
+        for (int row = 0; row < r; row++) {
+            double dy = r - row - 0.5;
+            int inset = Math.max(0, r - (int) Math.floor(Math.sqrt(r * r - dy * dy)));
+            g.fill(x + inset, y + row, x + w - inset, y + row + 1, color);
+            g.fill(x + inset, y + h - row - 1, x + w - inset, y + h - row, color);
+        }
+    }
+
+    private static void outlineRounded(GuiGraphics g, int x, int y, int w, int h,
+                                       int color, int radius) {
+        if (w <= 0 || h <= 0) return;
+        int r = Math.max(1, Math.min(radius, Math.min(w, h) / 2));
+        g.fill(x + r, y, x + w - r, y + 1, color);
+        g.fill(x + r, y + h - 1, x + w - r, y + h, color);
+        g.fill(x, y + r, x + 1, y + h - r, color);
+        g.fill(x + w - 1, y + r, x + w, y + h - r, color);
+        for (int row = 0; row < r; row++) {
+            double dy = r - row - 0.5;
+            int inset = Math.max(0, r - (int) Math.floor(Math.sqrt(r * r - dy * dy)));
+            g.fill(x + inset, y + row, x + inset + 1, y + row + 1, color);
+            g.fill(x + w - inset - 1, y + row, x + w - inset, y + row + 1, color);
+            g.fill(x + inset, y + h - row - 1, x + inset + 1, y + h - row, color);
+            g.fill(x + w - inset - 1, y + h - row - 1, x + w - inset, y + h - row, color);
+        }
     }
 
     private static int withAlpha(int color, int alpha) {
