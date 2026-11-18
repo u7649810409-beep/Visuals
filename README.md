@@ -1,44 +1,40 @@
-# Ruffy Visuals 1.9.0 — Smooth Rounded Crimson
+# Ruffy Visuals 2.0.0 — Galaxy Edition
 
 A client-side visual mod for **Minecraft Java 1.21.11** using Fabric.
 
-## Smooth anti-aliased control center
+## Galaxy Control Center
 
-- Rounded controls now use a GPU-filtered 4× supersampled alpha mask and nine-slice texture rendering.
-- Separate anti-aliased outline masks; no staircase-shaped pixel rectangles for rounded edges.
-- Consistent curves on the main client frame, navigation tabs, module rows, search field, filters, buttons, switches and setting cards.
-- Compact 472 × 318 GUI-pixel layout, adapting to smaller screens.
-- Minimal charcoal / Crimson surface styling.
-- **10 color palettes:** Crimson, Rose, Magenta, Violet, Azure, Ice, Mint, Emerald, Amber and Solar.
+- Fully redesigned Nebula / Galaxy visual identity with procedural purple-magenta nebula clouds and a star field.
+- Larger translucent glass panel with large anti-aliased rounded corners.
+- Soft violet/pink accent glow, pill navigation, roomy rounded module cards and animated toggles.
+- Subtle animated star glints in UI space; these are GUI decorations, not Minecraft world particles.
+- **10 palettes:** Nebula, Rose, Magenta, Violet, Azure, Ice, Mint, Emerald, Amber and Solar.
 - Open with **Right Shift**.
 
-## Smoother motion
+## Rounded UI renderer
 
-`RuffyAnimation` now uses a closed-form critically damped spring rather than incremental Euler stepping. The spring preserves velocity, is stable across varying frame rates and settles without overshoot. It drives tab selection, hover transitions, row selection, sliders, switches, HUD values and custom 3D transitions.
+`RuffyRoundedUi` draws rounded buttons, cards, panels, pills and outlines using 4× supersampled alpha masks and a nine-slice GPU texture. The corner radius remains consistent when controls are stretched to different sizes.
 
-## Clean modern HUD
+## Smooth motion
 
-The telemetry HUD uses compact metric cards with small labels and clear values:
+`RuffyAnimation` uses a closed-form critically damped spring, configurable smoothness, easing curves and 3D vector rotation helpers. The system drives tabs, hover states, module cards, switches, HUD values and custom 3D models.
 
-- Ruffy brand chip, FPS, facing/heading, movement speed, world time and position.
-- Separate Health and Armor cards with eased, rounded progress bars.
-- Compact rounded WASD / Jump / Sprint movement panel.
-- HUD scale adjustable from **75% to 120%** in Style.
-- HUD opacity adjustable independently.
-- Only enabled HUD modules are rendered; content wraps to a second row when required.
+## Galaxy HUD
+
+The HUD uses transparent violet-tinted glass cards with compact telemetry labels, FPS, heading, speed, world time and coordinates. Health and Armor have separate eased progress bars. The WASD / Jump / Sprint panel uses larger smooth keycaps and matching Nebula accents. HUD scale (75–120%) and opacity can be adjusted in Style.
 
 ## Custom 3D visuals
 
-`RuffyVisualEffects` owns its effect simulation and draws custom geometry through Fabric's world-render pass. It does not spawn Minecraft `ParticleTypes` or call `ClientLevel.addParticle`.
+`RuffyVisualEffects` simulates and renders its own geometry through Fabric's world-render pass; it does not spawn Minecraft `ParticleTypes` or call `ClientLevel.addParticle`.
 
-- 3D Prism Core: rotating octahedra, inner wireframe cube and orbit loops.
-- 3D Orbit Drones: three independently rotating crystal meshes.
-- 3D Slash Volume: curved swing ribbon with depth ribs.
-- Custom trails, orbit rings, jump/landing shockwaves, glints, aura, helix, damage pulse, rain, cave glints, bubbles and starfall streaks.
+- 3D Prism Core: rotating octahedra, a wireframe cube and orbital loops.
+- 3D Orbit Drones: three rotating crystal meshes.
+- 3D Slash Volume: a curved swing ribbon with depth ribs.
+- Custom rings, trails, shockwaves, glints, aura, helix, damage pulse, rain, cave glints, bubbles and starfall streaks.
 
-## Modules (30)
+## Modules
 
-**HUD:** Watermark, Performance (FPS), Coordinates, Keystrokes, Direction, Movement Speed, World Clock, Health and Armor.
+**HUD:** Watermark, Performance, Coordinates, Keystrokes, Direction, Movement Speed, World Clock, Health and Armor.
 
 **Motion:** Ambient Glints, Orbit Rings, 3D Prism Core, 3D Orbit Drones, Motion Ribbon, Jump Shockwave, Sprint Streaks, Landing Pulse, Footstep Glints, Starfall Streaks and Palette FX.
 
@@ -57,12 +53,12 @@ Smooth Swing changes only local first-person rendering. Attack cooldowns, reach,
 
 ## Build
 
-Run `gradle build`. GitHub Actions verifies `build/libs/ruffy-visuals-1.9.0.jar`, including the rounded renderer, animation engine, 3D effects and Mixin metadata.
+Run `gradle build`. GitHub Actions verifies `build/libs/ruffy-visuals-2.0.0.jar`, including the Galaxy background, rounded renderer, animation engine and custom 3D effects.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 1.21.11.
 2. Install Fabric API for 1.21.11.
-3. Put `ruffy-visuals-1.9.0.jar` into `.minecraft/mods`.
+3. Put `ruffy-visuals-2.0.0.jar` into `.minecraft/mods`.
 4. Launch the Fabric 1.21.11 profile.
 5. Press **Right Shift** in a world.
