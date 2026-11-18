@@ -27,6 +27,8 @@ public final class RuffyVisualEffects {
     private static final List<SlashArc> SLASHES = new ArrayList<>();
 
     private static final int MAX_POINTS = 420;
+    private static final int MAX_RINGS = 48;
+    private static final int MAX_SLASHES = 24;
     private static final double TAU = Math.PI * 2.0;
     private static final long CLIENT_TICK_NANOS = 50_000_000L;
 
@@ -39,7 +41,7 @@ public final class RuffyVisualEffects {
     private RuffyVisualEffects() {}
 
     /** Called once per client tick to simulate and spawn Ruffy's own effects. */
-    public static void tick(Minecraft client) {
+    public static synchronized void tick(Minecraft client) {
         if (client.player == null || client.level == null) {
             POINTS.clear();
             RINGS.clear();
@@ -47,6 +49,8 @@ public final class RuffyVisualEffects {
             wasGrounded = true;
             wasSwinging = false;
             previousHealth = 20.0F;
+            tick = 0L;
+            ambientCounter = 0;
             return;
         }
 
@@ -284,42 +288,50 @@ public final class RuffyVisualEffects {
     }
 
     /** Draw custom meshes in Fabric's world-render pass. */
-    public static void render(WorldRenderContext context) {
+    public static synchronized void render(WorldRenderContext context) {
         Minecraft client = Minecraft.getInstance();
-        if (client.player == null || POINTS.isEmpty() && RINGS.isEmpty()
-                && SLASHES.isEmpty() && !RuffyConfig.get("orbit_particles")
+        if (context == null || client.player == null || client.level == null
+                || context.matrices() == null || context.consumers() == null) {
+            return;
+        }
+        if (POINTS.isEmpty() && RINGS.isEmpty() && SLASHES.isEmpty()
+                && !RuffyConfig.get("orbit_particles")
                 && !RuffyConfig.get("prism_core") && !RuffyConfig.get("orbit_drones")) {
             return;
         }
 
+        LocalPlayer player = client.player;
         Vec3 camera = context.gameRenderer().getMainCamera().position();
         PoseStack matrices = context.matrices();
         matrices.pushPose();
-        matrices.translate(-camera.x, -camera.y, -camera.z);
-        PoseStack.Pose pose = matrices.last();
-        VertexConsumer lines = context.consumers().getBuffer(RenderTypes.LINES_TRANSLUCENT);
-        long renderNanos = System.nanoTime();
+        try {
+            matrices.translate(-camera.x, -camera.y, -camera.z);
+            PoseStack.Pose pose = matrices.last();
+            VertexConsumer lines = context.consumers().getBuffer(RenderTypes.LINES_TRANSLUCENT);
+            if (lines == null) return;
 
-        for (PulseRing ring : RINGS) {
-            drawRing(lines, pose, ring, renderNanos);
+            long renderNanos = System.nanoTime();
+            for (PulseRing ring : RINGS) {
+                drawRing(lines, pose, ring, renderNanos);
+            }
+            for (SlashArc slash : SLASHES) {
+                drawSlash(lines, pose, slash, renderNanos);
+            }
+            for (GlowPoint point : POINTS) {
+                drawPoint(lines, pose, point, renderNanos);
+            }
+            if (RuffyConfig.get("orbit_particles")) {
+                drawOrbit(lines, pose, player);
+            }
+            if (RuffyConfig.get("prism_core")) {
+                drawPrismCore(lines, pose, player);
+            }
+            if (RuffyConfig.get("orbit_drones")) {
+                drawOrbitDrones(lines, pose, player);
+            }
+        } finally {
+            matrices.popPose();
         }
-        for (SlashArc slash : SLASHES) {
-            drawSlash(lines, pose, slash, renderNanos);
-        }
-        for (GlowPoint point : POINTS) {
-            drawPoint(lines, pose, point, renderNanos);
-        }
-        if (RuffyConfig.get("orbit_particles")) {
-            drawOrbit(lines, pose, client.player);
-        }
-        if (RuffyConfig.get("prism_core")) {
-            drawPrismCore(lines, pose, client.player);
-        }
-        if (RuffyConfig.get("orbit_drones")) {
-            drawOrbitDrones(lines, pose, client.player);
-        }
-
-        matrices.popPose();
     }
 
     private static void spawnSlash(LocalPlayer player, int detail) {
@@ -331,6 +343,7 @@ public final class RuffyVisualEffects {
         Vec3 up = right.cross(forward).normalize();
         Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.63, 0.0)
                 .add(forward.scale(0.88));
+        if (SLASHES.size() >= MAX_SLASHES) SLASHES.remove(0);
         SLASHES.add(new SlashArc(center, right, up, 0.94, 0.30,
                 RuffyConfig.primaryColor(), RuffyConfig.secondaryColor(),
                 11 + detail * 3));
@@ -340,6 +353,7 @@ public final class RuffyVisualEffects {
 
     private static void addRing(Vec3 center, double start, double end,
                                 int life, int color, float width) {
+        if (RINGS.size() >= MAX_RINGS) RINGS.remove(0);
         RINGS.add(new PulseRing(center, start, end, life, color, width));
     }
 

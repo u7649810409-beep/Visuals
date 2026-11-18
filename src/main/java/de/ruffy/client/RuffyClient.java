@@ -23,6 +23,7 @@ public final class RuffyClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         RuffyConfig.load();
+        RuffySpotify.init();
 
         KeyMapping.Category category = KeyMapping.Category.register(
                 Identifier.fromNamespaceAndPath(MOD_ID, "main")
