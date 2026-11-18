@@ -53,21 +53,21 @@ public final class RuffyAnimation {
         track.lastNanos = now;
         if (dt <= 0.0) return track.value;
 
-        // 70–330 ms characteristic settle time, controlled by one global setting.
-        double duration = 0.070 + (strength / 100.0) * 0.260;
-        double omega = 4.6 / duration;
+        // Closed-form critically damped spring: stable at any frame rate,
+        // with no Euler-step jitter and no oscillating/overshooting UI controls.
+        double duration = 0.075 + (strength / 100.0) * 0.235;
+        double omega = 4.8 / duration;
         double displacement = track.value - target;
-        double acceleration = -(omega * omega) * displacement
-                - (2.0 * omega) * track.velocity;
+        double velocityTerm = track.velocity + omega * displacement;
+        double decay = Math.exp(-omega * dt);
+        double nextDisplacement = (displacement + velocityTerm * dt) * decay;
+        double nextVelocity = (track.velocity - omega * velocityTerm * dt) * decay;
 
-        track.velocity += acceleration * dt;
-        float previous = track.value;
-        track.value += (float) (track.velocity * dt);
+        track.value = (float) (target + nextDisplacement);
+        track.velocity = (float) nextVelocity;
 
-        // Snap cleanly at the target once the spring crosses it or settles.
-        if ((previous - target) * (track.value - target) <= 0.0F
-                || Math.abs(track.value - target) < 0.0012F
-                && Math.abs(track.velocity) < 0.008F) {
+        if (Math.abs(nextDisplacement) < 0.0008
+                && Math.abs(nextVelocity) < 0.006) {
             track.value = target;
             track.velocity = 0.0F;
         }
