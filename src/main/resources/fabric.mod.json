@@ -3,7 +3,7 @@
   "id": "ruffyclient",
   "version": "${version}",
   "name": "Ruffy Visuals",
-  "description": "A Crimson Red client-side visual client with a custom Java-rendered effects engine, animated ClickGUI, HUD widgets and smooth swing animation.",
+  "description": "A compact rounded Crimson Red client with ten color palettes, a rebuilt spring animation engine and custom 3D prism, drone and slash geometry.",
   "authors": ["Ruffy"],
   "license": "MIT",
   "environment": "client",
