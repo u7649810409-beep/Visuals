@@ -44,7 +44,7 @@ public final class RuffyClient implements ClientModInitializer {
         WorldRenderEvents.AFTER_ENTITIES.register(RuffyVisualEffects::render);
         ClientTickEvents.END_CLIENT_TICK.register(RuffyClient::tick);
 
-        LOGGER.info("Ruffy Visuals 2.0.0 Galaxy Edition initialized: procedural nebula and smooth rounded UI ready");
+        LOGGER.info("Ruffy Visuals 2.5.0 Galaxy Edition initialized: dashboard, Spotify and custom visual effects ready");
     }
 
     private static void tick(Minecraft client) {
