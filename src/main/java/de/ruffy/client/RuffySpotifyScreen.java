@@ -100,11 +100,11 @@ public final class RuffySpotifyScreen extends Screen {
                 0xEF111426, RuffyRoundedUi.RADIUS_WINDOW);
         g.fill(panelX, panelY + 23, panelX + panelW, panelY + 48, 0xE9110D21);
         RuffyRoundedUi.fill(g, panelX + 13, panelY + 9, 30, 30,
-                withAlpha(primary, 195), 15);
+                withAlpha(primary, 195), RuffyRoundedUi.RADIUS_ROW);
         g.drawCenteredString(font, "♪", panelX + 28, panelY + 18, WHITE);
         g.drawString(font, "RUFFY VISUALS  /  SPOTIFY", panelX + 53,
                 panelY + 10, WHITE, false);
-        g.drawString(font, "MUSIC CONTROL  ·  LYRICS", panelX + 53,
+        g.drawString(font, "MUSIC CONTROL  ·  LYRICS  ·  2.3", panelX + 53,
                 panelY + 25, secondary, false);
 
         int backX = panelX + panelW - 92;
