@@ -542,9 +542,9 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, "Spotify", x + 40, y + 12, WHITE, false);
         boolean connected = RuffySpotify.isConnected();
         int statusColor = connected ? 0xFF42E69A : 0xFFFFC078;
-        fillRounded(g, x + w - 68, y + 17, 5, 5, statusColor, 3);
+        fillRounded(g, x + w - 84, y + 17, 5, 5, statusColor, 3);
         g.drawString(font, connected ? "Connected" : "Connect",
-                x + w - 58, y + 13, statusColor, false);
+                x + w - 74, y + 13, statusColor, false);
         drawIconButton(g, x + w - 26, y + 9, 18, 18, "⚙", MUTED,
                 inside(mouseX, mouseY, x + w - 26, y + 9, 18, 18));
 
@@ -557,7 +557,7 @@ public final class RuffyClickGui extends Screen {
                 infoX, artY + 7, WHITE, false);
         g.drawString(font, trimToWidth(RuffySpotify.getArtistName(), infoW),
                 infoX, artY + 21, MUTED, false);
-        drawVisualizerBars(g, infoX, artY + 39, Math.max(30, infoW - 2));
+        drawVisualizerBars(g, infoX, artY + 23, Math.max(30, infoW - 2));
 
         int progressY = y + 91;
         int progressX = x + 12;
@@ -686,13 +686,19 @@ public final class RuffyClickGui extends Screen {
                 RuffyRoundedUi.RADIUS_CONTROL);
         outlineRounded(g, mainX, y, homePerfW, h, BORDER,
                 RuffyRoundedUi.RADIUS_CONTROL);
+        String fps = Minecraft.getInstance().getFps() + " FPS";
         g.drawString(font, "ϟ", mainX + 10, y + 8,
                 RuffyConfig.primaryColor(), false);
-        g.drawString(font, "Performance", mainX + 25, y + 6, WHITE, false);
-        g.drawString(font, "Smooth as never before", mainX + 25, y + 18, MUTED, false);
-        String fps = Minecraft.getInstance().getFps() + " FPS";
-        g.drawString(font, fps, mainX + homePerfW - font.width(fps) - 9,
-                y + 11, RuffyConfig.primaryColor(), false);
+        if (homePerfW < 160) {
+            g.drawString(font, "Performance", mainX + 25, y + 6, WHITE, false);
+            g.drawString(font, fps, mainX + 25, y + 18,
+                    RuffyConfig.primaryColor(), false);
+        } else {
+            g.drawString(font, "Performance", mainX + 25, y + 6, WHITE, false);
+            g.drawString(font, "Smooth as never before", mainX + 25, y + 18, MUTED, false);
+            g.drawString(font, fps, mainX + homePerfW - font.width(fps) - 9,
+                    y + 11, RuffyConfig.primaryColor(), false);
+        }
 
         fillRounded(g, homeVersionX, y, homeVersionW, h, 0xD00C0D20,
                 RuffyRoundedUi.RADIUS_CONTROL);
