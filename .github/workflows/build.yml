@@ -47,7 +47,7 @@ jobs:
           unzip -l "$jar_path" | grep -q 'de/ruffy/client/RuffySpotify.class'
           unzip -l "$jar_path" | grep -q 'de/ruffy/client/RuffySpotifyScreen.class'
           unzip -p "$jar_path" fabric.mod.json | grep -q '"minecraft": "~1.21.11"'
-          unzip -p "$jar_path" fabric.mod.json | grep -q '"version": "2.1.0"'
+          unzip -p "$jar_path" fabric.mod.json | grep -q '"version": "2.2.0"'
           echo "Verified mod archive: $jar_path"
 
       - name: Upload mod JAR
