@@ -580,11 +580,14 @@ public final class RuffyClickGui extends Screen {
         int infoW = Math.max(40, x + w - 12 - infoX);
         g.drawString(font, trimToWidth(RuffySpotify.getTrackName(), infoW),
                 infoX, artY + 4, WHITE, false);
-        g.drawString(font, trimToWidth(RuffySpotify.getArtistName(), infoW),
-                infoX, artY + 17, MUTED, false);
+        String artist = RuffySpotify.getArtistName();
+        if (!compact || !artist.isBlank()) {
+            g.drawString(font, trimToWidth(artist, infoW),
+                    infoX, artY + 17, MUTED, false);
+        }
         if (!compact && RuffyConfig.get("music_visualizer")) {
             drawVisualizerBars(g, infoX, artY + 28, infoW);
-        } else if (compact) {
+        } else if (compact && artist.isBlank()) {
             g.drawString(font, connected ? "PLAYING" : "NOT CONNECTED",
                     infoX, artY + 19, DIM, false);
         }
@@ -664,7 +667,12 @@ public final class RuffyClickGui extends Screen {
         outlineRounded(g, x, y, w, homeAppearanceH, 0x765B3D96, RuffyRoundedUi.RADIUS_PANEL);
 
         g.drawString(font, "⚙  Quick Settings", x + 11, y + 10, WHITE, false);
-        g.drawString(font, "WAVE", x + w - 79, y + 12, MUTED, false);
+        // Keep the heading clear on the narrow dashboard column. The switch
+        // remains visible and interactive; the optional caption returns on
+        // wider layouts where it cannot collide with the title.
+        if (w >= 162) {
+            g.drawString(font, "WAVE", x + w - 79, y + 12, MUTED, false);
+        }
         drawSwitch(g, x + w - 42, y + 8, RuffyConfig.get("music_visualizer"),
                 32, 18, "home.music.visualizer");
 
