@@ -372,12 +372,12 @@ public final class RuffyClickGui extends Screen {
     private void drawHeader(GuiGraphics g, int mouseX, int mouseY) {
         if (tab == Tab.HOME) {
             int brandX = mainX + Math.max(8, Math.round(mainW * 0.055F));
-            int brandY = panelY + Math.max(5, Math.round(panelH * 0.022F));
+            int brandY = panelY + Math.max(12, Math.round(panelH * 0.035F));
             g.drawString(font, "Ruffy", brandX, brandY, WHITE, false);
             g.drawString(font, "Visuals", brandX + font.width("Ruffy ") - 1,
                     brandY, RuffyConfig.primaryColor(), false);
             g.drawString(font, "GALAXY STUDIO  ·  2.7", brandX,
-                    panelY + Math.round(panelH * 0.055F), MUTED, false);
+                    panelY + Math.max(36, Math.round(panelH * 0.092F)), MUTED, false);
         } else {
             String title = switch (tab) {
                 case HOME -> "Home";
