@@ -116,6 +116,11 @@ public final class RuffyAnimation {
         return t * t * t * (t * (t * 6.0F - 15.0F) + 10.0F);
     }
 
+    /** Backwards-compatible alias used by existing hand-swing and effect animations. */
+    public static float easeInOut(float progress) {
+        return smoothStep(progress);
+    }
+
     /** Cubic ease-out used by expanding effects and quick transitions. */
     public static float easeOut(float progress) {
         float inverse = 1.0F - clamp01(progress);
