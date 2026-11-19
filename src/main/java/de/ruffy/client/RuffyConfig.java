@@ -49,7 +49,8 @@ public final class RuffyConfig {
             Map.entry("smooth_animations", true),
             Map.entry("prism_core", true),
             Map.entry("orbit_drones", false),
-            Map.entry("three_d_slash", true)
+            Map.entry("three_d_slash", true),
+            Map.entry("music_visualizer", true)
     );
 
     private static final Map<String, Integer> INTEGER_DEFAULTS = Map.of(
