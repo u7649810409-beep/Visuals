@@ -1115,8 +1115,8 @@ public final class RuffyClickGui extends Screen {
     private void drawCosmetics(GuiGraphics g, int mouseX, int mouseY) {
         int x = mainX;
         int y = panelY + 72;
-        int h = 82;
-        int gap = 9;
+        int h = 76;
+        int gap = 7;
 
         drawCosmeticCategory(g, mouseX, mouseY, x, y, mainW, h,
                 "PLAYER AURA", "A subtle orbit around your character",
@@ -1141,7 +1141,7 @@ public final class RuffyClickGui extends Screen {
                 new int[]{0xFF666A7A, 0xFFC58CFF, 0xFFFF9A42, 0xFF79E7FF, 0xFFCA7BFF},
                 RuffyConfig.getInt("cosmetic_trail"));
 
-        int noteY = panelY + panelH - 48;
+        int noteY = panelY + panelH - 43;
         g.drawString(font, "COSMETICS ARE CLIENT-SIDE VISUALS ONLY",
                 x + 2, noteY + 7, DIM, false);
         String equipped = (RuffyConfig.getInt("cosmetic_aura") > 0 ? 1 : 0)
@@ -1167,7 +1167,7 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, status, x + w - font.width(status) - 12,
                 y + 10, statusColor, false);
 
-        int chipY = y + 43;
+        int chipY = y + 40;
         int innerX = x + 10;
         int chipGap = 5;
         int chipW = (w - 20 - chipGap * 4) / 5;
