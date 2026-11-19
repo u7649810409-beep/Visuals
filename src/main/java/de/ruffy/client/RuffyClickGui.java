@@ -616,13 +616,15 @@ public final class RuffyClickGui extends Screen {
         int x = homeQuickX;
         int y = homeAppearanceY;
         int w = homeQuickW;
-        int h = homeAppearanceH;
-        fillRounded(g, x, y, w, h, 0xE1090918, RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, x, y, w, h, 0x765B3D96, RuffyRoundedUi.RADIUS_PANEL);
+        fillRounded(g, x, y, w, homeAppearanceH, 0xE1090918, RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x, y, w, homeAppearanceH, 0x765B3D96, RuffyRoundedUi.RADIUS_PANEL);
 
         g.drawString(font, "⚙  Quick Settings", x + 11, y + 10, WHITE, false);
+        g.drawString(font, "WAVE", x + w - 79, y + 12, MUTED, false);
+        drawSwitch(g, x + w - 42, y + 8, RuffyConfig.get("music_visualizer"),
+                32, 18, "home.music.visualizer");
 
-        int themeY = y + 35;
+        int themeY = y + 29;
         g.drawString(font, "Theme", x + 12, themeY + 6, MUTED, false);
         int themeW = Math.min(88, w - 78);
         int themeX = x + w - themeW - 10;
@@ -635,7 +637,7 @@ public final class RuffyClickGui extends Screen {
                 Math.max(28, themeW - 30)), themeX + 19, themeY + 6, WHITE, false);
         g.drawString(font, "⌄", themeX + themeW - 11, themeY + 6, MUTED, false);
 
-        int opacityY = y + 65;
+        int opacityY = y + 51;
         g.drawString(font, "Opacity", x + 12, opacityY + 4, MUTED, false);
         int sliderX = x + 66;
         int sliderW = Math.max(32, w - 111);
@@ -645,7 +647,7 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, opacity, x + w - font.width(opacity) - 9,
                 opacityY + 3, WHITE, false);
 
-        int qualityY = y + 96;
+        int qualityY = y + 73;
         g.drawString(font, "FX Quality", x + 12, qualityY + 5, MUTED, false);
         int qGap = 3;
         int qW = Math.max(31, Math.min(39, (w - 112) / 3));
@@ -658,14 +660,6 @@ public final class RuffyClickGui extends Screen {
                     selected ? ButtonStyle.SEGMENT : ButtonStyle.GHOST,
                     inside(mouseX, mouseY, bx, qualityY, qW, 20), selected);
         }
-
-        int visualizerY = y + 128;
-        g.drawString(font, "Music Visualizer", x + 12, visualizerY + 5, MUTED, false);
-        String visualizerState = RuffyConfig.get("music_visualizer") ? "ON" : "OFF";
-        g.drawString(font, visualizerState, x + w - 74, visualizerY + 5,
-                RuffyConfig.get("music_visualizer") ? RuffyConfig.primaryColor() : DIM, false);
-        drawSwitch(g, x + w - 42, visualizerY, RuffyConfig.get("music_visualizer"),
-                32, 18, "home.music.visualizer");
     }
 
     private void drawHomeLyrics(GuiGraphics g, int mouseX, int mouseY) {
@@ -679,12 +673,12 @@ public final class RuffyClickGui extends Screen {
                 RuffyConfig.primaryColor(), false);
         g.drawString(font, "NOW PLAYING", x + 11, y + 23, DIM, false);
 
-        int artY = y + 33;
-        int artH = Math.min(70, Math.max(48, h / 3));
+        int artY = y + 32;
+        int artH = Math.min(48, Math.max(30, h / 4));
         RuffyDashboardArt.drawHero(g, x + 9, artY, w - 18, artH);
         String source = RuffySpotify.getLyrics();
         String[] lines = source == null ? new String[0] : source.split("\\R");
-        int textY = artY + artH + 9;
+        int textY = artY + artH + 6;
         if (lines.length == 0 || lines[0].isBlank()) {
             String hint = RuffySpotify.isConnected()
                     ? "Lyrics not available for this track."
@@ -692,14 +686,15 @@ public final class RuffyClickGui extends Screen {
             g.drawCenteredString(font, trimToWidth(hint, w - 18),
                     x + w / 2, textY, MUTED);
         } else {
-            int maxShown = Math.min(3, lines.length);
+            int maxShown = Math.min(3, Math.max(1, (h - 91) / 13));
+            maxShown = Math.min(maxShown, lines.length);
             for (int i = 0; i < maxShown; i++) {
                 g.drawCenteredString(font, trimToWidth(lines[i], w - 20),
                         x + w / 2, textY + i * 13, i == 0 ? WHITE : MUTED);
             }
         }
         String track = trimToWidth(RuffySpotify.getTrackName(), w - 20);
-        g.drawString(font, track, x + 10, y + h - 17, DIM, false);
+        g.drawString(font, track, x + 10, y + h - 14, DIM, false);
         if (inside(mouseX, mouseY, x, y, w, h)) {
             outlineRounded(g, x + 1, y + 1, w - 2, h - 2,
                     withAlpha(RuffyConfig.primaryColor(), 65), RuffyRoundedUi.RADIUS_PANEL);
@@ -863,14 +858,14 @@ public final class RuffyClickGui extends Screen {
 
         int sliderX = quickX + 66;
         int sliderW = Math.max(32, quickW - 111);
-        int opacityY = quickY + 65;
+        int opacityY = quickY + 51;
         if (inside(mx, my, sliderX - 4, opacityY, sliderW + 8, 16)) {
             int value = 60 + Math.round((mx - sliderX) * 40.0F / Math.max(1, sliderW));
             RuffyConfig.setInt("menu_opacity", value);
             return true;
         }
 
-        int qualityY = quickY + 96;
+        int qualityY = quickY + 73;
         int qGap = 3;
         int qW = Math.max(31, Math.min(39, (quickW - 112) / 3));
         int qX = quickX + quickW - (qW * 3 + qGap * 2) - 9;
@@ -882,7 +877,7 @@ public final class RuffyClickGui extends Screen {
             }
         }
 
-        int visualizerY = quickY + 128;
+        int visualizerY = quickY + 8;
         if (inside(mx, my, quickX + quickW - 44, visualizerY - 2, 36, 22)) {
             RuffyConfig.set("music_visualizer", !RuffyConfig.get("music_visualizer"));
             return true;
