@@ -304,9 +304,14 @@ public final class RuffyClickGui extends Screen {
         drawNavItem(g, Tab.SETUP, navX, ys[6], navW, itemHeight, mouseX, mouseY);
 
         if (compact) {
-            int dotY = sidebarY + sidebarH - 13;
-            fillRounded(g, sidebarX + 16, dotY, 6, 6, 0xFF45DB91, 3);
-            g.drawString(font, "ONLINE", sidebarX + 29, dotY - 1, DIM, false);
+            int bottomY = sidebarY + sidebarH - 30;
+            fillRounded(g, sidebarX + 6, bottomY, sidebarW - 12, 26,
+                    0xB5111426, RuffyRoundedUi.RADIUS_CONTROL);
+            outlineRounded(g, sidebarX + 6, bottomY, sidebarW - 12, 26,
+                    withAlpha(RuffyConfig.primaryColor(), 98), RuffyRoundedUi.RADIUS_CONTROL);
+            fillRounded(g, sidebarX + 12, bottomY + 7, 6, 6, 0xFF45DB91, 3);
+            g.drawString(font, "ONLINE", sidebarX + 22, bottomY + 5, WHITE, false);
+            g.drawString(font, "1.21.11", sidebarX + 12, bottomY + 15, DIM, false);
         } else {
             int bottomY = sidebarY + sidebarH - 41;
             fillRounded(g, sidebarX + 8, bottomY, navW, 33,
@@ -336,8 +341,8 @@ public final class RuffyClickGui extends Screen {
                 sidebarY + Math.round(h * 0.38F),
                 sidebarY + Math.round(h * 0.48F),
                 sidebarY + Math.round(h * 0.60F),
-                sidebarY + Math.round(h * 0.72F),
-                sidebarY + Math.round(h * 0.82F)
+                sidebarY + Math.round(h * 0.68F),
+                sidebarY + Math.round(h * 0.76F)
         };
     }
 
@@ -457,7 +462,7 @@ public final class RuffyClickGui extends Screen {
         homeLyricsX = homeRightX;
         homeLyricsW = homeRightW;
         homeAppearanceY = homeModulesY + Math.max(5, Math.round(homeModulesH * 0.09F));
-        homeAppearanceH = Math.max(34, homeModulesH - Math.max(8, Math.round(homeModulesH * 0.18F)));
+        homeAppearanceH = Math.max(34, homeModulesH - Math.max(6, Math.round(homeModulesH * 0.09F)));
 
         homePerfW = Math.max(78, Math.min(220, mainW * 31 / 100));
         homeSocialX = mainX + mainW - 4 * 27 - 3 * 5;
@@ -605,12 +610,15 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, trimToWidth(RuffySpotify.getTrackName(), infoW),
                 infoX, artY + 4, WHITE, false);
         String artist = RuffySpotify.getArtistName();
+        int textWidth = compact ? Math.max(32, infoW * 52 / 100) : infoW;
         if (!compact || !artist.isBlank()) {
-            g.drawString(font, trimToWidth(artist, infoW),
+            g.drawString(font, trimToWidth(artist, textWidth),
                     infoX, artY + 17, MUTED, false);
         }
-        if (!compact && RuffyConfig.get("music_visualizer")) {
-            drawVisualizerBars(g, infoX, artY + 28, infoW);
+        if (RuffyConfig.get("music_visualizer")) {
+            int visualX = compact ? infoX + textWidth + 3 : infoX;
+            int visualW = compact ? Math.max(18, x + w - 12 - visualX) : infoW;
+            drawVisualizerBars(g, visualX, compact ? artY + 5 : artY + 28, visualW);
         } else if (compact && artist.isBlank()) {
             g.drawString(font, connected ? "PLAYING" : "NOT CONNECTED",
                     infoX, artY + 19, DIM, false);
