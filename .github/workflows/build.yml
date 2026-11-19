@@ -2,7 +2,7 @@ name: Ruffy Visuals Build
 
 on:
   push:
-    branches: [ main, 'feature/ruffy-visuals-2.1-spotify-polish' ]
+    branches: [ main, 'feature/ruffy-visuals-2.1-spotify-polish', 'feature/ruffy-visuals-2.2-performance' ]
     tags: [ 'v*' ]
   pull_request:
   workflow_dispatch:
