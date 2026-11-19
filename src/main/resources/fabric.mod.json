@@ -3,7 +3,7 @@
   "id": "ruffyclient",
   "version": "${version}",
   "name": "Ruffy Visuals",
-  "description": "A Galaxy Edition client with a Minecraft-inspired dashboard, custom animations, an anti-aliased rounded interface, a Nebula HUD, Spotify integration, custom 3D effects and selectable client-side cosmetics.",
+  "description": "A desktop-style cosmic visual studio with an abstract nebula dashboard, custom animations, an anti-aliased rounded interface, Spotify integration, client-side cosmetics and optimized 3D effects.",
   "authors": ["Ruffy"],
   "license": "MIT",
   "environment": "client",
