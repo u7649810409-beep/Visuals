@@ -634,7 +634,7 @@ public final class RuffyClickGui extends Screen {
         drawInfoRow(g, x, y + 56, "LEFT CLICK", "Toggle modules, favorites and settings");
         drawInfoRow(g, x, y + 88, "ESC", "Close the menu");
         drawInfoRow(g, x, y + 120, "CONFIG", "Saved in config/ruffyclient.properties");
-        drawInfoRow(g, x, y + 152, "VERSION", "Minecraft 1.21.11 · Fabric · Java 21");
+        drawInfoRow(g, x, y + 152, "VERSION", "Ruffy Visuals 2.3.0 · Minecraft 1.21.11 · Fabric");
     }
 
     private void drawActionCard(GuiGraphics g, int mouseX, int mouseY,
@@ -720,9 +720,12 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void drawFooter(GuiGraphics g) {
-        int y = panelY + panelH - 1;
-        g.fill(panelX, y, panelX + panelW, y + 1, BORDER);
-        g.fill(panelX, y, panelX + 88, y + 1, RuffyConfig.primaryColor());
+        // Keep the footer stroke safely inside the super-rounded window corners.
+        int x = panelX + 34;
+        int y = panelY + panelH - 3;
+        int width = panelW - 68;
+        g.fill(x, y, x + width, y + 1, BORDER);
+        g.fill(x, y, x + 88, y + 1, RuffyConfig.primaryColor());
         g.drawString(font, "RUFFY VISUALS", panelX + 13,
                 panelY + panelH - 17, DIM, false);
         g.drawString(font, "2.3  ·  RIGHT SHIFT", panelX + panelW - 108,
