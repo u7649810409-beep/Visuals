@@ -996,7 +996,7 @@ public final class RuffyClickGui extends Screen {
             RuffyConfig.setInt("hud_opacity", 44);
             RuffyConfig.setInt("hud_scale", 96);
             RuffyConfig.setInt("menu_opacity", 94);
-            RuffyConfig.setInt("effect_quality", 2);
+            RuffyConfig.setInt("effect_quality", 1);
             RuffyConfig.set("smooth_animations", true);
             RuffyConfig.setInt("animation_smoothness", 78);
             return true;
