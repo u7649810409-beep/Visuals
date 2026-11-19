@@ -27,9 +27,9 @@ public final class RuffyVisualEffects {
     private static final List<SlashArc> SLASHES = new ArrayList<>();
 
     // Hard caps keep burst spam and long sessions from growing render work.
-    private static final int MAX_POINTS = 220;
-    private static final int MAX_RINGS = 18;
-    private static final int MAX_SLASHES = 8;
+    private static final int MAX_POINTS = 180;
+    private static final int MAX_RINGS = 12;
+    private static final int MAX_SLASHES = 4;
     private static final double TAU = Math.PI * 2.0;
     private static final long CLIENT_TICK_NANOS = 50_000_000L;
     private static final int CIRCLE_SAMPLES = 48;
@@ -325,7 +325,7 @@ public final class RuffyVisualEffects {
             long renderNanos = System.nanoTime();
             double timeSeconds = renderNanos * 1.0E-9;
             int quality = RuffyConfig.getInt("effect_quality");
-            int pointBudget = quality == 0 ? 40 : quality == 1 ? 72 : 112;
+            int pointBudget = quality == 0 ? 24 : quality == 1 ? 48 : 96;
             double renderDistance = quality == 0 ? 16.0 : quality == 1 ? 24.0 : 32.0;
             double renderDistanceSqr = renderDistance * renderDistance;
 
@@ -450,8 +450,8 @@ public final class RuffyVisualEffects {
                 int index = (i * stride) % CIRCLE_SAMPLES;
                 double x = CIRCLE_COS[index] * radius;
                 double z = CIRCLE_SIN[index] * radius;
-                double y = Math.sin((Math.atan2(CIRCLE_SIN[index], CIRCLE_COS[index]) + time) * 2.0
-                        + time) * 0.13;
+                double angle = TAU * index / CIRCLE_SAMPLES;
+                double y = Math.sin((angle + time) * 2.0 + time) * 0.13;
                 Vec3 next = base.add(x, y + z * tilt, z);
                 if (previous != null) {
                     drawLine(out, pose, previous, next, withAlpha(color, alpha), 1.35F);
@@ -497,8 +497,8 @@ public final class RuffyVisualEffects {
             Vec3 previous = null;
             for (int i = 0; i <= segments; i++) {
                 int index = (i * stride) % CIRCLE_SAMPLES;
-                double y = Math.sin(Math.atan2(CIRCLE_SIN[index], CIRCLE_COS[index]) * 2.0
-                        + time) * 0.10;
+                double angle = TAU * index / CIRCLE_SAMPLES;
+                double y = Math.sin(angle * 2.0 + time) * 0.10;
                 Vec3 local = new Vec3(CIRCLE_COS[index] * radius,
                         y, CIRCLE_SIN[index] * radius);
                 Vec3 next = center.add(rotation.transform(local));
@@ -538,13 +538,6 @@ public final class RuffyVisualEffects {
     }
 
 
-    private static Vec3 coreLoopPoint(Vec3 center, double radius, double tilt,
-                                      double time, double angle) {
-        Vec3 local = new Vec3(Math.cos(angle) * radius,
-                Math.sin(angle * 2.0 + time) * 0.10,
-                Math.sin(angle) * radius);
-        return center.add(RuffyAnimation.rotate3D(local, time * 0.2, tilt, time * 0.08));
-    }
 
     private static void drawOctahedron(VertexConsumer out, PoseStack.Pose pose,
                                        Vec3 center, double radius,
