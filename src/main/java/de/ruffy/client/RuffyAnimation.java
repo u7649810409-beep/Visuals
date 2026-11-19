@@ -33,13 +33,15 @@ public final class RuffyAnimation {
         long now = System.nanoTime();
         SpringTrack track = SPRINGS.get(key);
         if (track == null) {
-            track = new SpringTrack(target, 0.0F, now);
+            track = new SpringTrack(0.0F, 0.0F, now);
             SPRINGS.put(key, track);
             LAST_ACCESS.put(key, now);
-            return target;
+            maybeCleanup(now);
+            return 0.0F;
         }
 
         LAST_ACCESS.put(key, now);
+        maybeCleanup(now);
         if (!RuffyConfig.get("smooth_animations")) {
             track.value = target;
             track.velocity = 0.0F;
@@ -79,11 +81,14 @@ public final class RuffyAnimation {
             track.velocity = 0.0F;
         }
 
+        return track.value;
+    }
+
+    private static void maybeCleanup(long now) {
         if (++cleanupCounter >= CLEANUP_INTERVAL) {
             cleanupCounter = 0;
             cleanup(now);
         }
-        return track.value;
     }
 
     /** Immediately places an animation at a known value. */
