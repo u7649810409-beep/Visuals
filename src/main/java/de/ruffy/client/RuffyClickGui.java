@@ -861,7 +861,7 @@ public final class RuffyClickGui extends Screen {
         int spotifyY = homeSpotifyY;
         int spotifyW = homeRightW;
         int center = spotifyX + spotifyW / 2;
-        int controlsYPlayer = spotifyY + homeSpotifyH - 25;
+        int controlsYPlayer = spotifyY + homeSpotifyH - (homeSpotifyH < 120 ? 22 : 25);
         if (inside(mx, my, center - 36, controlsYPlayer, 22, 20)) {
             RuffySpotify.previousTrack();
             return true;
@@ -1379,7 +1379,7 @@ public final class RuffyClickGui extends Screen {
                 withAlpha(RuffyConfig.primaryColor(), 46), RuffyRoundedUi.RADIUS_PANEL);
         g.drawCenteredString(font, "♫", x + 42, y + 34, RuffyConfig.primaryColor());
         g.drawString(font, "SPOTIFY CONNECT", x + 80, y + 20, WHITE, false);
-        g.drawString(font, "Control playback and keep lyrics inside Minecraft.",
+        g.drawString(font, "Control playback and view lyrics in your studio.",
                 x + 80, y + 37, MUTED, false);
 
         String state = RuffySpotify.isConnected() ? "CONNECTED" : "NOT CONNECTED";
