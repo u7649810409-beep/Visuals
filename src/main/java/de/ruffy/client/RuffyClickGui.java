@@ -128,30 +128,30 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void calculateLayout() {
-        panelW = Math.min(720, Math.max(540, width - 24));
+        panelW = Math.min(1180, Math.max(660, width - 28));
         panelW = Math.min(panelW, width - 12);
-        panelH = Math.min(430, Math.max(380, height - 24));
+        panelH = Math.min(680, Math.max(410, height - 20));
         panelH = Math.min(panelH, height - 12);
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
 
         sidebarX = panelX + 12;
         sidebarY = panelY + 12;
-        sidebarW = Math.max(112, Math.min(126, panelW / 5));
+        sidebarW = Math.max(132, Math.min(170, Math.round(panelW * 0.18F)));
         sidebarH = panelH - 24;
-        mainX = sidebarX + sidebarW + 16;
-        mainW = panelX + panelW - 16 - mainX;
+        mainX = sidebarX + sidebarW + 14;
+        mainW = panelX + panelW - 14 - mainX;
 
-        searchW = Math.min(158, Math.max(112, mainW - 210));
-        searchX = mainX + mainW - searchW - 42;
-        searchY = panelY + 13;
+        searchW = Math.min(226, Math.max(126, mainW * 34 / 100));
+        searchX = mainX + (mainW - searchW) / 2;
+        searchY = panelY + 14;
 
-        filterY = panelY + 80;
-        listTop = panelY + 119;
-        cardGap = 8;
+        filterY = panelY + 82;
+        listTop = panelY + 121;
+        cardGap = 9;
         cardWidth = (mainW - cardGap) / 2;
-        int available = Math.max(150, panelY + panelH - 48 - listTop);
-        rowHeight = Math.max(44, Math.min(58, (available - cardGap * 3) / 4));
+        int available = Math.max(150, panelY + panelH - 55 - listTop);
+        rowHeight = Math.max(44, Math.min(62, (available - cardGap * 3) / 4));
 
         if (searchBox != null) {
             searchBox.setPosition(searchX + 25, searchY + 3);
