@@ -390,26 +390,33 @@ public final class RuffyClickGui extends Screen {
 
     private void prepareHomeLayout() {
         int gap = 9;
-        homeRightW = Math.max(154, Math.min(210, mainW * 38 / 100));
         homeCenterX = mainX;
-        homeCenterW = Math.max(160, mainW - homeRightW - gap);
+        homeCenterW = Math.max(230, (mainW - gap) * 63 / 100);
         homeRightX = homeCenterX + homeCenterW + gap;
+        homeRightW = Math.max(150, mainX + mainW - homeRightX);
 
-        homeHeroY = panelY + 67;
-        homeHeroH = Math.max(118, Math.min(146, Math.round(panelH * 0.34F)));
+        homeHeroY = panelY + 64;
+        int availableHeight = Math.max(160, panelH - 124);
+        homeHeroH = Math.max(126, Math.min(178, Math.round(availableHeight * 0.43F)));
         homeModulesY = homeHeroY + homeHeroH + 8;
-        homeBottomY = panelY + panelH - 48;
-        homeModulesH = Math.max(96, homeBottomY - homeModulesY - 8);
+        homeBottomY = panelY + panelH - 49;
+        homeModulesH = Math.max(92, homeBottomY - homeModulesY - 4);
 
         homeSpotifyY = homeHeroY;
-        homeSpotifyH = Math.max(158, Math.min(190, Math.round(panelH * 0.43F)));
-        homeAppearanceY = homeSpotifyY + homeSpotifyH + 8;
-        homeAppearanceH = Math.max(88, homeBottomY - homeAppearanceY - 8);
+        homeSpotifyH = homeHeroH;
+        int lowerWidth = Math.max(180, mainW - gap * 2);
+        homeModulesW = lowerWidth * 45 / 100;
+        homeQuickW = lowerWidth * 30 / 100;
+        homeLyricsW = lowerWidth - homeModulesW - homeQuickW;
+        homeQuickX = mainX + homeModulesW + gap;
+        homeLyricsX = homeQuickX + homeQuickW + gap;
+        homeAppearanceY = homeModulesY;
+        homeAppearanceH = homeModulesH;
 
-        homePerfW = Math.max(126, Math.min(196, mainW * 39 / 100));
-        homeSocialX = mainX + mainW - 4 * 24 - 3 * 5;
+        homePerfW = Math.max(130, Math.min(220, mainW * 30 / 100));
+        homeSocialX = mainX + mainW - 4 * 27 - 3 * 5;
         homeVersionX = mainX + homePerfW + 8;
-        homeVersionW = Math.max(100, homeSocialX - homeVersionX - 8);
+        homeVersionW = Math.max(95, homeSocialX - homeVersionX - 8);
     }
 
     private void drawHomeDashboard(GuiGraphics g, int mouseX, int mouseY) {
@@ -427,92 +434,26 @@ public final class RuffyClickGui extends Screen {
         int w = homeCenterW;
         int h = homeHeroH;
 
-        fillRounded(g, x, y, w, h, 0xD20B0D22, RuffyRoundedUi.RADIUS_PANEL);
-        drawHeroLandscape(g, x + 2, y + 2, w - 4, h - 4);
+        fillRounded(g, x, y, w, h, 0xE10B071D, RuffyRoundedUi.RADIUS_PANEL);
+        RuffyDashboardArt.drawHero(g, x + 1, y + 1, w - 2, h - 2);
+        fillRounded(g, x + 1, y + 1, Math.max(80, w / 2), h - 2,
+                0x56100925, RuffyRoundedUi.RADIUS_PANEL);
         outlineRounded(g, x, y, w, h,
-                withAlpha(RuffyConfig.primaryColor(), 165), RuffyRoundedUi.RADIUS_PANEL);
+                withAlpha(RuffyConfig.primaryColor(), 170), RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x + 2, y + 2, w - 4, h - 4,
+                withAlpha(0xFFE8C9FF, 48), RuffyRoundedUi.RADIUS_PANEL);
 
-        int textX = x + 17;
+        int textX = x + 18;
         g.drawString(font, "Welcome back!", textX, y + 22, WHITE, false);
-        g.drawString(font, "Enjoy your game with", textX, y + 43, MUTED, false);
-        g.drawString(font, "Ruffy Visuals  ♥", textX, y + 56,
-                RuffyConfig.primaryColor(), false);
+        g.drawString(font, "Your visual universe.", textX, y + 42, MUTED, false);
+        g.drawString(font, "Make it yours with Ruffy Visuals.", textX,
+                y + 56, 0xFFE8C9FF, false);
 
         int buttonY = y + h - 34;
-        drawButton(g, textX, buttonY, Math.min(130, w / 2), 24,
+        int buttonW = Math.min(132, Math.max(106, w / 2));
+        drawButton(g, textX, buttonY, buttonW, 24,
                 "Explore Modules  →", ButtonStyle.PRIMARY,
-                inside(mouseX, mouseY, textX, buttonY, Math.min(130, w / 2), 24), false);
-    }
-
-    private void drawHeroLandscape(GuiGraphics g, int x, int y, int w, int h) {
-        g.fill(x, y, x + w, y + h, 0xFF100B2D);
-        g.fill(x, y + h / 3, x + w, y + h, 0xFF211052);
-        g.fill(x, y + h / 2, x + w, y + h, 0xFF180D35);
-
-        // Nebula bands and a bright horizon reproduce the purple Minecraft dusk.
-        g.fill(x + w / 3, y + 8, x + w - 12, y + h / 2, 0x402F21A0);
-        g.fill(x + w / 2, y + h / 3, x + w - 10, y + h / 2 + 12, 0x553C1A8A);
-        g.fill(x + w / 3, y + h / 2, x + w - 8, y + h / 2 + 2,
-                withAlpha(RuffyConfig.primaryColor(), 115));
-
-        for (int i = 0; i < 19; i++) {
-            int sx = x + Math.floorMod(i * 53 + 17, Math.max(1, w));
-            int sy = y + Math.floorMod(i * 29 + 7, Math.max(1, h / 2));
-            int size = i % 5 == 0 ? 3 : 1;
-            fillRounded(g, sx, sy, size, size,
-                    withAlpha(i % 3 == 0 ? 0xFFFFD8FF : 0xFFD8C0FF, 115 + (i % 4) * 28), 2);
-        }
-
-        int horizon = y + h - 28;
-        g.fill(x, horizon, x + w, y + h, 0xFF0A0C20);
-        for (int i = 0; i < 14; i++) {
-            int bx = x + i * Math.max(1, w / 13);
-            int bw = Math.max(7, w / 15);
-            int bh = 7 + Math.floorMod(i * 13, 19);
-            g.fill(bx, horizon - bh, Math.min(x + w, bx + bw), y + h,
-                    i % 2 == 0 ? 0xFF10122B : 0xFF171039);
-            if (i % 3 == 0) {
-                g.fill(bx + 2, horizon - bh - 9, bx + bw - 1, horizon - bh + 2,
-                        0xFF171039);
-            }
-        }
-        g.fill(x + 4, y + h - 7, x + w - 4, y + h - 5,
-                withAlpha(RuffyConfig.primaryColor(), 70));
-
-        // Pixel-styled floating crystal and a dark Enderman-like silhouette.
-        drawHeroCrystal(g, x + w - 86, y + 19, RuffyConfig.primaryColor());
-        drawHeroCharacter(g, x + w - 65, y + h - 78);
-    }
-
-    private void drawHeroCrystal(GuiGraphics g, int x, int y, int color) {
-        fillRounded(g, x - 8, y + 8, 50, 48, withAlpha(color, 25), 20);
-        int[] widths = {8, 16, 22, 26, 22, 16, 8};
-        int[] offsets = {9, 5, 2, 0, 2, 5, 9};
-        for (int i = 0; i < widths.length; i++) {
-            int rowY = y + i * 5;
-            g.fill(x + offsets[i], rowY, x + offsets[i] + widths[i], rowY + 5,
-                    i < 3 ? withAlpha(0xFFE9D7FF, 230 - i * 18)
-                            : withAlpha(color, 235 - i * 16));
-        }
-        g.fill(x + 10, y + 9, x + 15, y + 27, 0xFFEFE4FF);
-        g.fill(x + 16, y + 20, x + 22, y + 33, withAlpha(0xFF9A58FF, 225));
-        g.fill(x + 12, y + 39, x + 18, y + 45, withAlpha(0xFFFFFFFF, 155));
-    }
-
-    private void drawHeroCharacter(GuiGraphics g, int x, int y) {
-        g.fill(x + 8, y, x + 38, y + 31, 0xFF080817);
-        g.fill(x + 12, y + 5, x + 34, y + 26, 0xFF111024);
-        g.fill(x + 14, y + 13, x + 19, y + 17, 0xFFFF43FF);
-        g.fill(x + 27, y + 13, x + 32, y + 17, 0xFFFF43FF);
-        g.fill(x + 13, y + 31, x + 34, y + 61, 0xFF090A18);
-        g.fill(x + 1, y + 33, x + 13, y + 59, 0xFF0C0D1E);
-        g.fill(x + 34, y + 33, x + 45, y + 59, 0xFF0C0D1E);
-        g.fill(x + 15, y + 58, x + 23, y + 76, 0xFF080916);
-        g.fill(x + 26, y + 58, x + 34, y + 76, 0xFF080916);
-        g.fill(x + 18, y + 32, x + 30, y + 51,
-                withAlpha(RuffyConfig.primaryColor(), 72));
-        g.fill(x + 22, y + 35, x + 26, y + 49,
-                withAlpha(RuffyConfig.primaryColor(), 170));
+                inside(mouseX, mouseY, textX, buttonY, buttonW, 24), false);
     }
 
     private void drawHomeModules(GuiGraphics g, int mouseX, int mouseY) {
