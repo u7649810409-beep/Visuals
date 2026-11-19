@@ -35,6 +35,7 @@ public final class RuffyClickGui extends Screen {
         WORLD("World", "Atmosphere and world-side effects", "◇"),
         HUD("HUD", "Your in-game information layout", "▣"),
         PRESETS("Presets", "Ready-made visual profiles", "▤"),
+        COSMETICS("Cosmetics", "Auras, companions and movement trails", "✧"),
         STYLE("Visuals", "Colors, motion and interface tuning", "◈"),
         MUSIC("Spotify", "Music and lyrics", "♫"),
         CONFIGS("Settings", "Configuration and reset options", "⚙"),
@@ -183,6 +184,7 @@ public final class RuffyClickGui extends Screen {
             case WORLD -> drawModuleBrowser(g, mouseX, mouseY, RuffyFeature.Section.WORLD);
             case HUD -> drawModuleBrowser(g, mouseX, mouseY, RuffyFeature.Section.HUD);
             case PRESETS -> drawPresets(g, mouseX, mouseY);
+            case COSMETICS -> drawCosmetics(g, mouseX, mouseY);
             case STYLE -> drawStyle(g, mouseX, mouseY);
             case CONFIGS -> drawConfigs(g, mouseX, mouseY);
             case SETUP -> drawSetup(g);
@@ -295,15 +297,16 @@ public final class RuffyClickGui extends Screen {
         drawSidebarLabel(g, "MENU", sidebarX + 12, panelY + 99);
         drawNavItem(g, Tab.HOME, navX, panelY + 111, navW, 23, mouseX, mouseY);
         drawNavItem(g, Tab.VISUALS, navX, panelY + 136, navW, 23, mouseX, mouseY);
-        drawNavItem(g, Tab.STYLE, navX, panelY + 161, navW, 23, mouseX, mouseY);
-        drawNavItem(g, Tab.HUD, navX, panelY + 186, navW, 23, mouseX, mouseY);
+        drawNavItem(g, Tab.COSMETICS, navX, panelY + 161, navW, 23, mouseX, mouseY);
+        drawNavItem(g, Tab.STYLE, navX, panelY + 186, navW, 23, mouseX, mouseY);
+        drawNavItem(g, Tab.HUD, navX, panelY + 211, navW, 23, mouseX, mouseY);
 
-        drawSidebarLabel(g, "CONNECT", sidebarX + 12, panelY + 217);
-        drawNavItem(g, Tab.MUSIC, navX, panelY + 229, navW, 23, mouseX, mouseY);
+        drawSidebarLabel(g, "CONNECT", sidebarX + 12, panelY + 242);
+        drawNavItem(g, Tab.MUSIC, navX, panelY + 254, navW, 23, mouseX, mouseY);
 
-        drawSidebarLabel(g, "PREFERENCES", sidebarX + 12, panelY + 260);
-        drawNavItem(g, Tab.CONFIGS, navX, panelY + 272, navW, 23, mouseX, mouseY);
-        drawNavItem(g, Tab.SETUP, navX, panelY + 297, navW, 23, mouseX, mouseY);
+        drawSidebarLabel(g, "PREFERENCES", sidebarX + 12, panelY + 285);
+        drawNavItem(g, Tab.CONFIGS, navX, panelY + 297, navW, 23, mouseX, mouseY);
+        drawNavItem(g, Tab.SETUP, navX, panelY + 322, navW, 23, mouseX, mouseY);
 
         int bottomY = sidebarY + sidebarH - 38;
         fillRounded(g, sidebarX + 8, bottomY, navW, 31,
@@ -363,6 +366,7 @@ public final class RuffyClickGui extends Screen {
                 case WORLD -> "World effects";
                 case HUD -> "HUD studio";
                 case PRESETS -> "Visual profiles";
+                case COSMETICS -> "Cosmetics";
                 case STYLE -> "Visuals";
                 case MUSIC -> "Spotify";
                 case CONFIGS -> "Settings";
@@ -1107,6 +1111,114 @@ public final class RuffyClickGui extends Screen {
         }
     }
 
+
+    private void drawCosmetics(GuiGraphics g, int mouseX, int mouseY) {
+        int x = mainX;
+        int y = panelY + 72;
+        int h = 82;
+        int gap = 9;
+
+        drawCosmeticCategory(g, mouseX, mouseY, x, y, mainW, h,
+                "PLAYER AURA", "A subtle orbit around your character",
+                "cosmetic_aura",
+                new String[]{"OFF", "NEBULA", "SOLAR", "FROST", "ROSE"},
+                new int[]{0xFF666A7A, 0xFFC58CFF, 0xFFFFB34D, 0xFF79E7FF, 0xFFFF70B8},
+                RuffyConfig.getInt("cosmetic_aura"));
+        y += h + gap;
+
+        drawCosmeticCategory(g, mouseX, mouseY, x, y, mainW, h,
+                "COMPANION", "A floating crystal that follows your shoulder",
+                "cosmetic_companion",
+                new String[]{"NONE", "AMETHYST", "SOLAR", "FROST", "ROSE"},
+                new int[]{0xFF666A7A, 0xFFC98BFF, 0xFFFFC15A, 0xFF8CEBFF, 0xFFFF78C6},
+                RuffyConfig.getInt("cosmetic_companion"));
+        y += h + gap;
+
+        drawCosmeticCategory(g, mouseX, mouseY, x, y, mainW, h,
+                "MOVEMENT TRAIL", "A custom trail while walking or sprinting",
+                "cosmetic_trail",
+                new String[]{"OFF", "NEBULA", "EMBER", "FROST", "PRISM"},
+                new int[]{0xFF666A7A, 0xFFC58CFF, 0xFFFF9A42, 0xFF79E7FF, 0xFFCA7BFF},
+                RuffyConfig.getInt("cosmetic_trail"));
+
+        int noteY = panelY + panelH - 48;
+        g.drawString(font, "COSMETICS ARE CLIENT-SIDE VISUALS ONLY",
+                x + 2, noteY + 7, DIM, false);
+        String equipped = (RuffyConfig.getInt("cosmetic_aura") > 0 ? 1 : 0)
+                + (RuffyConfig.getInt("cosmetic_companion") > 0 ? 1 : 0)
+                + (RuffyConfig.getInt("cosmetic_trail") > 0 ? 1 : 0) + " EQUIPPED";
+        g.drawString(font, equipped, x + mainW - font.width(equipped),
+                noteY + 7, RuffyConfig.primaryColor(), false);
+    }
+
+    private void drawCosmeticCategory(GuiGraphics g, int mouseX, int mouseY,
+                                      int x, int y, int w, int h,
+                                      String title, String subtitle, String key,
+                                      String[] names, int[] colors, int selected) {
+        fillRounded(g, x, y, w, h, 0xD00A0D1C,
+                RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x, y, w, h, BORDER,
+                RuffyRoundedUi.RADIUS_PANEL);
+
+        g.drawString(font, title, x + 12, y + 9, WHITE, false);
+        g.drawString(font, subtitle, x + 12, y + 22, MUTED, false);
+        String status = selected == 0 ? "NOT EQUIPPED" : "EQUIPPED";
+        int statusColor = selected == 0 ? DIM : 0xFF68E7AC;
+        g.drawString(font, status, x + w - font.width(status) - 12,
+                y + 10, statusColor, false);
+
+        int chipY = y + 43;
+        int innerX = x + 10;
+        int chipGap = 5;
+        int chipW = (w - 20 - chipGap * 4) / 5;
+        for (int i = 0; i < names.length; i++) {
+            int cx = innerX + i * (chipW + chipGap);
+            boolean active = selected == i;
+            boolean hovered = inside(mouseX, mouseY, cx, chipY, chipW, 29);
+            float hover = RuffyAnimation.animate("cosmetic.hover." + key + "." + i,
+                    hovered ? 1.0F : 0.0F);
+            int background = active ? withAlpha(colors[i], 48)
+                    : RuffyAnimation.blendColor(0x8014192A, 0xC51E2340, hover);
+            fillRounded(g, cx, chipY, chipW, 29, background,
+                    RuffyRoundedUi.RADIUS_CONTROL);
+            outlineRounded(g, cx, chipY, chipW, 29,
+                    active ? withAlpha(colors[i], 200)
+                            : withAlpha(0xFF8B91AA, hovered ? 100 : 38),
+                    RuffyRoundedUi.RADIUS_CONTROL);
+            fillRounded(g, cx + 7, chipY + 10, 8, 8, colors[i], 4);
+            String label = trimToWidth(names[i], Math.max(12, chipW - 22));
+            g.drawString(font, label, cx + 19, chipY + 11,
+                    active ? WHITE : MUTED, false);
+            if (active) {
+                fillRounded(g, cx + chipW - 8, chipY + 12, 3, 3,
+                        colors[i], 2);
+            }
+        }
+    }
+
+    private boolean handleCosmeticsClick(int mx, int my) {
+        int x = mainX;
+        int y = panelY + 72;
+        int h = 82;
+        int gap = 9;
+        String[] keys = {"cosmetic_aura", "cosmetic_companion", "cosmetic_trail"};
+        for (String key : keys) {
+            int chipY = y + 43;
+            int chipGap = 5;
+            int chipW = (mainW - 20 - chipGap * 4) / 5;
+            int innerX = x + 10;
+            for (int i = 0; i < 5; i++) {
+                int cx = innerX + i * (chipW + chipGap);
+                if (inside(mx, my, cx, chipY, chipW, 29)) {
+                    RuffyConfig.setInt(key, i);
+                    return true;
+                }
+            }
+            y += h + gap;
+        }
+        return false;
+    }
+
     private void drawStyle(GuiGraphics g, int mouseX, int mouseY) {
         int x = mainX;
         int y = panelY + 96;
@@ -1448,6 +1560,7 @@ public final class RuffyClickGui extends Screen {
             if (handlePagination(mx, my)) return true;
         }
         if (tab == Tab.PRESETS && handlePresetClick(mx, my)) return true;
+        if (tab == Tab.COSMETICS && handleCosmeticsClick(mx, my)) return true;
         if (tab == Tab.STYLE && handleStyleClick(mx, my)) return true;
         if (tab == Tab.CONFIGS && handleConfigClick(mx, my)) return true;
         if (tab == Tab.MUSIC && inside(mx, my,
@@ -1463,12 +1576,12 @@ public final class RuffyClickGui extends Screen {
         int w = sidebarW - 16;
         int[] ys = {
                 panelY + 111, panelY + 136, panelY + 161,
-                panelY + 186, panelY + 229, panelY + 272,
-                panelY + 297
+                panelY + 186, panelY + 211, panelY + 254,
+                panelY + 297, panelY + 322
         };
         Tab[] tabs = {
-                Tab.HOME, Tab.VISUALS, Tab.STYLE, Tab.HUD,
-                Tab.MUSIC, Tab.CONFIGS, Tab.SETUP
+                Tab.HOME, Tab.VISUALS, Tab.COSMETICS, Tab.STYLE,
+                Tab.HUD, Tab.MUSIC, Tab.CONFIGS, Tab.SETUP
         };
         for (int i = 0; i < tabs.length; i++) {
             if (!inside(mx, my, x, ys[i], w, 26)) continue;
