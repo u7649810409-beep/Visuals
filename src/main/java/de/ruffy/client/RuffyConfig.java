@@ -60,7 +60,7 @@ public final class RuffyConfig {
             "animation_smoothness", 78,
             "hud_scale", 96,
             "cosmetic_aura", 1,
-            "cosmetic_companion", 1,
+            "cosmetic_companion", 0,
             "cosmetic_trail", 0
     );
 
