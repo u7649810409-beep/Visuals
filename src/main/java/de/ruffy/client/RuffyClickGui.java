@@ -195,7 +195,9 @@ public final class RuffyClickGui extends Screen {
 
     private void drawBackdrop(GuiGraphics g) {
         RuffyGalaxyUi.draw(g, width, height);
-        g.fill(0, 0, width, height, 0x76060913);
+        g.fill(0, 0, width, height, 0x66060913);
+        drawMinecraftBackdrop(g);
+
         double time = RuffyAnimation.timeSeconds();
         for (int i = 0; i < 16; i++) {
             float pulse = RuffyAnimation.breathe(time, 0.10 + (i % 4) * 0.018,
@@ -207,6 +209,49 @@ public final class RuffyClickGui extends Screen {
             int color = i % 4 == 0 ? RuffyConfig.secondaryColor() : RuffyConfig.primaryColor();
             int alpha = Math.round(18 + pulse * 38);
             fillRounded(g, x, y, 2, 2, withAlpha(color, alpha), 1);
+        }
+    }
+
+    /** Small Minecraft-style block landscape and water reflections behind the dashboard. */
+    private void drawMinecraftBackdrop(GuiGraphics g) {
+        int horizon = height * 61 / 100;
+        int waterLine = height * 72 / 100;
+        g.fill(0, horizon, width, height, 0xB5081020);
+        g.fill(0, waterLine, width, height, 0x50213B71);
+
+        // Distant forest silhouettes.
+        for (int i = 0; i < 18; i++) {
+            int px = Math.floorMod(i * 97 + 31, Math.max(1, width));
+            int trunkW = 5 + (i % 3) * 2;
+            int trunkH = 15 + (i % 5) * 7;
+            int base = horizon + 5 + (i % 4) * 3;
+            int color = i % 2 == 0 ? 0xB5070D20 : 0xB50B1028;
+            g.fill(px, base - trunkH, px + trunkW, height, color);
+            g.fill(px - 8, base - trunkH - 11, px + trunkW + 8,
+                    base - trunkH + 5, color);
+            g.fill(px - 5, base - trunkH - 18, px + trunkW + 5,
+                    base - trunkH - 7, color);
+        }
+
+        // Dark grass blocks at the foreground edges leave the water visible in the middle.
+        int groundY = height * 88 / 100;
+        g.fill(0, groundY, width, height, 0xD0060B16);
+        for (int i = 0; i < 30; i++) {
+            int px = Math.floorMod(i * 73 + 9, Math.max(1, width));
+            int py = groundY - Math.floorMod(i * 17, Math.max(1, height / 14));
+            int size = 4 + i % 4;
+            g.fill(px, py, Math.min(width, px + size), Math.min(height, py + size),
+                    i % 3 == 0 ? 0xA21B2544 : 0xA20D1830);
+        }
+
+        // Violet reflections on the lake.
+        for (int i = 0; i < 22; i++) {
+            int rw = 18 + (i % 5) * 11;
+            int rx = Math.floorMod(i * 83 + 23, Math.max(1, width));
+            int ry = waterLine + 3 + Math.floorMod(i * 13, Math.max(1, height / 6));
+            int alpha = 18 + (i % 4) * 10;
+            g.fill(rx, ry, Math.min(width, rx + rw), Math.min(height, ry + 2),
+                    withAlpha(RuffyConfig.primaryColor(), alpha));
         }
     }
 
