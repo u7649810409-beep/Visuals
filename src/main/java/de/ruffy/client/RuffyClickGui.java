@@ -425,6 +425,7 @@ public final class RuffyClickGui extends Screen {
         drawHomeModules(g, mouseX, mouseY);
         drawHomeSpotify(g, mouseX, mouseY);
         drawHomeAppearance(g, mouseX, mouseY);
+        drawHomeLyrics(g, mouseX, mouseY);
         drawHomeBottom(g, mouseX, mouseY);
     }
 
@@ -709,41 +710,39 @@ public final class RuffyClickGui extends Screen {
         int y = homeBottomY + 7;
         int h = 32;
 
-        fillRounded(g, mainX, y, homePerfW, h, 0xD20B0D1C,
+        fillRounded(g, mainX, y, homePerfW, h, 0xE1090818,
                 RuffyRoundedUi.RADIUS_CONTROL);
         outlineRounded(g, mainX, y, homePerfW, h, BORDER,
                 RuffyRoundedUi.RADIUS_CONTROL);
         String fps = Minecraft.getInstance().getFps() + " FPS";
         g.drawString(font, "ϟ", mainX + 10, y + 8,
                 RuffyConfig.primaryColor(), false);
-        if (homePerfW < 160) {
-            g.drawString(font, "Performance", mainX + 25, y + 6, WHITE, false);
-            g.drawString(font, fps, mainX + 25, y + 18,
-                    RuffyConfig.primaryColor(), false);
-        } else {
-            g.drawString(font, "Performance", mainX + 25, y + 6, WHITE, false);
-            g.drawString(font, "Smooth as never before", mainX + 25, y + 18, MUTED, false);
-            g.drawString(font, fps, mainX + homePerfW - font.width(fps) - 9,
-                    y + 11, RuffyConfig.primaryColor(), false);
-        }
+        g.drawString(font, "Performance", mainX + 25, y + 6, WHITE, false);
+        g.drawString(font, fps, mainX + 25, y + 18,
+                RuffyConfig.primaryColor(), false);
 
-        fillRounded(g, homeVersionX, y, homeVersionW, h, 0xD00C0D20,
+        fillRounded(g, homeVersionX, y, homeVersionW, h, 0xE1090819,
                 RuffyRoundedUi.RADIUS_CONTROL);
         outlineRounded(g, homeVersionX, y, homeVersionW, h,
-                withAlpha(RuffyConfig.primaryColor(), 130), RuffyRoundedUi.RADIUS_CONTROL);
+                withAlpha(RuffyConfig.primaryColor(), 140), RuffyRoundedUi.RADIUS_CONTROL);
         g.drawString(font, "♛", homeVersionX + 9, y + 8, 0xFFFFD45E, false);
-        g.drawString(font, trimToWidth("Ruffy Visuals 2.6.0", Math.max(1, homeVersionW - 34)),
+        g.drawString(font, trimToWidth("Ruffy Visuals 2.7.0",
+                Math.max(1, homeVersionW - 34)),
                 homeVersionX + 24, y + 6, WHITE, false);
-        g.drawString(font, trimToWidth("The best visuals. Better than ever.", Math.max(1, homeVersionW - 34)),
+        g.drawString(font, trimToWidth("A cleaner visual universe.",
+                Math.max(1, homeVersionW - 34)),
                 homeVersionX + 24, y + 18, MUTED, false);
 
-        String[] socials = {"D", "▶", "GH", "◎"};
-        for (int i = 0; i < socials.length; i++) {
+        String[] actions = {"⌂", "♫", "⚙", "ⓘ"};
+        for (int i = 0; i < actions.length; i++) {
             int sx = homeSocialX + i * 29;
-            fillRounded(g, sx, y + 4, 24, 24, 0xD20D1020, 12);
-            outlineRounded(g, sx, y + 4, 24, 24, 0x745D4AA3, 12);
-            g.drawCenteredString(font, socials[i], sx + 12, y + 12,
-                    i == 0 ? RuffyConfig.primaryColor() : WHITE);
+            boolean hover = inside(mouseX, mouseY, sx, y + 4, 24, 24);
+            fillRounded(g, sx, y + 4, 24, 24,
+                    hover ? 0xE3261A42 : 0xD20D1020, 12);
+            outlineRounded(g, sx, y + 4, 24, 24,
+                    withAlpha(RuffyConfig.primaryColor(), hover ? 185 : 105), 12);
+            g.drawCenteredString(font, actions[i], sx + 12, y + 12,
+                    i == 1 ? 0xFF7DE5B1 : WHITE);
         }
     }
 
