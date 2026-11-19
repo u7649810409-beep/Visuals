@@ -267,39 +267,32 @@ public final class RuffyClickGui extends Screen {
         outlineRounded(g, sidebarX, sidebarY, sidebarW, sidebarH,
                 0x7D8C58D8, RuffyRoundedUi.RADIUS_PANEL);
 
-        int logoX = sidebarX + (sidebarW - 48) / 2;
-        int logoY = sidebarY + Math.max(5, Math.round(sidebarH * 0.025F));
-        fillRounded(g, logoX - 8, logoY - 7, 64, 64,
+        int logoX = sidebarX + (sidebarW - 42) / 2;
+        int logoY = sidebarY + Math.max(4, Math.round(sidebarH * 0.018F));
+        fillRounded(g, logoX - 8, logoY - 6, 58, 58,
                 withAlpha(RuffyConfig.primaryColor(), 36), RuffyRoundedUi.RADIUS_PANEL);
-        fillRounded(g, logoX - 3, logoY - 3, 54, 54,
+        fillRounded(g, logoX - 3, logoY - 3, 48, 48,
                 withAlpha(RuffyConfig.secondaryColor(), 68), RuffyRoundedUi.RADIUS_PANEL);
-        fillRounded(g, logoX, logoY, 48, 48,
+        fillRounded(g, logoX, logoY, 42, 42,
                 withAlpha(RuffyConfig.primaryColor(), 76), RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, logoX - 1, logoY - 1, 50, 50,
+        outlineRounded(g, logoX - 1, logoY - 1, 44, 44,
                 withAlpha(RuffyConfig.primaryColor(), 230), RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, logoX + 2, logoY + 2, 44, 44,
+        outlineRounded(g, logoX + 2, logoY + 2, 38, 38,
                 withAlpha(0xFFEACBFF, 75), RuffyRoundedUi.RADIUS_PANEL);
-        g.drawCenteredString(font, "R", logoX + 24, logoY + 12, WHITE);
-        fillRounded(g, logoX + 7, logoY + 34, 34, 2,
+        g.drawCenteredString(font, "R", logoX + 21, logoY + 10, WHITE);
+        fillRounded(g, logoX + 6, logoY + 30, 30, 2,
                 withAlpha(0xFFE8C9FF, 165), 1);
 
         int navX = sidebarX + Math.max(4, Math.round(sidebarW * 0.06F));
         int navW = sidebarW - Math.max(8, Math.round(sidebarW * 0.12F));
         int[] ys = navigationYPositions();
         int itemHeight = navigationItemHeight();
-        drawSidebarLabel(g, "WORKSPACE", sidebarX + 7,
-                ys[0] - Math.max(15, Math.round(sidebarH * 0.075F)));
         Tab[] firstGroup = {Tab.HOME, Tab.VISUALS, Tab.STYLE, Tab.HUD};
         for (int i = 0; i < firstGroup.length; i++) {
             drawNavItem(g, firstGroup[i], navX, ys[i], navW, itemHeight, mouseX, mouseY);
         }
 
-        drawSidebarLabel(g, "CONNECT", sidebarX + 7,
-                ys[4] - Math.max(13, Math.round(sidebarH * 0.065F)));
         drawNavItem(g, Tab.MUSIC, navX, ys[4], navW, itemHeight, mouseX, mouseY);
-
-        drawSidebarLabel(g, "PREFERENCES", sidebarX + 7,
-                ys[5] - Math.max(13, Math.round(sidebarH * 0.065F)));
         drawNavItem(g, Tab.CONFIGS, navX, ys[5], navW, itemHeight, mouseX, mouseY);
         drawNavItem(g, Tab.SETUP, navX, ys[6], navW, itemHeight, mouseX, mouseY);
 
