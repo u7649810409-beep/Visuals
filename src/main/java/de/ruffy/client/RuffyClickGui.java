@@ -247,28 +247,28 @@ public final class RuffyClickGui extends Screen {
 
         int navX = sidebarX + 8;
         int navW = sidebarW - 16;
-        drawSidebarLabel(g, "MENU", sidebarX + 12, panelY + 101);
-        drawNavItem(g, Tab.HOME, navX, panelY + 113, navW, 26, mouseX, mouseY);
-        drawNavItem(g, Tab.VISUALS, navX, panelY + 141, navW, 26, mouseX, mouseY);
-        drawNavItem(g, Tab.STYLE, navX, panelY + 169, navW, 26, mouseX, mouseY);
-        drawNavItem(g, Tab.HUD, navX, panelY + 197, navW, 26, mouseX, mouseY);
+        drawSidebarLabel(g, "MENU", sidebarX + 12, panelY + 99);
+        drawNavItem(g, Tab.HOME, navX, panelY + 111, navW, 23, mouseX, mouseY);
+        drawNavItem(g, Tab.VISUALS, navX, panelY + 136, navW, 23, mouseX, mouseY);
+        drawNavItem(g, Tab.STYLE, navX, panelY + 161, navW, 23, mouseX, mouseY);
+        drawNavItem(g, Tab.HUD, navX, panelY + 186, navW, 23, mouseX, mouseY);
 
-        drawSidebarLabel(g, "CONNECT", sidebarX + 12, panelY + 236);
-        drawNavItem(g, Tab.MUSIC, navX, panelY + 248, navW, 26, mouseX, mouseY);
+        drawSidebarLabel(g, "CONNECT", sidebarX + 12, panelY + 217);
+        drawNavItem(g, Tab.MUSIC, navX, panelY + 229, navW, 23, mouseX, mouseY);
 
-        drawSidebarLabel(g, "PREFERENCES", sidebarX + 12, panelY + 287);
-        drawNavItem(g, Tab.CONFIGS, navX, panelY + 299, navW, 26, mouseX, mouseY);
-        drawNavItem(g, Tab.SETUP, navX, panelY + 327, navW, 26, mouseX, mouseY);
+        drawSidebarLabel(g, "PREFERENCES", sidebarX + 12, panelY + 260);
+        drawNavItem(g, Tab.CONFIGS, navX, panelY + 272, navW, 23, mouseX, mouseY);
+        drawNavItem(g, Tab.SETUP, navX, panelY + 297, navW, 23, mouseX, mouseY);
 
-        int bottomY = sidebarY + sidebarH - 43;
-        fillRounded(g, sidebarX + 8, bottomY, navW, 36,
+        int bottomY = sidebarY + sidebarH - 38;
+        fillRounded(g, sidebarX + 8, bottomY, navW, 31,
                 0x6A171B30, RuffyRoundedUi.RADIUS_CONTROL);
-        fillRounded(g, sidebarX + 16, bottomY + 10, 6, 6,
+        fillRounded(g, sidebarX + 16, bottomY + 9, 6, 6,
                 0xFF45DB91, 3);
         g.drawString(font, "ONLINE", sidebarX + 29,
-                bottomY + 8, WHITE, false);
+                bottomY + 6, WHITE, false);
         g.drawString(font, "1.21.11  ·  FABRIC", sidebarX + 16,
-                bottomY + 21, DIM, false);
+                bottomY + 18, DIM, false);
     }
 
     private void drawSidebarLabel(GuiGraphics g, String value, int x, int y) {
@@ -659,7 +659,7 @@ public final class RuffyClickGui extends Screen {
                 themeX + 17, themeY + 6, WHITE, false);
         g.drawString(font, "⌄", themeX + 59, themeY + 5, MUTED, false);
 
-        int opacityY = y + 65;
+        int opacityY = y + 59;
         g.drawString(font, "Opacity", x + 12, opacityY + 4, MUTED, false);
         int sliderX = x + 72;
         int sliderW = Math.max(38, w - 119);
@@ -669,7 +669,7 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, opacity, x + w - font.width(opacity) - 11,
                 opacityY + 3, WHITE, false);
 
-        int effectsY = y + 89;
+        int effectsY = y + (h >= 108 ? 87 : h - 22);
         g.drawString(font, "Particles", x + 12, effectsY + 4, MUTED, false);
         int effectPercent = RuffyConfig.getInt("effect_quality") * 50;
         drawSlider(g, sliderX, effectsY, sliderW, effectPercent, 0, 100);
@@ -820,13 +820,13 @@ public final class RuffyClickGui extends Screen {
 
         int sliderX = appearanceX + 72;
         int sliderW = Math.max(38, homeRightW - 119);
-        int opacityY = appearanceY + 65;
+        int opacityY = appearanceY + 59;
         if (inside(mx, my, sliderX - 4, opacityY, sliderW + 8, 16)) {
             int value = 60 + Math.round((mx - sliderX) * 40.0F / Math.max(1, sliderW));
             RuffyConfig.setInt("menu_opacity", value);
             return true;
         }
-        int effectsY = appearanceY + 89;
+        int effectsY = appearanceY + (homeAppearanceH >= 108 ? 87 : homeAppearanceH - 22);
         if (inside(mx, my, sliderX - 4, effectsY, sliderW + 8, 16)) {
             int percent = Math.round((mx - sliderX) * 100.0F / Math.max(1, sliderW));
             RuffyConfig.setInt("effect_quality", Math.round(percent / 50.0F));
@@ -1321,11 +1321,13 @@ public final class RuffyClickGui extends Screen {
         g.fill(mainX + 14, y, mainX + mainW - 14, y + 1, 0x315E6885);
         fillRounded(g, mainX + 14, y, 58, 1,
                 withAlpha(RuffyConfig.primaryColor(), 125), 1);
-        g.drawString(font, "RUFFY VISUALS 2.4  ·  GALAXY EDITION",
-                mainX, panelY + panelH - 18, DIM, false);
-        String hint = "RIGHT SHIFT  ·  ESC";
-        g.drawString(font, hint, mainX + mainW - font.width(hint),
-                panelY + panelH - 18, DIM, false);
+        if (tab != Tab.HOME) {
+            g.drawString(font, "RUFFY VISUALS 2.5  ·  GALAXY EDITION",
+                    mainX, panelY + panelH - 18, DIM, false);
+            String hint = "RIGHT SHIFT  ·  ESC";
+            g.drawString(font, hint, mainX + mainW - font.width(hint),
+                    panelY + panelH - 18, DIM, false);
+        }
     }
 
     private static String qualityName(int quality) {
@@ -1384,6 +1386,7 @@ public final class RuffyClickGui extends Screen {
         int my = (int) event.y();
 
         if (handleNavigation(mx, my)) return true;
+        if (tab == Tab.HOME && handleHomeClick(mx, my)) return true;
 
         if (isModuleTab()) {
             if (handleFilters(mx, my)) return true;
@@ -1405,9 +1408,9 @@ public final class RuffyClickGui extends Screen {
         int x = sidebarX + 8;
         int w = sidebarW - 16;
         int[] ys = {
-                panelY + 113, panelY + 141, panelY + 169,
-                panelY + 197, panelY + 248, panelY + 299,
-                panelY + 327
+                panelY + 111, panelY + 136, panelY + 161,
+                panelY + 186, panelY + 229, panelY + 272,
+                panelY + 297
         };
         Tab[] tabs = {
                 Tab.HOME, Tab.VISUALS, Tab.STYLE, Tab.HUD,
@@ -1477,7 +1480,7 @@ public final class RuffyClickGui extends Screen {
     }
 
     private boolean handlePagination(int mx, int my) {
-        int y = panelY + panelH - 34;
+        int y = panelY + panelH - 44;
         int right = mainX + mainW - 80;
         if (inside(mx, my, right, y, 22, 21)) {
             modulePage = Math.max(0, modulePage - 1);
