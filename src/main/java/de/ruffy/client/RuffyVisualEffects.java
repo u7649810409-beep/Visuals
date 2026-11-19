@@ -607,48 +607,55 @@ public final class RuffyVisualEffects {
     }
 
     private static void drawRing(VertexConsumer out, PoseStack.Pose pose,
-                                 PulseRing ring, long now) {
+                                 PulseRing ring, long now, int quality) {
         float progress = lifeProgress(ring.age, ring.life, ring.lastStepNanos, now);
-        float eased = RuffyAnimation.easeOut(progress);
-        float radius = (float) (ring.startRadius
-                + (ring.endRadius - ring.startRadius) * eased);
+        float radius = (float) RuffyAnimation.lerp((float) ring.startRadius,
+                (float) ring.endRadius, RuffyAnimation.easeOut(progress));
         float fade = 1.0F - RuffyAnimation.easeInOut(progress);
         int alpha = Math.round(((ring.color >>> 24) & 0xFF) * fade);
-        int color = (ring.color & 0x00FFFFFF) | (alpha << 24);
-        Vec3 previous = ring.center.add(radius, ring.verticalDrift(progress), 0.0);
-        for (int i = 1; i <= 64; i++) {
-            double angle = TAU * i / 64.0;
-            Vec3 next = ring.center.add(Math.cos(angle) * radius,
-                    ring.verticalDrift(progress), Math.sin(angle) * radius);
-            drawLine(out, pose, previous, next, withAlpha(color, alpha), ring.width);
+        if (alpha < 3) return;
+
+        int segments = quality == 0 ? 12 : quality == 1 ? 24 : 48;
+        int stride = CIRCLE_SAMPLES / segments;
+        double y = ring.verticalDrift(progress);
+        Vec3 previous = ring.center.add(radius, y, 0.0);
+        for (int i = 1; i <= segments; i++) {
+            int index = (i * stride) % CIRCLE_SAMPLES;
+            Vec3 next = ring.center.add(CIRCLE_COS[index] * radius, y,
+                    CIRCLE_SIN[index] * radius);
+            drawLine(out, pose, previous, next, withAlpha(ring.color, alpha), ring.width);
             previous = next;
         }
     }
 
-    private static void drawSlash(VertexConsumer out, PoseStack.Pose pose, SlashArc slash, long now) {
+    private static void drawSlash(VertexConsumer out, PoseStack.Pose pose,
+                                   SlashArc slash, long now, int quality) {
         float progress = lifeProgress(slash.age, slash.life, slash.lastStepNanos, now);
         float fade = 1.0F - RuffyAnimation.easeInOut(progress);
+        if (fade < 0.015F) return;
         float growth = 0.5F + 0.5F * RuffyAnimation.easeOut(Math.min(1.0F, progress * 1.8F));
         int primary = withAlpha(slash.primary, Math.round(255 * fade));
-        int secondary = withAlpha(slash.secondary, Math.round(200 * fade));
-        Vec3 depth = slash.right.cross(slash.up).normalize().scale(0.16 * growth);
+        int secondary = withAlpha(slash.secondary, Math.round(185 * fade));
+        Vec3 depth = slash.right.cross(slash.up).normalize().scale(0.13 * growth);
         Vec3 last = slash.point(0.0, growth);
-        Vec3 lastGlow = slash.point(0.0, growth * 1.10);
+        Vec3 lastGlow = slash.point(0.0, growth * 1.08);
         Vec3 lastBack = last.add(depth);
-        for (int i = 1; i <= 36; i++) {
-            double t = i / 36.0;
+        int segments = quality == 0 ? 12 : quality == 1 ? 20 : 28;
+        boolean volume = quality > 0 && RuffyConfig.get("three_d_slash");
+        int ribEvery = quality == 1 ? 5 : 4;
+        for (int i = 1; i <= segments; i++) {
+            double t = i / (double) segments;
             Vec3 next = slash.point(t, growth);
-            Vec3 glow = slash.point(t, growth * 1.10);
+            Vec3 glow = slash.point(t, growth * 1.08);
             Vec3 nextBack = next.add(depth);
-            drawLine(out, pose, lastGlow, glow,
-                    withAlpha(secondary, Math.round(82 * fade)), 4.2F);
-            drawLine(out, pose, last, next, primary, 2.2F);
+            drawLine(out, pose, lastGlow, glow, withAlpha(secondary, Math.round(65 * fade)), 3.0F);
+            drawLine(out, pose, last, next, primary, 1.8F);
 
-            if (RuffyConfig.get("three_d_slash") && i % 3 == 0) {
-                int ribAlpha = Math.round(115 * fade);
-                drawLine(out, pose, last, lastBack, withAlpha(secondary, ribAlpha), 1.1F);
-                drawLine(out, pose, next, nextBack, withAlpha(secondary, ribAlpha), 1.1F);
-                drawLine(out, pose, lastBack, nextBack, withAlpha(secondary, ribAlpha), 1.0F);
+            if (volume && i % ribEvery == 0) {
+                int ribAlpha = Math.round(90 * fade);
+                drawLine(out, pose, last, lastBack, withAlpha(secondary, ribAlpha), 0.9F);
+                drawLine(out, pose, next, nextBack, withAlpha(secondary, ribAlpha), 0.9F);
+                drawLine(out, pose, lastBack, nextBack, withAlpha(secondary, ribAlpha), 0.8F);
             }
             last = next;
             lastGlow = glow;
@@ -656,38 +663,47 @@ public final class RuffyVisualEffects {
         }
     }
 
-    private static void drawPoint(VertexConsumer out, PoseStack.Pose pose, GlowPoint point, long now) {
+    private static void drawPoint(VertexConsumer out, PoseStack.Pose pose,
+                                  GlowPoint point, long now, int quality) {
         float progress = lifeProgress(point.age, point.life, point.lastStepNanos, now);
         float fade = 1.0F - RuffyAnimation.easeInOut(progress);
-        float pulse = 0.72F + 0.28F * RuffyAnimation.breathe(
+        if (fade < 0.015F) return;
+        float pulse = 0.82F + 0.18F * RuffyAnimation.breathe(
                 now / 1_000_000_000.0, 0.9, point.phase);
         float size = point.size * (0.75F + 0.25F * RuffyAnimation.easeOut(progress));
         int alpha = Math.round(((point.color >>> 24) & 0xFF) * fade * pulse);
+        if (alpha < 3) return;
         int color = (point.color & 0x00FFFFFF) | (alpha << 24);
         double frameBlend = interpolation(point.lastStepNanos, now);
         Vec3 position = point.previousPosition.add(
                 point.position.subtract(point.previousPosition).scale(frameBlend));
 
         if (point.shape == Shape.RING) {
-            Vec3 last = position.add(size, 0.0, 0.0);
-            for (int i = 1; i <= 12; i++) {
-                double angle = TAU * i / 12.0;
-                Vec3 next = position.add(Math.cos(angle) * size, 0.0,
-                        Math.sin(angle) * size);
-                drawLine(out, pose, last, next, color, 1.1F);
-                last = next;
+            int segments = quality == 0 ? 6 : quality == 1 ? 8 : 12;
+            int stride = CIRCLE_SAMPLES / segments;
+            Vec3 previous = position.add(size, 0.0, 0.0);
+            for (int i = 1; i <= segments; i++) {
+                int index = (i * stride) % CIRCLE_SAMPLES;
+                Vec3 next = position.add(CIRCLE_COS[index] * size, 0.0,
+                        CIRCLE_SIN[index] * size);
+                drawLine(out, pose, previous, next, color, 0.9F);
+                previous = next;
             }
             return;
         }
 
         Vec3 tail = position.subtract(point.velocity.scale(2.8));
-        drawLine(out, pose, tail, position, withAlpha(color, alpha), 1.2F);
-        if (point.shape == Shape.STREAK) return;
+        drawLine(out, pose, tail, position, color, 1.0F);
+        if (point.shape == Shape.STREAK || quality == 0) return;
 
-        Vec3 p = position;
-        drawLine(out, pose, p.add(-size, 0.0, 0.0), p.add(size, 0.0, 0.0), color, 1.0F);
-        drawLine(out, pose, p.add(0.0, -size, 0.0), p.add(0.0, size, 0.0), color, 1.0F);
-        drawLine(out, pose, p.add(0.0, 0.0, -size), p.add(0.0, 0.0, size), color, 1.0F);
+        drawLine(out, pose, position.add(-size, 0.0, 0.0),
+                position.add(size, 0.0, 0.0), color, 0.9F);
+        drawLine(out, pose, position.add(0.0, -size, 0.0),
+                position.add(0.0, size, 0.0), color, 0.9F);
+        if (quality >= 2) {
+            drawLine(out, pose, position.add(0.0, 0.0, -size),
+                    position.add(0.0, 0.0, size), color, 0.8F);
+        }
     }
 
     private static void drawLine(VertexConsumer out, PoseStack.Pose pose,
