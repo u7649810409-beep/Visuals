@@ -612,46 +612,97 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void drawHomeAppearance(GuiGraphics g, int mouseX, int mouseY) {
-        int x = homeRightX;
+        int x = homeQuickX;
         int y = homeAppearanceY;
-        int w = homeRightW;
+        int w = homeQuickW;
         int h = homeAppearanceH;
-        fillRounded(g, x, y, w, h, 0xDA0A0D1C, RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, x, y, w, h, BORDER, RuffyRoundedUi.RADIUS_PANEL);
+        fillRounded(g, x, y, w, h, 0xE1090918, RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x, y, w, h, 0x765B3D96, RuffyRoundedUi.RADIUS_PANEL);
 
-        g.drawString(font, "◈  Appearance", x + 11, y + 10, WHITE, false);
-        g.drawString(font, "Customize your look", x + 11, y + 23, MUTED, false);
+        g.drawString(font, "⚙  Quick Settings", x + 11, y + 10, WHITE, false);
 
-        int themeY = y + 31;
-        g.drawString(font, "Theme", x + 12, themeY + 5, MUTED, false);
-        int themeX = x + w - 83;
-        fillRounded(g, themeX, themeY, 70, 20, 0x8C20203D,
+        int themeY = y + 35;
+        g.drawString(font, "Theme", x + 12, themeY + 6, MUTED, false);
+        int themeW = Math.min(88, w - 78);
+        int themeX = x + w - themeW - 10;
+        fillRounded(g, themeX, themeY, themeW, 21, 0xA81E1734,
                 RuffyRoundedUi.RADIUS_CONTROL);
-        outlineRounded(g, themeX, themeY, 70, 20,
-                0x556A5F98, RuffyRoundedUi.RADIUS_CONTROL);
-        fillRounded(g, themeX + 7, themeY + 7, 6, 6,
-                RuffyConfig.primaryColor(), 3);
-        g.drawString(font, paletteName(RuffyConfig.getInt("palette")),
-                themeX + 17, themeY + 6, WHITE, false);
-        g.drawString(font, "⌄", themeX + 59, themeY + 5, MUTED, false);
+        outlineRounded(g, themeX, themeY, themeW, 21,
+                0x756C50A8, RuffyRoundedUi.RADIUS_CONTROL);
+        fillRounded(g, themeX + 7, themeY + 7, 7, 7, RuffyConfig.primaryColor(), 4);
+        g.drawString(font, trimToWidth(paletteName(RuffyConfig.getInt("palette")),
+                Math.max(28, themeW - 30)), themeX + 19, themeY + 6, WHITE, false);
+        g.drawString(font, "⌄", themeX + themeW - 11, themeY + 6, MUTED, false);
 
-        int opacityY = y + 54;
+        int opacityY = y + 65;
         g.drawString(font, "Opacity", x + 12, opacityY + 4, MUTED, false);
-        int sliderX = x + 72;
-        int sliderW = Math.max(38, w - 119);
+        int sliderX = x + 66;
+        int sliderW = Math.max(32, w - 111);
         drawSlider(g, sliderX, opacityY, sliderW,
                 RuffyConfig.getInt("menu_opacity"), 60, 100);
         String opacity = RuffyConfig.getInt("menu_opacity") + "%";
-        g.drawString(font, opacity, x + w - font.width(opacity) - 11,
+        g.drawString(font, opacity, x + w - font.width(opacity) - 9,
                 opacityY + 3, WHITE, false);
 
-        int effectsY = y + 76;
-        g.drawString(font, "Particles", x + 12, effectsY + 4, MUTED, false);
-        int effectPercent = RuffyConfig.getInt("effect_quality") * 50;
-        drawSlider(g, sliderX, effectsY, sliderW, effectPercent, 0, 100);
-        String effects = effectPercent + "%";
-        g.drawString(font, effects, x + w - font.width(effects) - 11,
-                effectsY + 3, WHITE, false);
+        int qualityY = y + 96;
+        g.drawString(font, "FX Quality", x + 12, qualityY + 5, MUTED, false);
+        int qGap = 3;
+        int qW = Math.max(31, Math.min(39, (w - 112) / 3));
+        int qX = x + w - (qW * 3 + qGap * 2) - 9;
+        String[] qualityLabels = {"LOW", "MID", "HIGH"};
+        for (int i = 0; i < 3; i++) {
+            boolean selected = RuffyConfig.getInt("effect_quality") == i;
+            int bx = qX + i * (qW + qGap);
+            drawButton(g, bx, qualityY, qW, 20, qualityLabels[i],
+                    selected ? ButtonStyle.SEGMENT : ButtonStyle.GHOST,
+                    inside(mouseX, mouseY, bx, qualityY, qW, 20), selected);
+        }
+
+        int visualizerY = y + 128;
+        g.drawString(font, "Music Visualizer", x + 12, visualizerY + 5, MUTED, false);
+        String visualizerState = RuffyConfig.get("music_visualizer") ? "ON" : "OFF";
+        g.drawString(font, visualizerState, x + w - 74, visualizerY + 5,
+                RuffyConfig.get("music_visualizer") ? RuffyConfig.primaryColor() : DIM, false);
+        drawSwitch(g, x + w - 42, visualizerY, RuffyConfig.get("music_visualizer"),
+                32, 18, "home.music.visualizer");
+    }
+
+    private void drawHomeLyrics(GuiGraphics g, int mouseX, int mouseY) {
+        int x = homeLyricsX;
+        int y = homeAppearanceY;
+        int w = homeLyricsW;
+        int h = homeAppearanceH;
+        fillRounded(g, x, y, w, h, 0xE1090919, RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x, y, w, h, 0x785C3F9D, RuffyRoundedUi.RADIUS_PANEL);
+        g.drawString(font, "♫  Lyrics", x + 11, y + 10,
+                RuffyConfig.primaryColor(), false);
+        g.drawString(font, "NOW PLAYING", x + 11, y + 23, DIM, false);
+
+        int artY = y + 33;
+        int artH = Math.min(70, Math.max(48, h / 3));
+        RuffyDashboardArt.drawHero(g, x + 9, artY, w - 18, artH);
+        String source = RuffySpotify.getLyrics();
+        String[] lines = source == null ? new String[0] : source.split("\\R");
+        int textY = artY + artH + 9;
+        if (lines.length == 0 || lines[0].isBlank()) {
+            String hint = RuffySpotify.isConnected()
+                    ? "Lyrics not available for this track."
+                    : "Connect Spotify to view lyrics.";
+            g.drawCenteredString(font, trimToWidth(hint, w - 18),
+                    x + w / 2, textY, MUTED);
+        } else {
+            int maxShown = Math.min(3, lines.length);
+            for (int i = 0; i < maxShown; i++) {
+                g.drawCenteredString(font, trimToWidth(lines[i], w - 20),
+                        x + w / 2, textY + i * 13, i == 0 ? WHITE : MUTED);
+            }
+        }
+        String track = trimToWidth(RuffySpotify.getTrackName(), w - 20);
+        g.drawString(font, track, x + 10, y + h - 17, DIM, false);
+        if (inside(mouseX, mouseY, x, y, w, h)) {
+            outlineRounded(g, x + 1, y + 1, w - 2, h - 2,
+                    withAlpha(RuffyConfig.primaryColor(), 65), RuffyRoundedUi.RADIUS_PANEL);
+        }
     }
 
     private void drawHomeBottom(GuiGraphics g, int mouseX, int mouseY) {
