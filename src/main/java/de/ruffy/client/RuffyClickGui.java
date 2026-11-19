@@ -953,10 +953,10 @@ public final class RuffyClickGui extends Screen {
         int quickY = homeAppearanceY;
         int quickW = homeQuickW;
         int thumbW = Math.min(84, Math.max(58, quickW * 33 / 100));
-        int controlsX = quickX + 10 + thumbW + 11;
+        int appearanceControlsX = quickX + 10 + thumbW + 11;
         int right = quickX + quickW - 10;
         int themeY = quickY + 52;
-        int themeW = Math.min(88, Math.max(58, right - controlsX - 42));
+        int themeW = Math.min(88, Math.max(58, right - appearanceControlsX - 42));
         int themeX = right - themeW;
         if (inside(mx, my, themeX, themeY, themeW, 20)) {
             RuffyConfig.setInt("palette", (RuffyConfig.getInt("palette") + 1) % 10);
@@ -964,7 +964,7 @@ public final class RuffyClickGui extends Screen {
         }
 
         int labelW = font.width("Particles") + 5;
-        int sliderX = controlsX + labelW;
+        int sliderX = appearanceControlsX + labelW;
         int sliderW = Math.max(20, right - sliderX - 30);
         int opacityY = quickY + 83;
         if (inside(mx, my, sliderX - 4, opacityY - 3, sliderW + 8, 12)) {
