@@ -459,47 +459,59 @@ public final class RuffyClickGui extends Screen {
     private void drawHomeModules(GuiGraphics g, int mouseX, int mouseY) {
         int x = homeCenterX;
         int y = homeModulesY;
-        int w = homeCenterW;
+        int w = homeModulesW;
         int h = homeModulesH;
-        fillRounded(g, x, y, w, h, 0xD20A0D1C, RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, x, y, w, h, BORDER, RuffyRoundedUi.RADIUS_PANEL);
-
-        g.drawString(font, "✦  Featured Modules", x + 13, y + 11, WHITE, false);
-        g.drawString(font, "Manage your modules", x + 13, y + 24, MUTED, false);
-        int seeX = x + w - 62;
-        g.drawString(font, "See all  →", seeX, y + 17, RuffyConfig.primaryColor(), false);
+        fillRounded(g, x, y, w, h, 0xE10A0818, RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x, y, w, h, 0x765C3F9D, RuffyRoundedUi.RADIUS_PANEL);
+        g.drawString(font, "✦  Featured Modules", x + 12, y + 10, WHITE, false);
+        g.drawString(font, "Your visual toolkit", x + 12, y + 23, MUTED, false);
+        drawButton(g, x + w - 70, y + 8, 58, 20, "See all  →",
+                ButtonStyle.GHOST,
+                inside(mouseX, mouseY, x + w - 70, y + 8, 58, 20), false);
 
         String[] keys = {"prism_core", "nebula_particles", "orbit_particles", "swing_animation"};
-        String[] titles = {"3D Prism", "Particles", "Orbit Rings", "Animations"};
-        String[] descriptions = {"Crystal core", "Ambient glints", "Player orbit", "Smooth swing"};
-        String[] icons = {"◇", "✧", "◌", "★"};
-        int gap = 5;
+        String[] titles = {"Crystal Core", "Nebula", "Orbit Rings", "Swing Motion"};
+        String[] descriptions = {"3D centerpiece", "Ambient particles", "Orbiting accents", "Smooth motion"};
+        String[] icons = {"◇", "✧", "◎", "⌁"};
+        int gap = 7;
         int left = x + 11;
-        int tileY = y + 42;
-        int tileH = Math.max(42, h - 53);
-        int tileW = Math.max(48, (w - 22 - gap * 3) / 4);
+        int top = y + 37;
+        int tileW = Math.max(68, (w - 22 - gap) / 2);
+        int tileH = Math.max(42, (h - 47 - gap) / 2);
 
         for (int i = 0; i < keys.length; i++) {
-            int tx = left + i * (tileW + gap);
+            int column = i % 2;
+            int row = i / 2;
+            int tx = left + column * (tileW + gap);
+            int ty = top + row * (tileH + gap);
             boolean enabled = RuffyConfig.get(keys[i]);
-            boolean hovered = inside(mouseX, mouseY, tx, tileY, tileW, tileH);
+            boolean hovered = inside(mouseX, mouseY, tx, ty, tileW, tileH);
             float hover = RuffyAnimation.animate("home.feature.hover." + keys[i],
                     hovered ? 1.0F : 0.0F);
-            fillRounded(g, tx, tileY, tileW, tileH,
-                    RuffyAnimation.blendColor(0xA9141729, 0xD2202142, hover),
+            int background = RuffyAnimation.blendColor(0xAA171329, 0xE3231B3B, hover * 0.9F);
+            fillRounded(g, tx, ty, tileW, tileH, background,
                     RuffyRoundedUi.RADIUS_CONTROL);
-            outlineRounded(g, tx, tileY, tileW, tileH,
-                    withAlpha(RuffyConfig.primaryColor(), enabled ? 95 : 38),
+            outlineRounded(g, tx, ty, tileW, tileH,
+                    withAlpha(enabled ? RuffyConfig.primaryColor() : 0xFF877AAB,
+                            enabled ? 150 : 52), RuffyRoundedUi.RADIUS_CONTROL);
+
+            fillRounded(g, tx + 8, ty + 8, 24, 24,
+                    withAlpha(RuffyConfig.primaryColor(), enabled ? 58 : 24),
                     RuffyRoundedUi.RADIUS_CONTROL);
-            g.drawString(font, icons[i], tx + 7, tileY + 7,
-                    enabled ? RuffyConfig.primaryColor() : DIM, false);
-            int switchW = Math.min(24, tileW / 2);
-            drawSwitch(g, tx + tileW - switchW - 6, tileY + 7,
-                    enabled, switchW, 13, "home.feature." + keys[i]);
-            g.drawString(font, trimToWidth(titles[i], tileW - 12),
-                    tx + 7, tileY + 25, WHITE, false);
-            g.drawString(font, trimToWidth(descriptions[i], tileW - 12),
-                    tx + 7, tileY + 37, MUTED, false);
+            g.drawCenteredString(font, icons[i], tx + 20, ty + 15,
+                    enabled ? 0xFFEAD8FF : MUTED);
+
+            int textX = tx + 39;
+            int textW = Math.max(32, tileW - 80);
+            g.drawString(font, trimToWidth(titles[i], textW), textX,
+                    ty + 8, WHITE, false);
+            g.drawString(font, trimToWidth(descriptions[i], textW), textX,
+                    ty + 21, MUTED, false);
+
+            int switchX = tx + tileW - 38;
+            int switchY = ty + 8;
+            drawSwitch(g, switchX, switchY, enabled, 30, 16,
+                    "home.feature." + keys[i]);
         }
     }
 
