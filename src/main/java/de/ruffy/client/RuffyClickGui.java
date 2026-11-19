@@ -949,7 +949,7 @@ public final class RuffyClickGui extends Screen {
             }
         }
 
-visualizerY        // Lyrics opens the full player and lyrics screen.
+        // Lyrics opens the full player and lyrics screen.
         if (inside(mx, my, homeLyricsX, homeLyricsY,
                 homeLyricsW, homeLyricsH)) {
             if (minecraft != null) minecraft.setScreen(new RuffySpotifyScreen(this));
