@@ -56,7 +56,7 @@ public final class RuffyConfig {
             "palette", 0,
             "hud_opacity", 44,
             "menu_opacity", 94,
-            "effect_quality", 2,
+            "effect_quality", 1,
             "animation_smoothness", 78,
             "hud_scale", 96
     );
