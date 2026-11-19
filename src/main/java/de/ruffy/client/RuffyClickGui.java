@@ -130,16 +130,16 @@ public final class RuffyClickGui extends Screen {
 
     private void calculateLayout() {
         // App-sized floating shell with breathing room around the window.
-        panelW = Math.min(1180, Math.max(420, Math.round(width * 0.815F)));
+        panelW = Math.min(1180, Math.max(420, Math.round(width * 0.870F)));
         panelW = Math.min(panelW, width - 16);
-        panelH = Math.min(680, Math.max(220, Math.round(height * 0.745F)));
+        panelH = Math.min(680, Math.max(220, Math.round(height * 0.820F)));
         panelH = Math.min(panelH, height - 14);
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2 - Math.round(height * 0.035F);
         panelY = Math.max(5, Math.min(height - panelH - 5, panelY));
 
         sidebarX = panelX + Math.max(3, Math.round(panelW * 0.006F));
-        sidebarY = panelY + Math.round(panelH * 0.095F);
+        sidebarY = panelY + Math.round(panelH * 0.120F);
         sidebarW = Math.max(58, Math.min(170, Math.round(panelW * 0.145F)));
         sidebarH = panelH - Math.round(panelH * 0.12F);
         mainX = sidebarX + sidebarW + Math.max(5, Math.round(panelW * 0.012F));
@@ -318,19 +318,19 @@ public final class RuffyClickGui extends Screen {
     }
 
     private int navigationItemHeight() {
-        return compactSidebar() ? Math.max(16, Math.round(sidebarH * 0.09F)) : 24;
+        return compactSidebar() ? Math.max(13, Math.round(sidebarH * 0.065F)) : 24;
     }
 
     private int[] navigationYPositions() {
         int h = sidebarH;
         return new int[]{
-                sidebarY + Math.round(h * 0.18F),
-                sidebarY + Math.round(h * 0.29F),
+                sidebarY + Math.round(h * 0.32F),
                 sidebarY + Math.round(h * 0.40F),
-                sidebarY + Math.round(h * 0.49F),
-                sidebarY + Math.round(h * 0.58F),
-                sidebarY + Math.round(h * 0.67F),
-                sidebarY + Math.round(h * 0.74F)
+                sidebarY + Math.round(h * 0.48F),
+                sidebarY + Math.round(h * 0.56F),
+                sidebarY + Math.round(h * 0.64F),
+                sidebarY + Math.round(h * 0.72F),
+                sidebarY + Math.round(h * 0.80F)
         };
     }
 
@@ -362,8 +362,9 @@ public final class RuffyClickGui extends Screen {
 
         int iconColor = RuffyAnimation.blendColor(DIM, RuffyConfig.primaryColor(), active);
         int textColor = RuffyAnimation.blendColor(MUTED, WHITE, Math.max(active, hover * 0.3F));
-        g.drawString(font, item.icon, x + 9, y + 8, iconColor, false);
-        g.drawString(font, item.label, x + 27, y + 8, textColor, false);
+        g.drawString(font, item.icon, x + 6, y + 8, iconColor, false);
+        g.drawString(font, trimToWidth(item.label, Math.max(10, w - 27)),
+                x + 23, y + 8, textColor, false);
         if (item == Tab.MUSIC && RuffySpotify.isConnected()) {
             fillRounded(g, x + w - 12, y + 10, 4, 4, 0xFF5DD6A1, 2);
         }
@@ -372,12 +373,12 @@ public final class RuffyClickGui extends Screen {
     private void drawHeader(GuiGraphics g, int mouseX, int mouseY) {
         if (tab == Tab.HOME) {
             int brandX = mainX + Math.max(8, Math.round(mainW * 0.055F));
-            int brandY = panelY + Math.max(12, Math.round(panelH * 0.035F));
+            int brandY = panelY + Math.max(12, Math.round(panelH * 0.067F));
             g.drawString(font, "Ruffy", brandX, brandY, WHITE, false);
             g.drawString(font, "Visuals", brandX + font.width("Ruffy ") - 1,
                     brandY, RuffyConfig.primaryColor(), false);
             g.drawString(font, "GALAXY STUDIO  ·  2.7", brandX,
-                    panelY + Math.max(36, Math.round(panelH * 0.092F)), MUTED, false);
+                    panelY + Math.max(22, Math.round(panelH * 0.110F)), MUTED, false);
         } else {
             String title = switch (tab) {
                 case HOME -> "Home";
