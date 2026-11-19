@@ -623,17 +623,23 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void drawAlbumArt(GuiGraphics g, int x, int y, int size) {
-        fillRounded(g, x, y, size, size, 0xFF26104F, RuffyRoundedUi.RADIUS_CONTROL);
-        g.fill(x + 1, y + size / 2, x + size - 1, y + size - 1, 0xFF4A1684);
-        g.fill(x + 4, y + size / 3, x + size - 4, y + size / 2, 0xFF8B30D2);
-        g.fill(x + size / 2 - 4, y + 6, x + size / 2 + 5, y + size - 6,
-                withAlpha(RuffyConfig.primaryColor(), 165));
-        for (int i = 0; i < 7; i++) {
-            int sx = x + 4 + Math.floorMod(i * 13, Math.max(1, size - 8));
-            int sy = y + 4 + Math.floorMod(i * 17, Math.max(1, size - 8));
-            fillRounded(g, sx, sy, 2, 2, 0xFFEBD8FF, 1);
-        }
-        outlineRounded(g, x, y, size, size, 0x778A5CE6, RuffyRoundedUi.RADIUS_CONTROL);
+        int radius = size / 2;
+        fillRounded(g, x, y, size, size, 0xFF120C2B, radius);
+        fillRounded(g, x + 2, y + 3, size - 4, size - 6,
+                0xFF2B155B, radius);
+        fillRounded(g, x + 4, y + size / 2 - 4, size - 8,
+                Math.max(6, size / 4), 0xFF9A52D9, Math.max(3, size / 8));
+        fillRounded(g, x + size / 4, y + size / 5,
+                size / 2, size / 2, 0xFF6C38B5, size / 4);
+        fillRounded(g, x + size / 3, y + size / 4,
+                Math.max(4, size / 4), Math.max(4, size / 4),
+                0xFFD0A7FF, Math.max(2, size / 8));
+        fillRounded(g, x + 5, y + size / 2 + 4, size - 10,
+                Math.max(3, size / 10), 0xFFC27BFA, Math.max(2, size / 12));
+        fillRounded(g, x + size / 3, y + size / 4,
+                Math.max(2, size / 10), Math.max(2, size / 10),
+                0xFFFFF4FF, Math.max(1, size / 20));
+        outlineRounded(g, x, y, size, size, 0x778A5CE6, radius);
     }
 
     private void drawVisualizerBars(GuiGraphics g, int x, int y, int width) {
