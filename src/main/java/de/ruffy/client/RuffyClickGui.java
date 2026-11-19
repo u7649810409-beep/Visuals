@@ -251,48 +251,54 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void drawSidebar(GuiGraphics g, int mouseX, int mouseY) {
+        RuffyRoundedUi.shadow(g, sidebarX, sidebarY, sidebarW, sidebarH,
+                RuffyRoundedUi.RADIUS_PANEL, 28);
         fillRounded(g, sidebarX, sidebarY, sidebarW, sidebarH,
-                0xD00A0B1A, RuffyRoundedUi.RADIUS_PANEL);
+                0xEC080713, RuffyRoundedUi.RADIUS_PANEL);
         outlineRounded(g, sidebarX, sidebarY, sidebarW, sidebarH,
-                0x557A55C6, RuffyRoundedUi.RADIUS_PANEL);
+                0x7D8C58D8, RuffyRoundedUi.RADIUS_PANEL);
 
-        int logoX = sidebarX + (sidebarW - 42) / 2;
-        int logoY = sidebarY + 13;
-        fillRounded(g, logoX, logoY, 42, 42,
-                withAlpha(RuffyConfig.primaryColor(), 48), RuffyRoundedUi.RADIUS_PANEL);
-        fillRounded(g, logoX + 5, logoY + 5, 32, 32,
-                withAlpha(RuffyConfig.primaryColor(), 205), RuffyRoundedUi.RADIUS_PANEL);
-        g.drawCenteredString(font, "R", logoX + 21, logoY + 15, WHITE);
+        int logoX = sidebarX + (sidebarW - 48) / 2;
+        int logoY = sidebarY + 14;
+        fillRounded(g, logoX - 5, logoY - 4, 58, 58,
+                withAlpha(RuffyConfig.primaryColor(), 24), RuffyRoundedUi.RADIUS_PANEL);
+        fillRounded(g, logoX, logoY, 48, 48,
+                withAlpha(RuffyConfig.primaryColor(), 58), RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, logoX, logoY, 48, 48,
+                withAlpha(RuffyConfig.primaryColor(), 135), RuffyRoundedUi.RADIUS_PANEL);
+        g.drawCenteredString(font, "R", logoX + 24, logoY + 13, WHITE);
+        fillRounded(g, logoX + 7, logoY + 34, 34, 2,
+                withAlpha(0xFFE8C9FF, 125), 1);
         g.drawCenteredString(font, "RUFFY VISUALS", sidebarX + sidebarW / 2,
-                sidebarY + 61, WHITE);
+                sidebarY + 68, WHITE);
         g.drawCenteredString(font, "GALAXY EDITION", sidebarX + sidebarW / 2,
-                sidebarY + 73, RuffyConfig.primaryColor());
+                sidebarY + 81, RuffyConfig.primaryColor());
 
         int navX = sidebarX + 8;
         int navW = sidebarW - 16;
-        drawSidebarLabel(g, "MENU", sidebarX + 12, panelY + 99);
-        drawNavItem(g, Tab.HOME, navX, panelY + 111, navW, 23, mouseX, mouseY);
-        drawNavItem(g, Tab.VISUALS, navX, panelY + 136, navW, 23, mouseX, mouseY);
-        drawNavItem(g, Tab.COSMETICS, navX, panelY + 161, navW, 23, mouseX, mouseY);
-        drawNavItem(g, Tab.STYLE, navX, panelY + 186, navW, 23, mouseX, mouseY);
-        drawNavItem(g, Tab.HUD, navX, panelY + 211, navW, 23, mouseX, mouseY);
+        drawSidebarLabel(g, "WORKSPACE", sidebarX + 12, panelY + 104);
+        drawNavItem(g, Tab.HOME, navX, panelY + 116, navW, 24, mouseX, mouseY);
+        drawNavItem(g, Tab.VISUALS, navX, panelY + 142, navW, 24, mouseX, mouseY);
+        drawNavItem(g, Tab.STYLE, navX, panelY + 168, navW, 24, mouseX, mouseY);
+        drawNavItem(g, Tab.COSMETICS, navX, panelY + 194, navW, 24, mouseX, mouseY);
+        drawNavItem(g, Tab.HUD, navX, panelY + 220, navW, 24, mouseX, mouseY);
 
-        drawSidebarLabel(g, "CONNECT", sidebarX + 12, panelY + 242);
-        drawNavItem(g, Tab.MUSIC, navX, panelY + 254, navW, 23, mouseX, mouseY);
+        drawSidebarLabel(g, "CONNECT", sidebarX + 12, panelY + 257);
+        drawNavItem(g, Tab.MUSIC, navX, panelY + 269, navW, 24, mouseX, mouseY);
 
-        drawSidebarLabel(g, "PREFERENCES", sidebarX + 12, panelY + 285);
-        drawNavItem(g, Tab.CONFIGS, navX, panelY + 297, navW, 23, mouseX, mouseY);
-        drawNavItem(g, Tab.SETUP, navX, panelY + 322, navW, 23, mouseX, mouseY);
+        drawSidebarLabel(g, "PREFERENCES", sidebarX + 12, panelY + 306);
+        drawNavItem(g, Tab.CONFIGS, navX, panelY + 318, navW, 24, mouseX, mouseY);
+        drawNavItem(g, Tab.SETUP, navX, panelY + 344, navW, 24, mouseX, mouseY);
 
-        int bottomY = sidebarY + sidebarH - 38;
-        fillRounded(g, sidebarX + 8, bottomY, navW, 31,
-                0x6A171B30, RuffyRoundedUi.RADIUS_CONTROL);
+        int bottomY = sidebarY + sidebarH - 41;
+        fillRounded(g, sidebarX + 8, bottomY, navW, 33,
+                0x9A111424, RuffyRoundedUi.RADIUS_CONTROL);
         fillRounded(g, sidebarX + 16, bottomY + 9, 6, 6,
                 0xFF45DB91, 3);
-        g.drawString(font, "ONLINE", sidebarX + 29,
+        g.drawString(font, "SYSTEM ONLINE", sidebarX + 29,
                 bottomY + 6, WHITE, false);
-        g.drawString(font, "1.21.11  ·  FABRIC", sidebarX + 16,
-                bottomY + 18, DIM, false);
+        g.drawString(font, "LOCAL PROFILE", sidebarX + 16,
+                bottomY + 19, DIM, false);
     }
 
     private void drawSidebarLabel(GuiGraphics g, String value, int x, int y) {
@@ -1551,9 +1557,9 @@ public final class RuffyClickGui extends Screen {
         int x = sidebarX + 8;
         int w = sidebarW - 16;
         int[] ys = {
-                panelY + 111, panelY + 136, panelY + 161,
-                panelY + 186, panelY + 211, panelY + 254,
-                panelY + 297, panelY + 322
+                panelY + 116, panelY + 142, panelY + 168,
+                panelY + 194, panelY + 220, panelY + 269,
+                panelY + 318, panelY + 344
         };
         Tab[] tabs = {
                 Tab.HOME, Tab.VISUALS, Tab.COSMETICS, Tab.STYLE,
