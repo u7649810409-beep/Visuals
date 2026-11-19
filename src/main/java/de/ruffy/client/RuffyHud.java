@@ -183,8 +183,8 @@ public final class RuffyHud {
                               int width, int height, int accent, float opacity) {
         int fill = RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), opacity);
         int border = RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), opacity);
-        fillRounded(graphics, x, y, width, height, fill, 12);
-        outlineRounded(graphics, x, y, width, height, border, 12);
+        fillRounded(graphics, x, y, width, height, fill, RuffyRoundedUi.RADIUS_ROW);
+        outlineRounded(graphics, x, y, width, height, border, RuffyRoundedUi.RADIUS_ROW);
         // A short, quiet accent mark replaces the old full-height neon rail.
         fillRounded(graphics, x + 8, y + 1, Math.min(15, width - 16), 1,
                 withAlpha(accent, Math.round(96 * opacity)), 1);
@@ -199,9 +199,11 @@ public final class RuffyHud {
         float opacity = RuffyAnimation.animate("hud.input.panel", 1.0F);
 
         fillRounded(graphics, x - 3, y - 3, panelW + 6, panelH + 6,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), opacity), 9);
+                RuffyAnimation.multiplyAlpha(RuffyConfig.hudPanelColor(), opacity),
+                RuffyRoundedUi.RADIUS_CONTROL);
         outlineRounded(graphics, x - 3, y - 3, panelW + 6, panelH + 6,
-                RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), opacity), 9);
+                RuffyAnimation.multiplyAlpha(RuffyConfig.hudBorderColor(), opacity),
+                RuffyRoundedUi.RADIUS_CONTROL);
         graphics.drawString(client.font, "MOVEMENT", x + 2, y + 1,
                 RuffyAnimation.multiplyAlpha(MUTED, opacity), false);
 

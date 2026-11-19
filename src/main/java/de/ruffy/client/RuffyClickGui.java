@@ -116,16 +116,22 @@ public final class RuffyClickGui extends Screen {
         int accent = RuffyConfig.primaryColor();
         int secondary = RuffyConfig.secondaryColor();
 
-        // Galaxy glass shell with a soft two-tone halo and large anti-aliased corners.
-        fillRounded(g, panelX - 8, panelY - 8, panelW + 16, panelH + 16,
-                withAlpha(secondary, 30), 30);
-        fillRounded(g, panelX - 4, panelY - 4, panelW + 8, panelH + 8,
-                withAlpha(accent, 36), 30);
-        fillRounded(g, panelX, panelY, panelW, panelH, body, 28);
-        outlineRounded(g, panelX - 1, panelY - 1, panelW + 2, panelH + 2,
-                withAlpha(accent, 172), 29);
+        // A consistent depth stack: soft shadow, restrained violet halo,
+        // opaque glass surface, then one crisp edge and a quiet inner highlight.
+        RuffyRoundedUi.shadow(g, panelX - 2, panelY, panelW + 4, panelH + 4,
+                RuffyRoundedUi.RADIUS_WINDOW, 48);
+        fillRounded(g, panelX - 5, panelY - 4, panelW + 10, panelH + 8,
+                withAlpha(secondary, 16), RuffyRoundedUi.RADIUS_WINDOW);
+        fillRounded(g, panelX - 2, panelY - 2, panelW + 4, panelH + 4,
+                withAlpha(accent, 20), RuffyRoundedUi.RADIUS_WINDOW);
+        fillRounded(g, panelX, panelY, panelW, panelH, body,
+                RuffyRoundedUi.RADIUS_WINDOW);
+        outlineRounded(g, panelX, panelY, panelW, panelH,
+                withAlpha(accent, 148), RuffyRoundedUi.RADIUS_WINDOW);
         outlineRounded(g, panelX + 2, panelY + 2, panelW - 4, panelH - 4,
-                withAlpha(secondary, 70), 26);
+                withAlpha(secondary, 34), RuffyRoundedUi.RADIUS_WINDOW - 2);
+        fillRounded(g, panelX + 28, panelY + 1, panelW - 56, 1,
+                withAlpha(0xFFFFFFFF, 24), 1);
 
         drawHeader(g, header);
         drawNavigation(g, mouseX, mouseY);
@@ -168,23 +174,26 @@ public final class RuffyClickGui extends Screen {
     private void drawHeader(GuiGraphics g, int header) {
         int primary = RuffyConfig.primaryColor();
         int secondary = RuffyConfig.secondaryColor();
-        fillRounded(g, panelX, panelY, panelW, 42, header, 22);
-        g.fill(panelX, panelY + 18, panelX + panelW, panelY + 42, header);
+        fillRounded(g, panelX, panelY, panelW, 42, header,
+                RuffyRoundedUi.RADIUS_PANEL);
+        g.fill(panelX + 1, panelY + 21, panelX + panelW - 1, panelY + 42, header);
+        g.fill(panelX + 18, panelY + 41, panelX + panelW - 18, panelY + 42,
+                withAlpha(RuffyConfig.secondaryColor(), 28));
         fillRounded(g, panelX + 8, panelY + 1, panelW - 16, 1,
                 withAlpha(secondary, 68), 1);
 
         int logoX = panelX + 13;
         int logoY = panelY + 6;
         fillRounded(g, logoX - 4, logoY - 3, 34, 34,
-                withAlpha(primary, 30), 17);
+                withAlpha(primary, 30), RuffyRoundedUi.RADIUS_CARD);
         fillRounded(g, logoX, logoY, 27, 27,
-                withAlpha(primary, 195), 14);
+                withAlpha(primary, 195), RuffyRoundedUi.RADIUS_ROW);
         outlineRounded(g, logoX, logoY, 27, 27,
-                withAlpha(0xFFFFFFFF, 130), 14);
+                withAlpha(0xFFFFFFFF, 110), RuffyRoundedUi.RADIUS_ROW);
         g.drawCenteredString(font, "R", logoX + 13, logoY + 8, WHITE);
 
         g.drawString(font, "RUFFY VISUALS", panelX + 53, panelY + 8, WHITE, false);
-        g.drawString(font, "GALAXY CLIENT  ·  2.2", panelX + 53, panelY + 22,
+        g.drawString(font, "GALAXY CLIENT  ·  2.3", panelX + 53, panelY + 22,
                 secondary, false);
         fillRounded(g, panelX + 204, panelY + 16, 5, 5,
                 withAlpha(primary, 210), 3);
@@ -192,16 +201,19 @@ public final class RuffyClickGui extends Screen {
                 panelX + 220, panelY + 16, MUTED, false);
 
         fillRounded(g, panelX + panelW - 78, panelY + 7, 64, 26,
-                0x9E090817, 13);
+                0xB5090C19, RuffyRoundedUi.RADIUS_CONTROL);
         outlineRounded(g, panelX + panelW - 78, panelY + 7, 64, 26,
-                withAlpha(primary, 120), 13);
+                withAlpha(primary, 96), RuffyRoundedUi.RADIUS_CONTROL);
         g.drawCenteredString(font, "ESC  ×", panelX + panelW - 46,
                 panelY + 16, MUTED);
     }
 
     private void drawNavigation(GuiGraphics g, int mouseX, int mouseY) {
         int y = panelY + 42;
-        fillRounded(g, panelX + 10, y, panelW - 20, 31, 0x8D090817, 15);
+        fillRounded(g, panelX + 10, y, panelW - 20, 31, 0xA1080A16,
+                RuffyRoundedUi.RADIUS_CARD);
+        outlineRounded(g, panelX + 10, y, panelW - 20, 31,
+                0x306E5B92, RuffyRoundedUi.RADIUS_CARD);
         float navScale = Math.min(1.0F, (panelW - 20) / 436.0F);
         int x = panelX + 10;
         for (Tab item : Tab.values()) {
@@ -215,9 +227,11 @@ public final class RuffyClickGui extends Screen {
                     withAlpha(0xFF2A1119, 0), withAlpha(RuffyConfig.primaryColor(), 48), active);
             background = RuffyAnimation.blendColor(background, 0x6C2A1119, hover * (1.0F - active));
             if (active > 0.001F || hover > 0.001F) {
-                fillRounded(g, x, y + 3, itemWidth - 3, 24, background, 12);
+                fillRounded(g, x, y + 3, itemWidth - 3, 24, background,
+                        RuffyRoundedUi.RADIUS_CONTROL);
                 outlineRounded(g, x, y + 3, itemWidth - 3, 24,
-                        withAlpha(RuffyConfig.primaryColor(), Math.round(120 * active + 45 * hover)), 12);
+                        withAlpha(RuffyConfig.primaryColor(), Math.round(112 * active + 38 * hover)),
+                        RuffyRoundedUi.RADIUS_CONTROL);
             }
 
             int underlineWidth = Math.max(0, Math.round((itemWidth - 15) * active));
@@ -284,10 +298,12 @@ public final class RuffyClickGui extends Screen {
                 boolean hovered = inside(mouseX, mouseY, x, y, item.width, 22);
                 if (selected || hovered) {
                     fillRounded(g, x, y, item.width, 22,
-                            selected ? withAlpha(RuffyConfig.primaryColor(), 58) : 0x5C2A1018, 7);
+                            selected ? withAlpha(RuffyConfig.primaryColor(), 48) : 0x36121628,
+                            RuffyRoundedUi.RADIUS_CONTROL);
                     if (selected) {
                         outlineRounded(g, x, y, item.width, 22,
-                                withAlpha(RuffyConfig.primaryColor(), 130), 7);
+                                withAlpha(RuffyConfig.primaryColor(), 145),
+                                RuffyRoundedUi.RADIUS_CONTROL);
                         g.fill(x + 3, y + 20, x + item.width - 3, y + 22,
                                 RuffyConfig.primaryColor());
                     }
@@ -299,9 +315,9 @@ public final class RuffyClickGui extends Screen {
 
             if (searchBox != null) {
                 fillRounded(g, searchX - 4, searchY + 1, searchW + 8, 22,
-                        0xB012060A, 9);
+                        0xC8090D1A, RuffyRoundedUi.RADIUS_CONTROL);
                 outlineRounded(g, searchX - 4, searchY + 1, searchW + 8, 22,
-                        withAlpha(RuffyConfig.primaryColor(), 95), 9);
+                        withAlpha(RuffyConfig.primaryColor(), 82), RuffyRoundedUi.RADIUS_CONTROL);
                 g.drawString(font, "⌕", searchX + 4, searchY + 7, DIM, false);
                 searchBox.setVisible(true);
             }
@@ -351,8 +367,8 @@ public final class RuffyClickGui extends Screen {
         rowFill = RuffyAnimation.blendColor(rowFill, 0xD51A1230, selectedMotion);
         int rowBorder = RuffyAnimation.blendColor(BORDER, withAlpha(primary, 70), hoverMotion);
         rowBorder = RuffyAnimation.blendColor(rowBorder, withAlpha(primary, 165), selectedMotion);
-        fillRounded(g, x, y, w, h, rowFill, 14);
-        outlineRounded(g, x, y, w, h, rowBorder, 14);
+        fillRounded(g, x, y, w, h, rowFill, RuffyRoundedUi.RADIUS_ROW);
+        outlineRounded(g, x, y, w, h, rowBorder, RuffyRoundedUi.RADIUS_ROW);
         float enabledMotion = RuffyAnimation.animate(
                 "gui.row.enabled." + feature.key(), enabled ? 1.0F : 0.0F);
         if (selectedMotion > 0.001F || enabledMotion > 0.001F) {
@@ -440,8 +456,9 @@ public final class RuffyClickGui extends Screen {
         int y = listTop;
         int w = rightW;
         int h = panelY + panelH - 38 - y;
-        fillRounded(g, x, y, w, h, 0x95100D20, 18);
-        outlineRounded(g, x, y, w, h, withAlpha(RuffyConfig.primaryColor(), 98), 18);
+        fillRounded(g, x, y, w, h, 0xBD0B0D1A, RuffyRoundedUi.RADIUS_CARD);
+        outlineRounded(g, x, y, w, h, withAlpha(RuffyConfig.primaryColor(), 88),
+                RuffyRoundedUi.RADIUS_CARD);
         fillRounded(g, x + 3, y + 2, Math.max(0, w - 6), 2,
                 withAlpha(RuffyConfig.primaryColor(), 120), 1);
 
@@ -457,8 +474,10 @@ public final class RuffyClickGui extends Screen {
         int primary = RuffyConfig.primaryColor();
         boolean compact = h < 180;
         g.drawString(font, "MODULE SETTINGS", x + pad, y + 13, DIM, false);
-        fillRounded(g, x + pad, y + 32, 30, 30, withAlpha(primary, 42), 15);
-        outlineRounded(g, x + pad, y + 32, 30, 30, withAlpha(primary, 155), 15);
+        fillRounded(g, x + pad, y + 32, 30, 30,
+                withAlpha(primary, 42), RuffyRoundedUi.RADIUS_ROW);
+        outlineRounded(g, x + pad, y + 32, 30, 30,
+                withAlpha(primary, 145), RuffyRoundedUi.RADIUS_ROW);
         g.drawCenteredString(font, iconFor(selected), x + pad + 15, y + 43, primary);
         g.drawString(font, selected.title(), x + pad + 37, y + 35, WHITE, false);
         g.drawString(font, selected.section().title().toUpperCase(Locale.ROOT),
@@ -468,8 +487,10 @@ public final class RuffyClickGui extends Screen {
                 w - pad * 2, MUTED, 11);
 
         int toggleY = y + (compact ? 86 : 104);
-        fillRounded(g, x + pad, toggleY, w - pad * 2, 39, 0x84201934, 15);
-        outlineRounded(g, x + pad, toggleY, w - pad * 2, 39, withAlpha(primary, 72), 15);
+        fillRounded(g, x + pad, toggleY, w - pad * 2, 39,
+                0xA10E1020, RuffyRoundedUi.RADIUS_ROW);
+        outlineRounded(g, x + pad, toggleY, w - pad * 2, 39,
+                withAlpha(primary, 68), RuffyRoundedUi.RADIUS_ROW);
         g.drawString(font, "MODULE STATE", x + pad + 8, toggleY + 7, MUTED, false);
         boolean active = RuffyConfig.get(selected.key());
         g.drawString(font, active ? "ENABLED" : "DISABLED",
@@ -513,8 +534,10 @@ public final class RuffyClickGui extends Screen {
             int cy = y + 24 + (i / 2) * 84;
             int c = palettePrimary(palettes[i]);
             boolean hover = inside(mouseX, mouseY, cx, cy, w, 74);
-            fillRounded(g, cx, cy, w, 74, hover ? CARD_HOVER : CARD, 16);
-            outlineRounded(g, cx, cy, w, 74, hover ? withAlpha(c, 180) : BORDER, 16);
+            fillRounded(g, cx, cy, w, 74, hover ? CARD_HOVER : CARD,
+                    RuffyRoundedUi.RADIUS_CARD);
+            outlineRounded(g, cx, cy, w, 74, hover ? withAlpha(c, 180) : BORDER,
+                    RuffyRoundedUi.RADIUS_CARD);
             fillRounded(g, cx + 3, cy + 1, w - 6, 2, c, 1);
             g.drawString(font, names[i], cx + 10, cy + 13, WHITE, false);
             g.drawString(font, desc[i], cx + 10, cy + 30, MUTED, false);
@@ -537,9 +560,9 @@ public final class RuffyClickGui extends Screen {
             float hovered = RuffyAnimation.animate("style.palette.hover." + i, hover ? 1.0F : 0.0F);
             int fill = RuffyAnimation.blendColor(CARD, CARD_HOVER, hovered);
             fill = RuffyAnimation.blendColor(fill, withAlpha(primary, 48), active);
-            fillRounded(g, cx, cy, sw, 27, fill, 13);
-            int outline = RuffyAnimation.blendColor(BORDER, withAlpha(primary, 220), active);
-            outlineRounded(g, cx, cy, sw, 27, outline, 13);
+            fillRounded(g, cx, cy, sw, 27, fill, RuffyRoundedUi.RADIUS_ROW);
+            int outline = RuffyAnimation.blendColor(BORDER, withAlpha(primary, 205), active);
+            outlineRounded(g, cx, cy, sw, 27, outline, RuffyRoundedUi.RADIUS_ROW);
             fillRounded(g, cx + 6, cy + 6, 10, 10, primary, 5);
             fillRounded(g, cx + 19, cy + 6, 10, 10, paletteSecondary(i), 5);
             g.drawString(font, PALETTE_NAMES[i],
@@ -611,7 +634,7 @@ public final class RuffyClickGui extends Screen {
         drawInfoRow(g, x, y + 56, "LEFT CLICK", "Toggle modules, favorites and settings");
         drawInfoRow(g, x, y + 88, "ESC", "Close the menu");
         drawInfoRow(g, x, y + 120, "CONFIG", "Saved in config/ruffyclient.properties");
-        drawInfoRow(g, x, y + 152, "VERSION", "Minecraft 1.21.11 · Fabric · Java 21");
+        drawInfoRow(g, x, y + 152, "VERSION", "Ruffy Visuals 2.3.0 · Minecraft 1.21.11 · Fabric");
     }
 
     private void drawActionCard(GuiGraphics g, int mouseX, int mouseY,
@@ -619,17 +642,20 @@ public final class RuffyClickGui extends Screen {
         boolean hovered = inside(mouseX, mouseY, x, y, w, h);
         float hover = RuffyAnimation.animate("gui.action." + title, hovered ? 1.0F : 0.0F);
         int fill = RuffyAnimation.blendColor(CARD, CARD_HOVER, hover);
-        fillRounded(g, x, y, w, h, fill, 9);
+        fillRounded(g, x, y, w, h, fill, RuffyRoundedUi.RADIUS_ROW);
         outlineRounded(g, x, y, w, h,
-                RuffyAnimation.blendColor(BORDER, withAlpha(RuffyConfig.primaryColor(), 185), hover), 9);
+                RuffyAnimation.blendColor(BORDER, withAlpha(RuffyConfig.primaryColor(), 165), hover),
+                RuffyRoundedUi.RADIUS_ROW);
         fillRounded(g, x + 1, y + 5, 3, h - 10, RuffyConfig.primaryColor(), 2);
         g.drawString(font, title, x + 12, y + 8, WHITE, false);
         g.drawString(font, subtitle, x + 12, y + 25, MUTED, false);
     }
 
     private void drawInfoRow(GuiGraphics g, int x, int y, String left, String right) {
-        fillRounded(g, x, y, panelW - 36, 25, 0x571A0D13, 7);
-        outlineRounded(g, x, y, panelW - 36, 25, BORDER, 7);
+        fillRounded(g, x, y, panelW - 36, 25, 0x64101422,
+                RuffyRoundedUi.RADIUS_CONTROL);
+        outlineRounded(g, x, y, panelW - 36, 25, BORDER,
+                RuffyRoundedUi.RADIUS_CONTROL);
         g.drawString(font, left, x + 8, y + 8, RuffyConfig.primaryColor(), false);
         g.drawString(font, right, x + 112, y + 8, MUTED, false);
     }
@@ -694,12 +720,15 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void drawFooter(GuiGraphics g) {
-        int y = panelY + panelH - 1;
-        g.fill(panelX, y, panelX + panelW, y + 1, BORDER);
-        g.fill(panelX, y, panelX + 88, y + 1, RuffyConfig.primaryColor());
+        // Keep the footer stroke safely inside the super-rounded window corners.
+        int x = panelX + 34;
+        int y = panelY + panelH - 3;
+        int width = panelW - 68;
+        g.fill(x, y, x + width, y + 1, BORDER);
+        g.fill(x, y, x + 88, y + 1, RuffyConfig.primaryColor());
         g.drawString(font, "RUFFY VISUALS", panelX + 13,
                 panelY + panelH - 17, DIM, false);
-        g.drawString(font, "RIGHT SHIFT", panelX + panelW - 75,
+        g.drawString(font, "2.3  ·  RIGHT SHIFT", panelX + panelW - 108,
                 panelY + panelH - 17, DIM, false);
     }
 
@@ -771,7 +800,7 @@ public final class RuffyClickGui extends Screen {
     private boolean handleNavigation(int mx, int my) {
         int y = panelY + 42;
         if (my < y + 3 || my > y + 27) return false;
-        float navScale = Math.min(1.0F, (panelW - 20) / 384.0F);
+        float navScale = Math.min(1.0F, (panelW - 20) / 436.0F);
         int x = panelX + 10;
         for (Tab item : Tab.values()) {
             int itemWidth = Math.max(26, Math.round(item.width * navScale));
