@@ -776,92 +776,140 @@ public final class RuffyClickGui extends Screen {
     private boolean handleHomeClick(int mx, int my) {
         prepareHomeLayout();
 
-        // Close control in the top-right of the app bar.
-        int closeX = mainX + mainW - 36 + 26;
-        int closeY = panelY + 14;
-        if (inside(mx, my, closeX - 1, closeY - 1, 13, 13)) {
+        // Window close action matches the rightmost circular title-bar control.
+        int controlsX = mainX + mainW - 45;
+        int controlsY = panelY + 14;
+        if (inside(mx, my, controlsX + 30, controlsY, 12, 12)) {
             onClose();
             return true;
         }
 
-        int heroButtonX = homeCenterX + 17;
+        int heroButtonX = homeCenterX + 18;
         int heroButtonY = homeHeroY + homeHeroH - 34;
-        if (inside(mx, my, heroButtonX, heroButtonY,
-                Math.min(130, homeCenterW / 2), 24)) {
+        int heroButtonW = Math.min(132, Math.max(106, homeCenterW / 2));
+        if (inside(mx, my, heroButtonX, heroButtonY, heroButtonW, 24)) {
             tab = Tab.VISUALS;
             modulePage = 0;
             return true;
         }
 
-        int moduleSeeX = homeCenterX + homeCenterW - 62;
-        if (inside(mx, my, moduleSeeX, homeModulesY + 7, 58, 24)) {
+        int moduleSeeX = homeCenterX + homeModulesW - 70;
+        if (inside(mx, my, moduleSeeX, homeModulesY + 8, 58, 20)) {
             tab = Tab.VISUALS;
+            modulePage = 0;
             return true;
         }
 
         String[] keys = {"prism_core", "nebula_particles", "orbit_particles", "swing_animation"};
-        int gap = 5;
+        int gap = 7;
         int left = homeCenterX + 11;
-        int tileY = homeModulesY + 42;
-        int tileH = Math.max(42, homeModulesH - 53);
-        int tileW = Math.max(48, (homeCenterW - 22 - gap * 3) / 4);
+        int top = homeModulesY + 37;
+        int tileW = Math.max(68, (homeModulesW - 22 - gap) / 2);
+        int tileH = Math.max(42, (homeModulesH - 47 - gap) / 2);
         for (int i = 0; i < keys.length; i++) {
-            int tx = left + i * (tileW + gap);
-            int switchW = Math.min(24, tileW / 2);
-            int switchX = tx + tileW - switchW - 6;
-            if (inside(mx, my, switchX - 2, tileY + 4, switchW + 4, 20)) {
+            int column = i % 2;
+            int row = i / 2;
+            int tx = left + column * (tileW + gap);
+            int ty = top + row * (tileH + gap);
+            int switchX = tx + tileW - 38;
+            int switchY = ty + 8;
+            if (inside(mx, my, switchX - 2, switchY - 2, 34, 20)) {
                 RuffyConfig.set(keys[i], !RuffyConfig.get(keys[i]));
                 return true;
             }
-            if (inside(mx, my, tx, tileY, tileW, tileH)) {
+            if (inside(mx, my, tx, ty, tileW, tileH)) {
                 tab = Tab.VISUALS;
                 selectedKey = keys[i];
+                modulePage = 0;
                 return true;
             }
         }
 
+        // Spotify player controls and album/header open action.
         int spotifyX = homeRightX;
         int spotifyY = homeSpotifyY;
         int spotifyW = homeRightW;
-        if (inside(mx, my, spotifyX + spotifyW / 2 - 11, spotifyY + 107, 23, 24)) {
-            RuffySpotify.togglePlayback();
-            return true;
-        }
         int center = spotifyX + spotifyW / 2;
-        if (inside(mx, my, center - 40, spotifyY + 108, 23, 22)) {
+        int controlsYPlayer = spotifyY + homeSpotifyH - 25;
+        if (inside(mx, my, center - 36, controlsYPlayer, 22, 20)) {
             RuffySpotify.previousTrack();
             return true;
         }
-        if (inside(mx, my, center + 16, spotifyY + 108, 24, 22)) {
+        if (inside(mx, my, center - 13, controlsYPlayer - 3, 27, 26)) {
+            RuffySpotify.togglePlayback();
+            return true;
+        }
+        if (inside(mx, my, center + 15, controlsYPlayer, 22, 20)) {
             RuffySpotify.nextTrack();
             return true;
         }
-        if (inside(mx, my, spotifyX + spotifyW - 30, spotifyY + 7, 24, 22)
-                || inside(mx, my, spotifyX, spotifyY, spotifyW, 34)) {
+        if (inside(mx, my, spotifyX + spotifyW - 24, spotifyY + 7, 18, 20)
+                || inside(mx, my, spotifyX, spotifyY, spotifyW, 32)) {
             if (minecraft != null) minecraft.setScreen(new RuffySpotifyScreen(this));
             return true;
         }
 
-        int appearanceX = homeRightX;
-        int appearanceY = homeAppearanceY;
-        int themeX = appearanceX + homeRightW - 83;
-        if (inside(mx, my, themeX, appearanceY + 31, 70, 20)) {
+        // Appearance / quick settings card.
+        int quickX = homeQuickX;
+        int quickY = homeAppearanceY;
+        int quickW = homeQuickW;
+        int themeY = quickY + 35;
+        int themeW = Math.min(88, quickW - 78);
+        int themeX = quickX + quickW - themeW - 10;
+        if (inside(mx, my, themeX, themeY, themeW, 21)) {
             RuffyConfig.setInt("palette", (RuffyConfig.getInt("palette") + 1) % 10);
             return true;
         }
 
-        int sliderX = appearanceX + 72;
-        int sliderW = Math.max(38, homeRightW - 119);
-        int opacityY = appearanceY + 54;
+        int sliderX = quickX + 66;
+        int sliderW = Math.max(32, quickW - 111);
+        int opacityY = quickY + 65;
         if (inside(mx, my, sliderX - 4, opacityY, sliderW + 8, 16)) {
             int value = 60 + Math.round((mx - sliderX) * 40.0F / Math.max(1, sliderW));
             RuffyConfig.setInt("menu_opacity", value);
             return true;
         }
-        int effectsY = appearanceY + 76;
-        if (inside(mx, my, sliderX - 4, effectsY, sliderW + 8, 16)) {
-            int percent = Math.round((mx - sliderX) * 100.0F / Math.max(1, sliderW));
-            RuffyConfig.setInt("effect_quality", Math.round(percent / 50.0F));
+
+        int qualityY = quickY + 96;
+        int qGap = 3;
+        int qW = Math.max(31, Math.min(39, (quickW - 112) / 3));
+        int qX = quickX + quickW - (qW * 3 + qGap * 2) - 9;
+        for (int i = 0; i < 3; i++) {
+            int bx = qX + i * (qW + qGap);
+            if (inside(mx, my, bx, qualityY, qW, 20)) {
+                RuffyConfig.setInt("effect_quality", i);
+                return true;
+            }
+        }
+
+        int visualizerY = quickY + 128;
+        if (inside(mx, my, quickX + quickW - 44, visualizerY - 2, 36, 22)) {
+            RuffyConfig.set("music_visualizer", !RuffyConfig.get("music_visualizer"));
+            return true;
+        }
+
+        // Lyrics opens the full player and lyrics screen.
+        if (inside(mx, my, homeLyricsX, homeAppearanceY,
+                homeLyricsW, homeAppearanceH)) {
+            if (minecraft != null) minecraft.setScreen(new RuffySpotifyScreen(this));
+            return true;
+        }
+
+        // Footer shortcuts are real navigation destinations.
+        int footerY = homeBottomY + 7;
+        for (int i = 0; i < 4; i++) {
+            int sx = homeSocialX + i * 29;
+            if (!inside(mx, my, sx, footerY + 4, 24, 24)) continue;
+            switch (i) {
+                case 0 -> tab = Tab.HOME;
+                case 1 -> {
+                    tab = Tab.MUSIC;
+                    if (minecraft != null) minecraft.setScreen(new RuffySpotifyScreen(this));
+                }
+                case 2 -> tab = Tab.CONFIGS;
+                case 3 -> tab = Tab.SETUP;
+                default -> { }
+            }
             return true;
         }
         return false;
