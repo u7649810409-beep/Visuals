@@ -247,21 +247,33 @@ public final class RuffyClickGui extends Screen {
         outlineRounded(g, sidebarX, sidebarY, sidebarW, sidebarH,
                 0x7D8C58D8, RuffyRoundedUi.RADIUS_PANEL);
 
-        int logoX = sidebarX + (sidebarW - 42) / 2;
-        int logoY = sidebarY - 2;
-        fillRounded(g, logoX - 8, logoY - 6, 58, 58,
-                withAlpha(RuffyConfig.primaryColor(), 36), RuffyRoundedUi.RADIUS_PANEL);
-        fillRounded(g, logoX - 3, logoY - 3, 48, 48,
-                withAlpha(RuffyConfig.secondaryColor(), 68), RuffyRoundedUi.RADIUS_PANEL);
-        fillRounded(g, logoX, logoY, 42, 42,
-                withAlpha(RuffyConfig.primaryColor(), 76), RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, logoX - 1, logoY - 1, 44, 44,
-                withAlpha(RuffyConfig.primaryColor(), 230), RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, logoX + 2, logoY + 2, 38, 38,
-                withAlpha(0xFFEACBFF, 75), RuffyRoundedUi.RADIUS_PANEL);
-        g.drawCenteredString(font, "R", logoX + 21, logoY + 10, WHITE);
-        fillRounded(g, logoX + 6, logoY + 30, 30, 2,
-                withAlpha(0xFFE8C9FF, 165), 1);
+        int logoSize = 54;
+        int logoX = sidebarX + (sidebarW - logoSize) / 2;
+        int logoY = sidebarY + 4;
+        double logoTime = RuffyAnimation.timeSeconds();
+        // Small orbiting glints create the luminous emblem seen in the reference.
+        for (int i = 0; i < 44; i++) {
+            double angle = Math.PI * 2.0 * i / 44.0 + logoTime * 0.10;
+            int px = logoX + logoSize / 2 + (int) Math.round(Math.cos(angle) * 34);
+            int py = logoY + logoSize / 2 + (int) Math.round(Math.sin(angle) * 19);
+            int alpha = 105 + Math.round(100 * RuffyAnimation.breathe(logoTime, 0.12, i));
+            fillRounded(g, px, py, i % 8 == 0 ? 3 : 2, i % 8 == 0 ? 3 : 2,
+                    withAlpha(RuffyConfig.primaryColor(), alpha), 2);
+        }
+        fillRounded(g, logoX - 7, logoY - 7, 68, 68,
+                withAlpha(RuffyConfig.primaryColor(), 34), RuffyRoundedUi.RADIUS_PANEL);
+        fillRounded(g, logoX - 3, logoY - 3, 60, 60,
+                withAlpha(RuffyConfig.secondaryColor(), 84), RuffyRoundedUi.RADIUS_PANEL);
+        fillRounded(g, logoX, logoY, logoSize, logoSize,
+                withAlpha(RuffyConfig.primaryColor(), 92), RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, logoX - 1, logoY - 1, logoSize + 2, logoSize + 2,
+                withAlpha(RuffyConfig.primaryColor(), 245), RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, logoX + 3, logoY + 3, logoSize - 6, logoSize - 6,
+                withAlpha(0xFFEACBFF, 95), RuffyRoundedUi.RADIUS_PANEL);
+        g.drawCenteredString(font, "R", logoX + logoSize / 2, logoY + 17,
+                0xFFF4DFFF);
+        fillRounded(g, logoX + 9, logoY + 43, 36, 2,
+                withAlpha(0xFFE8C9FF, 190), 1);
 
         int navX = sidebarX + Math.max(4, Math.round(sidebarW * 0.06F));
         int navW = sidebarW - Math.max(8, Math.round(sidebarW * 0.12F));
@@ -286,15 +298,17 @@ public final class RuffyClickGui extends Screen {
             g.drawString(font, "ONLINE", sidebarX + 22, bottomY + 5, WHITE, false);
             g.drawString(font, "1.21.11", sidebarX + 12, bottomY + 15, DIM, false);
         } else {
-            int bottomY = sidebarY + sidebarH - 41;
-            fillRounded(g, sidebarX + 8, bottomY, navW, 33,
-                    0x9A111424, RuffyRoundedUi.RADIUS_CONTROL);
-            fillRounded(g, sidebarX + 16, bottomY + 9, 6, 6,
-                    0xFF45DB91, 3);
-            g.drawString(font, "SYSTEM ONLINE", sidebarX + 29,
-                    bottomY + 6, WHITE, false);
-            g.drawString(font, "LOCAL PROFILE", sidebarX + 16,
-                    bottomY + 19, DIM, false);
+            int bottomY = sidebarY + sidebarH - 54;
+            fillRounded(g, sidebarX + 8, bottomY, navW, 46,
+                    0xB5111426, RuffyRoundedUi.RADIUS_CONTROL);
+            outlineRounded(g, sidebarX + 8, bottomY, navW, 46,
+                    withAlpha(RuffyConfig.primaryColor(), 105), RuffyRoundedUi.RADIUS_CONTROL);
+            fillRounded(g, sidebarX + 16, bottomY + 11, 7, 7,
+                    0xFF45DB91, 4);
+            g.drawString(font, "Online", sidebarX + 29,
+                    bottomY + 8, WHITE, false);
+            g.drawString(font, "1.21.11", sidebarX + 16,
+                    bottomY + 25, DIM, false);
         }
     }
 
