@@ -185,15 +185,15 @@ public final class RuffyClickGui extends Screen {
         int logoX = panelX + 13;
         int logoY = panelY + 6;
         fillRounded(g, logoX - 4, logoY - 3, 34, 34,
-                withAlpha(primary, 30), 17);
+                withAlpha(primary, 30), RuffyRoundedUi.RADIUS_CARD);
         fillRounded(g, logoX, logoY, 27, 27,
-                withAlpha(primary, 195), 14);
+                withAlpha(primary, 195), RuffyRoundedUi.RADIUS_ROW);
         outlineRounded(g, logoX, logoY, 27, 27,
-                withAlpha(0xFFFFFFFF, 130), 14);
+                withAlpha(0xFFFFFFFF, 110), RuffyRoundedUi.RADIUS_ROW);
         g.drawCenteredString(font, "R", logoX + 13, logoY + 8, WHITE);
 
         g.drawString(font, "RUFFY VISUALS", panelX + 53, panelY + 8, WHITE, false);
-        g.drawString(font, "GALAXY CLIENT  ·  2.2", panelX + 53, panelY + 22,
+        g.drawString(font, "GALAXY CLIENT  ·  2.3", panelX + 53, panelY + 22,
                 secondary, false);
         fillRounded(g, panelX + 204, panelY + 16, 5, 5,
                 withAlpha(primary, 210), 3);
@@ -201,9 +201,9 @@ public final class RuffyClickGui extends Screen {
                 panelX + 220, panelY + 16, MUTED, false);
 
         fillRounded(g, panelX + panelW - 78, panelY + 7, 64, 26,
-                0x9E090817, 13);
+                0xB5090C19, RuffyRoundedUi.RADIUS_CONTROL);
         outlineRounded(g, panelX + panelW - 78, panelY + 7, 64, 26,
-                withAlpha(primary, 120), 13);
+                withAlpha(primary, 96), RuffyRoundedUi.RADIUS_CONTROL);
         g.drawCenteredString(font, "ESC  ×", panelX + panelW - 46,
                 panelY + 16, MUTED);
     }
@@ -474,8 +474,10 @@ public final class RuffyClickGui extends Screen {
         int primary = RuffyConfig.primaryColor();
         boolean compact = h < 180;
         g.drawString(font, "MODULE SETTINGS", x + pad, y + 13, DIM, false);
-        fillRounded(g, x + pad, y + 32, 30, 30, withAlpha(primary, 42), 15);
-        outlineRounded(g, x + pad, y + 32, 30, 30, withAlpha(primary, 155), 15);
+        fillRounded(g, x + pad, y + 32, 30, 30,
+                withAlpha(primary, 42), RuffyRoundedUi.RADIUS_ROW);
+        outlineRounded(g, x + pad, y + 32, 30, 30,
+                withAlpha(primary, 145), RuffyRoundedUi.RADIUS_ROW);
         g.drawCenteredString(font, iconFor(selected), x + pad + 15, y + 43, primary);
         g.drawString(font, selected.title(), x + pad + 37, y + 35, WHITE, false);
         g.drawString(font, selected.section().title().toUpperCase(Locale.ROOT),
@@ -485,8 +487,10 @@ public final class RuffyClickGui extends Screen {
                 w - pad * 2, MUTED, 11);
 
         int toggleY = y + (compact ? 86 : 104);
-        fillRounded(g, x + pad, toggleY, w - pad * 2, 39, 0x84201934, 15);
-        outlineRounded(g, x + pad, toggleY, w - pad * 2, 39, withAlpha(primary, 72), 15);
+        fillRounded(g, x + pad, toggleY, w - pad * 2, 39,
+                0xA10E1020, RuffyRoundedUi.RADIUS_ROW);
+        outlineRounded(g, x + pad, toggleY, w - pad * 2, 39,
+                withAlpha(primary, 68), RuffyRoundedUi.RADIUS_ROW);
         g.drawString(font, "MODULE STATE", x + pad + 8, toggleY + 7, MUTED, false);
         boolean active = RuffyConfig.get(selected.key());
         g.drawString(font, active ? "ENABLED" : "DISABLED",
@@ -721,7 +725,7 @@ public final class RuffyClickGui extends Screen {
         g.fill(panelX, y, panelX + 88, y + 1, RuffyConfig.primaryColor());
         g.drawString(font, "RUFFY VISUALS", panelX + 13,
                 panelY + panelH - 17, DIM, false);
-        g.drawString(font, "RIGHT SHIFT", panelX + panelW - 75,
+        g.drawString(font, "2.3  ·  RIGHT SHIFT", panelX + panelW - 108,
                 panelY + panelH - 17, DIM, false);
     }
 
