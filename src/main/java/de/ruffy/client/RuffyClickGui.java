@@ -661,6 +661,21 @@ public final class RuffyClickGui extends Screen {
         drawIconButton(g, center + 15, controlsY, 23, 21, "▶|", WHITE,
                 inside(mouseX, mouseY, center + 15, controlsY, 23, 21));
     }
+    private void drawVisualizerBars(GuiGraphics g, int x, int y, int width) {
+        double time = RuffyAnimation.timeSeconds();
+        int bars = Math.max(6, Math.min(18, width / 4));
+        int gap = 2;
+        int barW = Math.max(1, (width - (bars - 1) * gap) / bars);
+        for (int i = 0; i < bars; i++) {
+            float pulse = 0.25F + 0.75F * RuffyAnimation.breathe(time,
+                    0.55 + (i % 4) * 0.12, i * 0.7F);
+            int height = Math.max(3, Math.round(5 + pulse * 21));
+            fillRounded(g, x + i * (barW + gap), y + 25 - height,
+                    barW, height, withAlpha(RuffyConfig.primaryColor(),
+                            160 + Math.round(pulse * 95)), 1);
+        }
+    }
+
     private void drawHomeLyrics(GuiGraphics g, int mouseX, int mouseY) {
         int x = homeLyricsX;
         int y = homeLyricsY;
