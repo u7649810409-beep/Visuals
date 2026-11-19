@@ -503,8 +503,8 @@ public final class RuffyClickGui extends Screen {
                 inside(mouseX, mouseY, x + w - 70, y + 8, 58, 20), false);
 
         String[] keys = {"prism_core", "nebula_particles", "orbit_particles", "swing_animation"};
-        String[] titles = {"Prism", "Nebula", "Orbit", "Swing"};
-        String[] descriptions = {"3D core", "Particles", "Rings", "Motion"};
+        String[] titles = {"Core", "Dust", "Rings", "Move"};
+        String[] descriptions = {"3D core", "Ambient FX", "Orbit accents", "Smooth swing"};
         String[] icons = {"◇", "✧", "◎", "⌁"};
         int gap = 7;
         int left = x + 11;
@@ -528,18 +528,21 @@ public final class RuffyClickGui extends Screen {
                     withAlpha(enabled ? RuffyConfig.primaryColor() : 0xFF877AAB,
                             enabled ? 150 : 52), RuffyRoundedUi.RADIUS_CONTROL);
 
-            fillRounded(g, tx + 7, ty + 7, 20, 20,
+            fillRounded(g, tx + 6, ty + 6, 20, 20,
                     withAlpha(RuffyConfig.primaryColor(), enabled ? 58 : 24),
                     RuffyRoundedUi.RADIUS_CONTROL);
-            g.drawCenteredString(font, icons[i], tx + 17, ty + 12,
+            g.drawCenteredString(font, icons[i], tx + 16, ty + 11,
                     enabled ? 0xFFEAD8FF : MUTED);
 
-            int textX = tx + 31;
-            int textW = Math.max(20, tileW - 66);
+            int textX = tx + 30;
+            int switchX = tx + tileW - 27;
+            int textW = Math.max(16, switchX - textX - 5);
             g.drawString(font, trimToWidth(titles[i], textW), textX,
-                    ty + 8, WHITE, false);
-            g.drawString(font, trimToWidth(descriptions[i], textW), textX,
-                    ty + 21, MUTED, false);
+                    tileW < 115 ? ty + 12 : ty + 8, WHITE, false);
+            if (tileW >= 115) {
+                g.drawString(font, trimToWidth(descriptions[i], textW), textX,
+                        ty + 21, MUTED, false);
+            }
 
             int switchX = tx + tileW - 29;
             int switchY = ty + 8;
@@ -836,13 +839,13 @@ public final class RuffyClickGui extends Screen {
         int left = homeCenterX + 11;
         int top = homeModulesY + 37;
         int tileW = Math.max(68, (homeModulesW - 22 - gap) / 2);
-        int tileH = Math.max(42, (homeModulesH - 47 - gap) / 2);
+        int tileH = Math.max(28, (homeModulesH - 47 - gap) / 2);
         for (int i = 0; i < keys.length; i++) {
             int column = i % 2;
             int row = i / 2;
             int tx = left + column * (tileW + gap);
             int ty = top + row * (tileH + gap);
-            int switchX = tx + tileW - 38;
+            int switchX = tx + tileW - 27;
             int switchY = ty + 8;
             if (inside(mx, my, switchX - 2, switchY - 2, 28, 18)) {
                 RuffyConfig.set(keys[i], !RuffyConfig.get(keys[i]));
