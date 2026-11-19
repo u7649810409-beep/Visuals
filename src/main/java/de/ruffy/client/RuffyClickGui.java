@@ -553,6 +553,7 @@ public final class RuffyClickGui extends Screen {
         int y = homeSpotifyY;
         int w = homeRightW;
         int h = homeSpotifyH;
+        boolean compact = h < 120;
         RuffyRoundedUi.shadow(g, x, y, w, h, RuffyRoundedUi.RADIUS_PANEL, 24);
         fillRounded(g, x, y, w, h, 0xE0080917, RuffyRoundedUi.RADIUS_PANEL);
         outlineRounded(g, x, y, w, h, 0x865E45AF, RuffyRoundedUi.RADIUS_PANEL);
@@ -569,24 +570,25 @@ public final class RuffyClickGui extends Screen {
         drawIconButton(g, x + w - 22, y + 9, 16, 17, "⚙", MUTED,
                 inside(mouseX, mouseY, x + w - 22, y + 9, 16, 17));
 
-        int artSize = Math.min(44, Math.max(34, h / 3));
+        int artSize = compact ? 28 : 44;
         int artX = x + 12;
-        int artY = y + 37;
+        int artY = y + (compact ? 34 : 37);
         drawAlbumArt(g, artX, artY, artSize);
         int infoX = artX + artSize + 10;
         int infoW = Math.max(40, x + w - 12 - infoX);
         g.drawString(font, trimToWidth(RuffySpotify.getTrackName(), infoW),
-                infoX, artY + 5, WHITE, false);
+                infoX, artY + 4, WHITE, false);
         g.drawString(font, trimToWidth(RuffySpotify.getArtistName(), infoW),
-                infoX, artY + 19, MUTED, false);
-        if (RuffyConfig.get("music_visualizer")) {
-            drawVisualizerBars(g, infoX, artY + 18, infoW);
-        } else {
-            g.drawString(font, connected ? "PLAYBACK READY" : "LINK YOUR ACCOUNT",
-                    infoX, artY + 31, DIM, false);
+                infoX, artY + 17, MUTED, false);
+        if (!compact && RuffyConfig.get("music_visualizer")) {
+            drawVisualizerBars(g, infoX, artY + 27, infoW);
+        } else if (compact) {
+            g.drawString(font, connected ? "PLAYING" : "NOT CONNECTED",
+                    infoX, artY + 19, DIM, false);
         }
 
-        int progressY = y + h - 47;
+        int controlsY = y + h - (compact ? 22 : 25);
+        int progressY = y + h - (compact ? 28 : 47);
         int progressX = x + 12;
         int progressW = w - 24;
         long duration = RuffySpotify.getDurationMs();
@@ -596,23 +598,25 @@ public final class RuffyClickGui extends Screen {
         fillRounded(g, progressX, progressY, progressW, 3, 0xFF332C46, 2);
         fillRounded(g, progressX, progressY, Math.round(progressW * ratio), 3,
                 RuffyConfig.primaryColor(), 2);
-        g.drawString(font, formatTime(position), progressX, progressY + 5, DIM, false);
-        String total = formatTime(duration);
-        g.drawString(font, total, progressX + progressW - font.width(total),
-                progressY + 5, DIM, false);
+        if (!compact) {
+            g.drawString(font, formatTime(position), progressX, progressY + 5, DIM, false);
+            String total = formatTime(duration);
+            g.drawString(font, total, progressX + progressW - font.width(total),
+                    progressY + 5, DIM, false);
+        }
 
-        int controlsY = y + h - 25;
+        int buttonHeight = 20;
         int center = x + w / 2;
-        drawIconButton(g, center - 36, controlsY, 22, 20, "|◀", WHITE,
-                inside(mouseX, mouseY, center - 36, controlsY, 22, 20));
+        drawIconButton(g, center - 36, controlsY, 22, buttonHeight, "|◀", WHITE,
+                inside(mouseX, mouseY, center - 36, controlsY, 22, buttonHeight));
         fillRounded(g, center - 11, controlsY - 1, 23, 22,
                 RuffyConfig.primaryColor(), 11);
         fillRounded(g, center - 13, controlsY - 3, 27, 26,
                 withAlpha(RuffyConfig.primaryColor(), 28), 13);
         g.drawCenteredString(font, RuffySpotify.isPlaying() ? "Ⅱ" : "▶",
                 center, controlsY + 6, WHITE);
-        drawIconButton(g, center + 15, controlsY, 22, 20, "▶|", WHITE,
-                inside(mouseX, mouseY, center + 15, controlsY, 22, 20));
+        drawIconButton(g, center + 15, controlsY, 22, buttonHeight, "▶|", WHITE,
+                inside(mouseX, mouseY, center + 15, controlsY, 22, buttonHeight));
     }
 
     private void drawAlbumArt(GuiGraphics g, int x, int y, int size) {
