@@ -303,7 +303,9 @@ public final class RuffyVisualEffects {
     public static synchronized void render(WorldRenderContext context) {
         Minecraft client = Minecraft.getInstance();
         if (context == null || client.player == null || client.level == null
-                || context.matrices() == null || context.consumers() == null) {
+                || context.matrices() == null || context.consumers() == null
+                || client.screen instanceof RuffyClickGui
+                || client.screen instanceof RuffySpotifyScreen) {
             return;
         }
         if (POINTS.isEmpty() && RINGS.isEmpty() && SLASHES.isEmpty()
