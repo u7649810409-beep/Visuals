@@ -1111,6 +1111,9 @@ public final class RuffyClickGui extends Screen {
         int x = mainX;
         int y = panelY + 96;
         g.drawString(font, "COLOR SYSTEM", x, y, WHITE, false);
+        drawButton(g, x + mainW - 78, y - 5, 70, 19, "PRESETS",
+                ButtonStyle.OUTLINE,
+                inside(mouseX, mouseY, x + mainW - 78, y - 5, 70, 19), false);
         int sw = (mainW - 24) / 5;
         for (int i = 0; i < PALETTE_NAMES.length; i++) {
             int cx = x + (i % 5) * (sw + 6);
@@ -1603,6 +1606,10 @@ public final class RuffyClickGui extends Screen {
     private boolean handleStyleClick(int mx, int my) {
         int x = mainX;
         int y = panelY + 96;
+        if (inside(mx, my, x + mainW - 78, y - 5, 70, 19)) {
+            tab = Tab.PRESETS;
+            return true;
+        }
         int sw = (mainW - 24) / 5;
         for (int i = 0; i < PALETTE_NAMES.length; i++) {
             int cx = x + (i % 5) * (sw + 6);
@@ -1613,7 +1620,7 @@ public final class RuffyClickGui extends Screen {
             }
         }
 
-        int settingsY = y + 104;
+        int settingsY = y + 87;
         if (inside(mx, my, x, settingsY + 11, mainW - 12, 15)) {
             RuffyConfig.setInt("hud_opacity",
                     12 + Math.round((mx - x) * 78.0F / (mainW - 12)));
