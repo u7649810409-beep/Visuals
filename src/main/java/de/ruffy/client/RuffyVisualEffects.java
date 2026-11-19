@@ -459,8 +459,9 @@ public final class RuffyVisualEffects {
     }
 
     private static float amount(String key) {
-        return RuffyAnimation.animate("effect." + key,
+        float enabled = RuffyAnimation.animate("effect." + key,
                 RuffyConfig.get(key) ? 1.0F : 0.0F);
+        return enabled * (RuffyConfig.getInt("particle_density") / 100.0F);
     }
 
     private static boolean shouldEmit(float amount, int currentTick, int interval) {
