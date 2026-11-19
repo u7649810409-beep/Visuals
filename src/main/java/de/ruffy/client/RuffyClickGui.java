@@ -268,7 +268,7 @@ public final class RuffyClickGui extends Screen {
                 0x7D8C58D8, RuffyRoundedUi.RADIUS_PANEL);
 
         int logoX = sidebarX + (sidebarW - 42) / 2;
-        int logoY = sidebarY + Math.max(4, Math.round(sidebarH * 0.018F));
+        int logoY = sidebarY - 2;
         fillRounded(g, logoX - 8, logoY - 6, 58, 58,
                 withAlpha(RuffyConfig.primaryColor(), 36), RuffyRoundedUi.RADIUS_PANEL);
         fillRounded(g, logoX - 3, logoY - 3, 48, 48,
@@ -330,12 +330,12 @@ public final class RuffyClickGui extends Screen {
         int h = sidebarH;
         return new int[]{
                 sidebarY + Math.round(h * 0.18F),
-                sidebarY + Math.round(h * 0.28F),
-                sidebarY + Math.round(h * 0.38F),
-                sidebarY + Math.round(h * 0.48F),
-                sidebarY + Math.round(h * 0.60F),
-                sidebarY + Math.round(h * 0.68F),
-                sidebarY + Math.round(h * 0.76F)
+                sidebarY + Math.round(h * 0.31F),
+                sidebarY + Math.round(h * 0.41F),
+                sidebarY + Math.round(h * 0.49F),
+                sidebarY + Math.round(h * 0.58F),
+                sidebarY + Math.round(h * 0.67F),
+                sidebarY + Math.round(h * 0.74F)
         };
     }
 
