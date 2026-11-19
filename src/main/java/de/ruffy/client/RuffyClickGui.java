@@ -714,6 +714,51 @@ public final class RuffyClickGui extends Screen {
                 RuffyConfig.getInt("particle_density"), 0, 100);
     }
 
+    private void drawAlbumArt(GuiGraphics g, int x, int y, int size) {
+        int radius = Math.max(4, size / 5);
+        fillRounded(g, x, y, size, size, 0xFF100A25, radius);
+        fillRounded(g, x + 2, y + 3, size - 4, size - 6, 0xFF24104D, radius);
+        fillRounded(g, x + 4, y + size / 2 - 4, size - 8,
+                Math.max(6, size / 4), 0xFF8B42D0, Math.max(3, size / 8));
+        fillRounded(g, x + size / 4, y + size / 5, size / 2, size / 2,
+                0xFF6330A6, size / 4);
+        fillRounded(g, x + size / 3, y + size / 4,
+                Math.max(4, size / 4), Math.max(4, size / 4),
+                0xFFC89AFF, Math.max(2, size / 8));
+        fillRounded(g, x + 5, y + size / 2 + 4, size - 10,
+                Math.max(3, size / 10), 0xFFD78BFF, Math.max(2, size / 12));
+        fillRounded(g, x + size / 3, y + size / 4,
+                Math.max(2, size / 10), Math.max(2, size / 10),
+                0xFFFFF4FF, Math.max(1, size / 20));
+        outlineRounded(g, x, y, size, size, withAlpha(RuffyConfig.primaryColor(), 165), radius);
+    }
+
+    private void drawVisualizerBars(GuiGraphics g, int x, int y, int width) {
+        if (width <= 0) return;
+        double time = RuffyAnimation.timeSeconds();
+        int bars = Math.max(5, Math.min(16, width / 3));
+        int gap = 1;
+        int barW = Math.max(1, (width - (bars - 1) * gap) / bars);
+        for (int i = 0; i < bars; i++) {
+            float pulse = 0.22F + 0.78F * RuffyAnimation.breathe(time,
+                    0.52 + (i % 4) * 0.13, i * 0.71F);
+            int barHeight = Math.max(3, Math.round(4 + pulse * 22));
+            fillRounded(g, x + i * (barW + gap), y + 25 - barHeight,
+                    barW, barHeight,
+                    withAlpha(RuffyConfig.primaryColor(), 145 + Math.round(pulse * 110)), 1);
+        }
+    }
+
+    private String formatTime(long millis) {
+        long seconds = Math.max(0L, millis) / 1000L;
+        return (seconds / 60L) + ":" + String.format(Locale.ROOT, "%02d", seconds % 60L);
+    }
+
+    private String paletteName(int palette) {
+        int safe = Math.max(0, Math.min(PALETTE_NAMES.length - 1, palette));
+        return PALETTE_NAMES[safe];
+    }
+
     private void drawHomeLyrics(GuiGraphics g, int mouseX, int mouseY) {
         int x = homeLyricsX;
         int y = homeLyricsY;
@@ -873,23 +918,23 @@ public final class RuffyClickGui extends Screen {
         // Appearance controls match their compact drawn positions.
         int quickX = homeQuickX, quickY = homeAppearanceY, quickW = homeQuickW;
         int thumbW = Math.min(58, Math.max(40, quickW * 42 / 100));
-        int controlsX = quickX + 10 + thumbW + 8, right = quickX + quickW - 8;
-        int themeY = quickY + 31, themeW = Math.max(28, right - controlsX);
-        if (inside(mx, my, controlsX, themeY, themeW, 16)) {
+        int appearanceControlsX = quickX + 10 + thumbW + 8, right = quickX + quickW - 8;
+        int themeY = quickY + 31, themeW = Math.max(28, right - appearanceControlsX);
+        if (inside(mx, my, appearanceControlsX, themeY, themeW, 16)) {
             RuffyConfig.setInt("palette", (RuffyConfig.getInt("palette") + 1) % 10);
             return true;
         }
-        int sliderW = Math.max(18, right - controlsX);
+        int sliderW = Math.max(18, right - appearanceControlsX);
         int blurY = quickY + 47;
-        if (inside(mx, my, controlsX - 3, blurY - 2, sliderW + 6, 12)) {
-            int value = Math.round((mx - controlsX) * 10.0F / Math.max(1, sliderW));
+        if (inside(mx, my, appearanceControlsX - 3, blurY - 2, sliderW + 6, 12)) {
+            int value = Math.round((mx - appearanceControlsX) * 10.0F / Math.max(1, sliderW));
             Minecraft.getInstance().options.menuBackgroundBlurriness().set(
                     Math.max(0, Math.min(10, value)));
             return true;
         }
         int particlesY = quickY + 62;
-        if (inside(mx, my, controlsX - 3, particlesY - 2, sliderW + 6, 12)) {
-            int value = Math.round((mx - controlsX) * 100.0F / Math.max(1, sliderW));
+        if (inside(mx, my, appearanceControlsX - 3, particlesY - 2, sliderW + 6, 12)) {
+            int value = Math.round((mx - appearanceControlsX) * 100.0F / Math.max(1, sliderW));
             RuffyConfig.setInt("particle_density", value);
             return true;
         }
