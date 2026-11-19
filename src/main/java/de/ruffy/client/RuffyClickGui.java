@@ -409,18 +409,20 @@ public final class RuffyClickGui extends Screen {
             searchBox.setWidth(Math.max(72, searchW - 33));
         }
 
-        int controlsX = mainX + mainW - 90;
-        int controlsY = panelY + 14;
+        int controlsX = mainX + mainW - 92;
+        int controlsY = panelY + Math.max(5, Math.round(panelH * 0.028F));
         for (int i = 0; i < 3; i++) {
-            int cx = controlsX + i * 15;
-            int controlColor = i == 2 ? 0xFFFF6487 : 0xFF8E78C5;
-            fillRounded(g, cx, controlsY, 12, 12, 0xC20D0B1B, 6);
-            outlineRounded(g, cx, controlsY, 12, 12,
-                    withAlpha(controlColor, i == 2 ? 172 : 94), 6);
+            int cx = controlsX + i * 34;
+            int controlColor = i == 2 ? 0xFFFF6487 : 0xFFBBA2F2;
+            fillRounded(g, cx - 2, controlsY - 2, 30, 30,
+                    withAlpha(controlColor, 22), 15);
+            fillRounded(g, cx, controlsY, 26, 26, 0xE50C0B1A, 13);
+            outlineRounded(g, cx, controlsY, 26, 26,
+                    withAlpha(controlColor, i == 2 ? 215 : 145), 13);
         }
-        g.drawCenteredString(font, "−", controlsX + 6, controlsY + 1, MUTED);
-        g.drawCenteredString(font, "□", controlsX + 21, controlsY + 1, MUTED);
-        g.drawCenteredString(font, "×", controlsX + 36, controlsY + 1, 0xFFFFA8BD);
+        g.drawCenteredString(font, "−", controlsX + 13, controlsY + 8, MUTED);
+        g.drawCenteredString(font, "□", controlsX + 47, controlsY + 8, MUTED);
+        g.drawCenteredString(font, "×", controlsX + 81, controlsY + 8, 0xFFFFA8BD);
     }
 
 
@@ -451,8 +453,8 @@ public final class RuffyClickGui extends Screen {
         homeAppearanceY = homeModulesY + Math.max(7, Math.round(homeModulesH * 0.13F));
         homeAppearanceH = Math.max(34, homeModulesH - Math.max(8, Math.round(homeModulesH * 0.13F)));
 
-        homePerfW = Math.max(90, Math.min(300, mainW * 36 / 100));
-        homeSocialX = mainX + mainW - 4 * 44 - 3 * 10;
+        homePerfW = Math.max(90, Math.min(300, mainW * 37 / 100));
+        homeSocialX = mainX + mainW - 4 * 44 - 3 * 14;
         homeVersionX = mainX + homePerfW + gap;
         homeVersionW = Math.max(80, homeSocialX - homeVersionX - gap);
     }
@@ -494,7 +496,7 @@ public final class RuffyClickGui extends Screen {
                 titleY + Math.max(28, h * 31 / 100), 0xFFE8C9FF, false);
 
         int buttonH = Math.max(19, Math.min(28, h / 5));
-        int buttonY = y + h - buttonH - Math.max(8, h * 6 / 100);
+        int buttonY = y + h - buttonH - Math.max(12, h * 11 / 100);
         int buttonW = Math.min(190, Math.max(90, w * 28 / 100));
         drawButton(g, textX, buttonY, buttonW, buttonH,
                 "Explore Modules  →", ButtonStyle.PRIMARY,
@@ -807,7 +809,7 @@ public final class RuffyClickGui extends Screen {
 
         String[] actions = {"◉", "▶", "⌘", "◎"};
         for (int i = 0; i < actions.length; i++) {
-            int sx = homeSocialX + i * 54;
+            int sx = homeSocialX + i * 58;
             boolean hover = inside(mouseX, mouseY, sx, y + (h - 42) / 2, 44, 42);
             fillRounded(g, sx, y + (h - 42) / 2, 42, 42,
                     hover ? 0xE3261A42 : 0xD20D1020, 21);
@@ -849,9 +851,9 @@ public final class RuffyClickGui extends Screen {
         prepareHomeLayout();
 
         // Window close action matches the rightmost circular title-bar control.
-        int controlsX = mainX + mainW - 90;
-        int controlsY = panelY + 14;
-        if (inside(mx, my, controlsX + 60, controlsY, 12, 12)) {
+        int controlsX = mainX + mainW - 92;
+        int controlsY = panelY + Math.max(5, Math.round(panelH * 0.028F));
+        if (inside(mx, my, controlsX + 68, controlsY, 26, 26)) {
             onClose();
             return true;
         }
@@ -859,7 +861,7 @@ public final class RuffyClickGui extends Screen {
         int heroButtonX = homeCenterX + Math.max(10, homeCenterW * 4 / 100);
         int heroButtonH = Math.max(19, Math.min(28, homeHeroH / 5));
         int heroButtonY = homeHeroY + homeHeroH - heroButtonH
-                - Math.max(8, homeHeroH * 6 / 100);
+                - Math.max(12, homeHeroH * 11 / 100);
         int heroButtonW = Math.min(190, Math.max(90, homeCenterW * 28 / 100));
         if (inside(mx, my, heroButtonX, heroButtonY, heroButtonW, heroButtonH)) {
             tab = Tab.VISUALS;
