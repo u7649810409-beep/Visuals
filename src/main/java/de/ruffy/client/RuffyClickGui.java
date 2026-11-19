@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Ruffy Visuals 2.4 — complete Control Center redesign.
+ * Ruffy Visuals 2.5 — Galaxy dashboard inspired by the approved visual reference.
  *
  * The layout follows an app-shell model: persistent task navigation at the
  * left, one clear content workspace, compact two-column module cards and a
@@ -707,7 +707,7 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, "♛", homeVersionX + 9, y + 8, 0xFFFFD45E, false);
         g.drawString(font, trimToWidth("Ruffy Visuals 2.5.0", Math.max(1, homeVersionW - 34)),
                 homeVersionX + 24, y + 6, WHITE, false);
-        g.drawString(font, "The best visuals. Better than ever.",
+        g.drawString(font, trimToWidth("The best visuals. Better than ever.", Math.max(1, homeVersionW - 34)),
                 homeVersionX + 24, y + 18, MUTED, false);
 
         String[] socials = {"D", "▶", "GH", "◎"};
@@ -819,7 +819,7 @@ public final class RuffyClickGui extends Screen {
         int appearanceX = homeRightX;
         int appearanceY = homeAppearanceY;
         int themeX = appearanceX + homeRightW - 83;
-        if (inside(mx, my, themeX, appearanceY + 39, 70, 20)) {
+        if (inside(mx, my, themeX, appearanceY + 31, 70, 20)) {
             RuffyConfig.setInt("palette", (RuffyConfig.getInt("palette") + 1) % 10);
             return true;
         }
