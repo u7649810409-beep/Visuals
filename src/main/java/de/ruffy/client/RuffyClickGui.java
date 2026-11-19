@@ -646,7 +646,7 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, "◈  Appearance", x + 11, y + 10, WHITE, false);
         g.drawString(font, "Customize your look", x + 11, y + 23, MUTED, false);
 
-        int themeY = y + 39;
+        int themeY = y + 31;
         g.drawString(font, "Theme", x + 12, themeY + 5, MUTED, false);
         int themeX = x + w - 83;
         fillRounded(g, themeX, themeY, 70, 20, 0x8C20203D,
@@ -659,7 +659,7 @@ public final class RuffyClickGui extends Screen {
                 themeX + 17, themeY + 6, WHITE, false);
         g.drawString(font, "⌄", themeX + 59, themeY + 5, MUTED, false);
 
-        int opacityY = y + 59;
+        int opacityY = y + 54;
         g.drawString(font, "Opacity", x + 12, opacityY + 4, MUTED, false);
         int sliderX = x + 72;
         int sliderW = Math.max(38, w - 119);
@@ -669,7 +669,7 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, opacity, x + w - font.width(opacity) - 11,
                 opacityY + 3, WHITE, false);
 
-        int effectsY = y + (h >= 108 ? 87 : h - 22);
+        int effectsY = y + 76;
         g.drawString(font, "Particles", x + 12, effectsY + 4, MUTED, false);
         int effectPercent = RuffyConfig.getInt("effect_quality") * 50;
         drawSlider(g, sliderX, effectsY, sliderW, effectPercent, 0, 100);
@@ -699,7 +699,7 @@ public final class RuffyClickGui extends Screen {
         outlineRounded(g, homeVersionX, y, homeVersionW, h,
                 withAlpha(RuffyConfig.primaryColor(), 130), RuffyRoundedUi.RADIUS_CONTROL);
         g.drawString(font, "♛", homeVersionX + 9, y + 8, 0xFFFFD45E, false);
-        g.drawString(font, "Ruffy Visuals 2.5.0",
+        g.drawString(font, trimToWidth("Ruffy Visuals 2.5.0", Math.max(1, homeVersionW - 34)),
                 homeVersionX + 24, y + 6, WHITE, false);
         g.drawString(font, "The best visuals. Better than ever.",
                 homeVersionX + 24, y + 18, MUTED, false);
@@ -820,13 +820,13 @@ public final class RuffyClickGui extends Screen {
 
         int sliderX = appearanceX + 72;
         int sliderW = Math.max(38, homeRightW - 119);
-        int opacityY = appearanceY + 59;
+        int opacityY = appearanceY + 54;
         if (inside(mx, my, sliderX - 4, opacityY, sliderW + 8, 16)) {
             int value = 60 + Math.round((mx - sliderX) * 40.0F / Math.max(1, sliderW));
             RuffyConfig.setInt("menu_opacity", value);
             return true;
         }
-        int effectsY = appearanceY + (homeAppearanceH >= 108 ? 87 : homeAppearanceH - 22);
+        int effectsY = appearanceY + 76;
         if (inside(mx, my, sliderX - 4, effectsY, sliderW + 8, 16)) {
             int percent = Math.round((mx - sliderX) * 100.0F / Math.max(1, sliderW));
             RuffyConfig.setInt("effect_quality", Math.round(percent / 50.0F));
@@ -1144,7 +1144,7 @@ public final class RuffyClickGui extends Screen {
         drawInfoRow(g, x, y + 108, "CONFIG FILE",
                 "config/ruffyclient.properties");
         drawInfoRow(g, x, y + 144, "BUILD",
-                "Ruffy Visuals 2.4 · Minecraft 1.21.11 · Fabric");
+                "Ruffy Visuals 2.5.0 · Minecraft 1.21.11 · Fabric");
     }
 
     private void drawMusicLanding(GuiGraphics g, int mouseX, int mouseY) {
