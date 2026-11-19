@@ -544,24 +544,24 @@ public final class RuffyClickGui extends Screen {
                             enabled ? 205 : 78), RuffyRoundedUi.RADIUS_CONTROL);
 
             int iconSize = Math.max(14, Math.min(22, tileW / 4));
-            fillRounded(g, tx + 7, ty + 6, iconSize, iconSize,
+            fillRounded(g, tx + 7, ty + 14, iconSize, iconSize,
                     withAlpha(RuffyConfig.primaryColor(), enabled ? 74 : 34),
                     RuffyRoundedUi.RADIUS_CONTROL);
-            g.drawCenteredString(font, icons[i], tx + 7 + iconSize / 2, ty + 10,
+            g.drawCenteredString(font, icons[i], tx + 7 + iconSize / 2, ty + 18,
                     enabled ? 0xFFF1DFFF : MUTED);
 
             int switchW = Math.max(18, Math.min(28, tileW / 4));
             int switchH = Math.max(11, Math.min(16, tileH / 4));
             int switchX = tx + tileW - switchW - 6;
-            int switchY = ty + 5;
+            int switchY = ty + 22;
             int textX = tx + 7;
             int textW = Math.max(15, tileW - 14);
-            int titleY = ty + Math.max(15, tileH - (tileH >= 42 ? 23 : 12));
+            int titleY = ty + Math.max(15, tileH * 43 / 100);
             g.drawString(font, trimToWidth(titles[i], textW), textX,
                     titleY, WHITE, false);
             if (tileH >= 52) {
                 g.drawString(font, trimToWidth(descriptions[i], textW), textX,
-                        ty + tileH - 12, MUTED, false);
+                        ty + tileH - 28, MUTED, false);
             }
             drawSwitch(g, switchX, switchY, enabled, switchW, switchH,
                     "home.feature." + keys[i]);
@@ -911,7 +911,7 @@ public final class RuffyClickGui extends Screen {
             int switchW = Math.max(20, Math.min(28, tileW / 4));
             int switchH = Math.max(12, Math.min(16, tileH / 5));
             int switchX = tx + tileW - switchW - 7;
-            int switchY = ty + 6;
+            int switchY = ty + 22;
             if (inside(mx, my, switchX - 2, switchY - 2, switchW + 4, switchH + 4)) {
                 RuffyConfig.set(keys[i], !RuffyConfig.get(keys[i]));
                 return true;
