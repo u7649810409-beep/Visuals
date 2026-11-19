@@ -235,21 +235,21 @@ public final class RuffyClickGui extends Screen {
 
         int navX = sidebarX + 8;
         int navW = sidebarW - 16;
-        drawSidebarLabel(g, "WORKSPACE", sidebarX + 12, panelY + 70);
-        drawNavItem(g, Tab.VISUALS, navX, panelY + 83, navW, 26, mouseX, mouseY);
-        drawNavItem(g, Tab.WORLD, navX, panelY + 112, navW, 26, mouseX, mouseY);
-        drawNavItem(g, Tab.HUD, navX, panelY + 141, navW, 26, mouseX, mouseY);
+        drawSidebarLabel(g, "WORKSPACE", sidebarX + 12, panelY + 68);
+        drawNavItem(g, Tab.VISUALS, navX, panelY + 80, navW, 26, mouseX, mouseY);
+        drawNavItem(g, Tab.WORLD, navX, panelY + 106, navW, 26, mouseX, mouseY);
+        drawNavItem(g, Tab.HUD, navX, panelY + 132, navW, 26, mouseX, mouseY);
 
-        drawSidebarLabel(g, "LIBRARY", sidebarX + 12, panelY + 178);
-        drawNavItem(g, Tab.PRESETS, navX, panelY + 191, navW, 26, mouseX, mouseY);
-        drawNavItem(g, Tab.STYLE, navX, panelY + 220, navW, 26, mouseX, mouseY);
-        drawNavItem(g, Tab.MUSIC, navX, panelY + 249, navW, 26, mouseX, mouseY);
+        drawSidebarLabel(g, "LIBRARY", sidebarX + 12, panelY + 162);
+        drawNavItem(g, Tab.PRESETS, navX, panelY + 174, navW, 26, mouseX, mouseY);
+        drawNavItem(g, Tab.STYLE, navX, panelY + 200, navW, 26, mouseX, mouseY);
+        drawNavItem(g, Tab.MUSIC, navX, panelY + 226, navW, 26, mouseX, mouseY);
 
-        drawSidebarLabel(g, "SYSTEM", sidebarX + 12, panelY + 286);
-        drawNavItem(g, Tab.CONFIGS, navX, panelY + 299, navW, 26, mouseX, mouseY);
-        drawNavItem(g, Tab.SETUP, navX, panelY + 328, navW, 26, mouseX, mouseY);
+        drawSidebarLabel(g, "SYSTEM", sidebarX + 12, panelY + 256);
+        drawNavItem(g, Tab.CONFIGS, navX, panelY + 268, navW, 26, mouseX, mouseY);
+        drawNavItem(g, Tab.SETUP, navX, panelY + 294, navW, 26, mouseX, mouseY);
 
-        int bottomY = sidebarY + sidebarH - 48;
+        int bottomY = sidebarY + sidebarH - 40;
         fillRounded(g, sidebarX + 9, bottomY, navW, 37,
                 0x60182134, RuffyRoundedUi.RADIUS_CONTROL);
         fillRounded(g, sidebarX + 17, bottomY + 10, 6, 6,
@@ -446,7 +446,7 @@ public final class RuffyClickGui extends Screen {
                 withAlpha(iconColor, 245));
 
         int switchX = x + w - 47;
-        int switchY = y + (h - 18) / 2;
+        int switchY = y + h - 22;
         int textX = x + 47;
         int textMax = Math.max(40, switchX - textX - 8);
         g.drawString(font, trimToWidth(feature.title(), textMax),
@@ -574,7 +574,7 @@ public final class RuffyClickGui extends Screen {
                     active > 0.5F ? WHITE : MUTED, false);
         }
 
-        int settingsY = y + 104;
+        int settingsY = y + 87;
         drawLabeledSlider(g, "HUD OPACITY", RuffyConfig.getInt("hud_opacity") + "%",
                 x, settingsY, mainW - 12, RuffyConfig.getInt("hud_opacity"), 12, 90);
         drawLabeledSlider(g, "HUD SCALE", RuffyConfig.getInt("hud_scale") + "%",
@@ -892,9 +892,9 @@ public final class RuffyClickGui extends Screen {
         int x = sidebarX + 8;
         int w = sidebarW - 16;
         int[] ys = {
-                panelY + 83, panelY + 112, panelY + 141,
-                panelY + 191, panelY + 220, panelY + 249,
-                panelY + 299, panelY + 328
+                panelY + 80, panelY + 106, panelY + 132,
+                panelY + 174, panelY + 200, panelY + 226,
+                panelY + 268, panelY + 294
         };
         Tab[] tabs = {
                 Tab.VISUALS, Tab.WORLD, Tab.HUD, Tab.PRESETS,
@@ -943,7 +943,7 @@ public final class RuffyClickGui extends Screen {
             if (!inside(mx, my, x, y, cardWidth, rowHeight)) continue;
 
             int switchX = x + cardWidth - 47;
-            int switchY = y + (rowHeight - 18) / 2;
+            int switchY = y + rowHeight - 22;
             if (inside(mx, my, switchX - 3, switchY - 4, 44, 26)) {
                 RuffyConfig.set(feature.key(), !RuffyConfig.get(feature.key()));
                 selectedKey = feature.key();
