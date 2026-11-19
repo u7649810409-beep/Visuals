@@ -47,7 +47,7 @@ public final class RuffySpotifyScreen extends Screen {
     }
 
     private void calculateLayout() {
-        panelW = Math.min(620, Math.max(440, width - 24));
+        panelW = Math.min(600, Math.max(440, width - 24));
         panelW = Math.min(panelW, width - 12);
         panelH = Math.min(392, Math.max(320, height - 24));
         panelH = Math.min(panelH, height - 12);
@@ -72,14 +72,19 @@ public final class RuffySpotifyScreen extends Screen {
 
         int primary = RuffyConfig.primaryColor();
         int secondary = RuffyConfig.secondaryColor();
-        int outer = withAlpha(secondary, 30);
-        int body = 0xEF0A0A18;
+        int outer = withAlpha(secondary, 18);
+        int body = 0xF10A0D19;
 
-        RuffyRoundedUi.fill(g, panelX - 7, panelY - 7,
-                panelW + 14, panelH + 14, outer, 30);
-        RuffyRoundedUi.fill(g, panelX, panelY, panelW, panelH, body, 28);
+        RuffyRoundedUi.shadow(g, panelX - 2, panelY, panelW + 4, panelH + 4,
+                RuffyRoundedUi.RADIUS_WINDOW, 48);
+        RuffyRoundedUi.fill(g, panelX - 5, panelY - 4,
+                panelW + 10, panelH + 8, outer, RuffyRoundedUi.RADIUS_WINDOW);
+        RuffyRoundedUi.fill(g, panelX, panelY, panelW, panelH, body,
+                RuffyRoundedUi.RADIUS_WINDOW);
         RuffyRoundedUi.outline(g, panelX, panelY, panelW, panelH,
-                withAlpha(primary, 190), 28);
+                withAlpha(primary, 150), RuffyRoundedUi.RADIUS_WINDOW);
+        RuffyRoundedUi.fill(g, panelX + 28, panelY + 1, panelW - 56, 1,
+                withAlpha(0xFFFFFFFF, 24), 1);
 
         renderMouseX = mouseX;
         renderMouseY = mouseY;
@@ -92,7 +97,7 @@ public final class RuffySpotifyScreen extends Screen {
 
     private void drawHeader(GuiGraphics g, int primary, int secondary) {
         RuffyRoundedUi.fill(g, panelX, panelY, panelW, 48,
-                0xE9110D21, 28);
+                0xEF111426, RuffyRoundedUi.RADIUS_WINDOW);
         g.fill(panelX, panelY + 23, panelX + panelW, panelY + 48, 0xE9110D21);
         RuffyRoundedUi.fill(g, panelX + 13, panelY + 9, 30, 30,
                 withAlpha(primary, 195), 15);
@@ -121,15 +126,15 @@ public final class RuffySpotifyScreen extends Screen {
         renderMouseY = mouseY;
         int y = panelY + 60;
         int h = panelH - 94;
-        RuffyRoundedUi.fill(g, leftX, y, leftW, h, CARD, 20);
-        RuffyRoundedUi.outline(g, leftX, y, leftW, h, BORDER, 20);
+        RuffyRoundedUi.fill(g, leftX, y, leftW, h, CARD, RuffyRoundedUi.RADIUS_PANEL);
+        RuffyRoundedUi.outline(g, leftX, y, leftW, h, BORDER, RuffyRoundedUi.RADIUS_PANEL);
 
         g.drawString(font, "SPOTIFY ACCOUNT", leftX + 12, y + 11, WHITE, false);
         g.drawString(font, "CLIENT ID", leftX + 12, y + 29, MUTED, false);
         RuffyRoundedUi.fill(g, leftX + 7, clientIdY, leftW - 14, 24,
-                0xC60D1020, 12);
+                0xD20C1020, RuffyRoundedUi.RADIUS_CONTROL);
         RuffyRoundedUi.outline(g, leftX + 7, clientIdY, leftW - 14, 24,
-                withAlpha(primary, 105), 12);
+                withAlpha(primary, 95), RuffyRoundedUi.RADIUS_CONTROL);
 
         boolean connectHover = inside(mouseX, mouseY, leftX + 9, actionY,
                 Math.max(65, (leftW - 25) / 2), 25);
@@ -160,7 +165,7 @@ public final class RuffySpotifyScreen extends Screen {
         int barW = Math.max(10, leftW - 24);
         float progress = duration <= 0L ? 0.0F
                 : Math.max(0.0F, Math.min(1.0F, position / (float) duration));
-        RuffyRoundedUi.fill(g, barX, barY, barW, 4, 0xFF393144, 2);
+        RuffyRoundedUi.fill(g, barX, barY, barW, 4, 0xFF332F40, 2);
         RuffyRoundedUi.fill(g, barX, barY, Math.round(barW * progress), 4, primary, 2);
         g.drawString(font, formatTime(position), barX, barY + 8, DIM, false);
         String total = formatTime(duration);
@@ -190,8 +195,8 @@ public final class RuffySpotifyScreen extends Screen {
     private void drawLyricsCard(GuiGraphics g, int primary) {
         int y = panelY + 60;
         int h = panelH - 94;
-        RuffyRoundedUi.fill(g, rightX, y, rightW, h, CARD, 20);
-        RuffyRoundedUi.outline(g, rightX, y, rightW, h, BORDER, 20);
+        RuffyRoundedUi.fill(g, rightX, y, rightW, h, CARD, RuffyRoundedUi.RADIUS_PANEL);
+        RuffyRoundedUi.outline(g, rightX, y, rightW, h, BORDER, RuffyRoundedUi.RADIUS_PANEL);
         RuffyRoundedUi.fill(g, rightX + 3, y + 3, rightW - 6, 2,
                 withAlpha(primary, 125), 1);
 
@@ -234,10 +239,10 @@ public final class RuffySpotifyScreen extends Screen {
                             String label, boolean hover, int tint) {
         int background = hover ? RuffyAnimation.blendColor(0xC8191428,
                 withAlpha(RuffyConfig.primaryColor(), 105), 0.7F) : tint;
-        RuffyRoundedUi.fill(g, x, y, w, h, background, Math.min(14, h / 2));
+        int radius = Math.min(RuffyRoundedUi.RADIUS_CONTROL, h / 2);
+        RuffyRoundedUi.fill(g, x, y, w, h, background, radius);
         RuffyRoundedUi.outline(g, x, y, w, h,
-                withAlpha(RuffyConfig.primaryColor(), hover ? 195 : 92),
-                Math.min(14, h / 2));
+                withAlpha(RuffyConfig.primaryColor(), hover ? 175 : 78), radius);
         g.drawCenteredString(font, label, x + w / 2, y + (h - 8) / 2,
                 hover ? WHITE : MUTED);
     }
