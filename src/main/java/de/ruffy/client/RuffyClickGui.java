@@ -544,7 +544,6 @@ public final class RuffyClickGui extends Screen {
                         ty + 21, MUTED, false);
             }
 
-            int switchX = tx + tileW - 29;
             int switchY = ty + 8;
             drawSwitch(g, switchX, switchY, enabled, 24, 14,
                     "home.feature." + keys[i]);
