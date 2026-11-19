@@ -520,76 +520,66 @@ public final class RuffyClickGui extends Screen {
         int y = homeSpotifyY;
         int w = homeRightW;
         int h = homeSpotifyH;
-        fillRounded(g, x, y, w, h, 0xE0090C19, RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, x, y, w, h, 0x775E4A9F, RuffyRoundedUi.RADIUS_PANEL);
+        RuffyRoundedUi.shadow(g, x, y, w, h, RuffyRoundedUi.RADIUS_PANEL, 24);
+        fillRounded(g, x, y, w, h, 0xE0080917, RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x, y, w, h, 0x865E45AF, RuffyRoundedUi.RADIUS_PANEL);
 
-        fillRounded(g, x + 11, y + 10, 22, 22, 0xFF1ED760, 11);
-        g.drawCenteredString(font, "≋", x + 22, y + 15, 0xFF092010);
-        g.drawString(font, "Spotify", x + 40, y + 12, WHITE, false);
+        fillRounded(g, x + 11, y + 9, 22, 22, 0xFF1ED760, 11);
+        g.drawCenteredString(font, "≋", x + 22, y + 14, 0xFF092010);
+        g.drawString(font, "Spotify", x + 40, y + 11, WHITE, false);
         boolean connected = RuffySpotify.isConnected();
         int statusColor = connected ? 0xFF42E69A : 0xFFFFC078;
-        fillRounded(g, x + w - 84, y + 17, 5, 5, statusColor, 3);
-        g.drawString(font, connected ? "Connected" : "Connect",
-                x + w - 74, y + 13, statusColor, false);
-        drawIconButton(g, x + w - 26, y + 9, 18, 18, "⚙", MUTED,
-                inside(mouseX, mouseY, x + w - 26, y + 9, 18, 18));
+        String statusLabel = connected ? "Connected" : "Connect";
+        int statusX = x + w - font.width(statusLabel) - 22;
+        fillRounded(g, statusX - 10, y + 17, 5, 5, statusColor, 3);
+        g.drawString(font, statusLabel, statusX, y + 12, statusColor, false);
+        drawIconButton(g, x + w - 22, y + 9, 16, 17, "⚙", MUTED,
+                inside(mouseX, mouseY, x + w - 22, y + 9, 16, 17));
 
+        int artSize = Math.min(44, Math.max(34, h / 3));
         int artX = x + 12;
-        int artY = y + 41;
-        drawAlbumArt(g, artX, artY, 43);
-        int infoX = artX + 52;
-        int infoW = w - 75;
+        int artY = y + 37;
+        drawAlbumArt(g, artX, artY, artSize);
+        int infoX = artX + artSize + 10;
+        int infoW = Math.max(40, x + w - 12 - infoX);
         g.drawString(font, trimToWidth(RuffySpotify.getTrackName(), infoW),
-                infoX, artY + 7, WHITE, false);
+                infoX, artY + 5, WHITE, false);
         g.drawString(font, trimToWidth(RuffySpotify.getArtistName(), infoW),
-                infoX, artY + 21, MUTED, false);
-        drawVisualizerBars(g, infoX, artY + 23, Math.max(30, infoW - 2));
+                infoX, artY + 19, MUTED, false);
+        if (RuffyConfig.get("music_visualizer")) {
+            drawVisualizerBars(g, infoX, artY + 18, infoW);
+        } else {
+            g.drawString(font, connected ? "PLAYBACK READY" : "LINK YOUR ACCOUNT",
+                    infoX, artY + 31, DIM, false);
+        }
 
-        int progressY = y + 91;
+        int progressY = y + h - 47;
         int progressX = x + 12;
         int progressW = w - 24;
         long duration = RuffySpotify.getDurationMs();
         long position = RuffySpotify.getProgressMs();
         float ratio = duration <= 0L ? 0.0F
                 : Math.max(0.0F, Math.min(1.0F, position / (float) duration));
-        fillRounded(g, progressX, progressY, progressW, 3, 0xFF38304D, 2);
+        fillRounded(g, progressX, progressY, progressW, 3, 0xFF332C46, 2);
         fillRounded(g, progressX, progressY, Math.round(progressW * ratio), 3,
                 RuffyConfig.primaryColor(), 2);
-        g.drawString(font, formatTime(position), progressX, progressY + 6, DIM, false);
+        g.drawString(font, formatTime(position), progressX, progressY + 5, DIM, false);
         String total = formatTime(duration);
         g.drawString(font, total, progressX + progressW - font.width(total),
-                progressY + 6, DIM, false);
+                progressY + 5, DIM, false);
 
-        int controlsY = y + 108;
+        int controlsY = y + h - 25;
         int center = x + w / 2;
-        drawIconButton(g, center - 37, controlsY, 21, 20, "|◀", WHITE,
-                inside(mouseX, mouseY, center - 37, controlsY, 21, 20));
+        drawIconButton(g, center - 36, controlsY, 22, 20, "|◀", WHITE,
+                inside(mouseX, mouseY, center - 36, controlsY, 22, 20));
         fillRounded(g, center - 11, controlsY - 1, 23, 22,
                 RuffyConfig.primaryColor(), 11);
+        fillRounded(g, center - 13, controlsY - 3, 27, 26,
+                withAlpha(RuffyConfig.primaryColor(), 28), 13);
         g.drawCenteredString(font, RuffySpotify.isPlaying() ? "Ⅱ" : "▶",
                 center, controlsY + 6, WHITE);
-        drawIconButton(g, center + 17, controlsY, 21, 20, "▶|", WHITE,
-                inside(mouseX, mouseY, center + 17, controlsY, 21, 20));
-
-        int lyricsY = y + 134;
-        int lyricsH = Math.max(27, h - 143);
-        fillRounded(g, x + 9, lyricsY, w - 18, lyricsH,
-                0x8F171329, RuffyRoundedUi.RADIUS_CONTROL);
-        outlineRounded(g, x + 9, lyricsY, w - 18, lyricsH,
-                0x4D8D52D5, RuffyRoundedUi.RADIUS_CONTROL);
-        g.drawString(font, "♫  Lyrics", x + 17, lyricsY + 7,
-                RuffyConfig.primaryColor(), false);
-        String[] lyricLines = RuffySpotify.getLyrics().split("\\R");
-        String lineOne = lyricLines.length > 0 ? lyricLines[0] : "";
-        String lineTwo = lyricLines.length > 1 ? lyricLines[1] : "";
-        if (lineOne.isBlank()) lineOne = connected
-                ? "Lyrics will appear here when available." : "Connect Spotify to show lyrics.";
-        g.drawCenteredString(font, trimToWidth(lineOne, w - 35),
-                x + w / 2, lyricsY + 19, WHITE);
-        if (lyricsH > 40 && !lineTwo.isBlank()) {
-            g.drawCenteredString(font, trimToWidth(lineTwo, w - 35),
-                    x + w / 2, lyricsY + 30, MUTED);
-        }
+        drawIconButton(g, center + 15, controlsY, 22, 20, "▶|", WHITE,
+                inside(mouseX, mouseY, center + 15, controlsY, 22, 20));
     }
 
     private void drawAlbumArt(GuiGraphics g, int x, int y, int size) {
