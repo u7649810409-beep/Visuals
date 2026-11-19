@@ -489,7 +489,7 @@ public final class RuffyClickGui extends Screen {
 
     private void drawModulePagination(GuiGraphics g, int count, int pages,
                                       int mouseX, int mouseY) {
-        int y = panelY + panelH - 34;
+        int y = panelY + panelH - 44;
         String leftLabel = count + " MODULES  ·  " + enabledCount() + " ENABLED";
         g.drawString(font, leftLabel, mainX, y + 8, MUTED, false);
 
@@ -808,7 +808,7 @@ public final class RuffyClickGui extends Screen {
         g.fill(mainX + 14, y, mainX + mainW - 14, y + 1, 0x315E6885);
         fillRounded(g, mainX + 14, y, 58, 1,
                 withAlpha(RuffyConfig.primaryColor(), 125), 1);
-        g.drawString(font, "RUFFY VISUALS  ·  GALAXY EDITION",
+        g.drawString(font, "RUFFY VISUALS 2.4  ·  GALAXY EDITION",
                 mainX, panelY + panelH - 18, DIM, false);
         String hint = "RIGHT SHIFT  ·  ESC";
         g.drawString(font, hint, mainX + mainW - font.width(hint),
