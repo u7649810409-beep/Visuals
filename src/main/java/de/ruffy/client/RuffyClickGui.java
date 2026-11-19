@@ -393,7 +393,7 @@ public final class RuffyClickGui extends Screen {
                 case HUD -> "HUD studio";
                 case PRESETS -> "Visual profiles";
                 case COSMETICS -> "Cosmetics";
-                case STYLE -> "Appearance";
+                case STYLE -> "Visuals";
                 case MUSIC -> "Spotify";
                 case CONFIGS -> "Settings";
                 case SETUP -> "About";
@@ -530,9 +530,9 @@ public final class RuffyClickGui extends Screen {
         String[] icons = {"✥", "✧", "◉", "★"};
         int gap = Math.max(4, Math.round(w * 0.012F));
         int left = x + 10;
-        int top = y + 36;
+        int top = y + Math.max(16, Math.round(panelH * 0.075F));
         int tileW = Math.max(38, (w - 20 - gap * 3) / 4);
-        int tileH = Math.max(24, h - 45);
+        int tileH = Math.max(24, h - (top - y) - Math.max(4, Math.round(panelH * 0.02F)));
 
         for (int i = 0; i < keys.length; i++) {
             int tx = left + i * (tileW + gap);
@@ -555,17 +555,18 @@ public final class RuffyClickGui extends Screen {
             g.drawCenteredString(font, icons[i], tx + 7 + iconSize / 2, ty + 10,
                     enabled ? 0xFFF1DFFF : MUTED);
 
-            int switchW = Math.max(20, Math.min(28, tileW / 4));
-            int switchH = Math.max(12, Math.min(16, tileH / 5));
-            int switchX = tx + tileW - switchW - 7;
-            int switchY = ty + 6;
-            int textX = tx + 8;
-            int textW = Math.max(15, tileW - 16);
+            int switchW = Math.max(18, Math.min(28, tileW / 4));
+            int switchH = Math.max(11, Math.min(16, tileH / 4));
+            int switchX = tx + tileW - switchW - 6;
+            int switchY = ty + 5;
+            int textX = tx + 7;
+            int textW = Math.max(15, tileW - 14);
+            int titleY = ty + Math.max(15, tileH - (tileH >= 42 ? 23 : 12));
             g.drawString(font, trimToWidth(titles[i], textW), textX,
-                    ty + Math.max(16, tileH * 49 / 100), WHITE, false);
-            if (tileH >= 46) {
+                    titleY, WHITE, false);
+            if (tileH >= 52) {
                 g.drawString(font, trimToWidth(descriptions[i], textW), textX,
-                        ty + tileH - 14, MUTED, false);
+                        ty + tileH - 12, MUTED, false);
             }
             drawSwitch(g, switchX, switchY, enabled, switchW, switchH,
                     "home.feature." + keys[i]);
@@ -846,10 +847,12 @@ public final class RuffyClickGui extends Screen {
             return true;
         }
 
-        int heroButtonX = homeCenterX + 18;
-        int heroButtonY = homeHeroY + homeHeroH - 34;
-        int heroButtonW = Math.min(132, Math.max(106, homeCenterW / 2));
-        if (inside(mx, my, heroButtonX, heroButtonY, heroButtonW, 24)) {
+        int heroButtonX = homeCenterX + Math.max(10, homeCenterW * 4 / 100);
+        int heroButtonH = Math.max(19, Math.min(28, homeHeroH / 5));
+        int heroButtonY = homeHeroY + homeHeroH - heroButtonH
+                - Math.max(8, homeHeroH * 6 / 100);
+        int heroButtonW = Math.min(190, Math.max(90, homeCenterW * 28 / 100));
+        if (inside(mx, my, heroButtonX, heroButtonY, heroButtonW, heroButtonH)) {
             tab = Tab.VISUALS;
             modulePage = 0;
             return true;
@@ -865,9 +868,10 @@ public final class RuffyClickGui extends Screen {
         String[] keys = {"prism_core", "nebula_particles", "orbit_particles", "swing_animation"};
         int gap = Math.max(4, Math.round(homeModulesW * 0.012F));
         int left = homeCenterX + 10;
-        int top = homeModulesY + 36;
+        int top = homeModulesY + Math.max(16, Math.round(panelH * 0.075F));
         int tileW = Math.max(38, (homeModulesW - 20 - gap * 3) / 4);
-        int tileH = Math.max(24, homeModulesH - 45);
+        int tileH = Math.max(24, homeModulesH - (top - homeModulesY)
+                - Math.max(4, Math.round(panelH * 0.02F)));
         for (int i = 0; i < keys.length; i++) {
             int tx = left + i * (tileW + gap);
             int ty = top;
@@ -1313,6 +1317,9 @@ public final class RuffyClickGui extends Screen {
         drawButton(g, x + mainW - 78, y - 5, 70, 19, "PRESETS",
                 ButtonStyle.OUTLINE,
                 inside(mouseX, mouseY, x + mainW - 78, y - 5, 70, 19), false);
+        drawButton(g, x + mainW - 162, y - 5, 78, 19, "COSMETICS",
+                ButtonStyle.OUTLINE,
+                inside(mouseX, mouseY, x + mainW - 162, y - 5, 78, 19), false);
         int sw = (mainW - 24) / 5;
         for (int i = 0; i < PALETTE_NAMES.length; i++) {
             int cx = x + (i % 5) * (sw + 6);
@@ -1659,8 +1666,8 @@ public final class RuffyClickGui extends Screen {
     }
 
     private boolean handleNavigation(int mx, int my) {
-        int x = sidebarX + 8;
-        int w = sidebarW - 16;
+        int x = sidebarX + Math.max(4, Math.round(sidebarW * 0.06F));
+        int w = sidebarW - Math.max(8, Math.round(sidebarW * 0.12F));
         int[] ys = navigationYPositions();
         int itemHeight = navigationItemHeight();
         Tab[] tabs = {
@@ -1805,6 +1812,10 @@ public final class RuffyClickGui extends Screen {
         int y = panelY + 96;
         if (inside(mx, my, x + mainW - 78, y - 5, 70, 19)) {
             tab = Tab.PRESETS;
+            return true;
+        }
+        if (inside(mx, my, x + mainW - 162, y - 5, 78, 19)) {
+            tab = Tab.COSMETICS;
             return true;
         }
         int sw = (mainW - 24) / 5;
