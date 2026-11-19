@@ -388,7 +388,7 @@ public final class RuffyClickGui extends Screen {
                 case CONFIGS -> "Settings";
                 case SETUP -> "About";
             };
-            g.drawString(font, "RUFFY VISUALS  /  GALAXY EDITION",
+            g.drawString(font, "RUFFY VISUALS  /  COSMIC STUDIO",
                     mainX, panelY + 15, DIM, false);
             g.drawString(font, title, mainX, panelY + 29, WHITE, false);
             g.drawString(font, tab.subtitle, mainX, panelY + 42, MUTED, false);
@@ -584,7 +584,7 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, trimToWidth(RuffySpotify.getArtistName(), infoW),
                 infoX, artY + 17, MUTED, false);
         if (!compact && RuffyConfig.get("music_visualizer")) {
-            drawVisualizerBars(g, infoX, artY + 27, infoW);
+            drawVisualizerBars(g, infoX, artY + 28, infoW);
         } else if (compact) {
             g.drawString(font, connected ? "PLAYING" : "NOT CONNECTED",
                     infoX, artY + 19, DIM, false);
@@ -687,7 +687,7 @@ public final class RuffyClickGui extends Screen {
                 opacityY + 3, WHITE, false);
 
         int qualityY = y + 73;
-        g.drawString(font, "FX Quality", x + 12, qualityY + 5, MUTED, false);
+        g.drawString(font, w < 160 ? "FX" : "FX Quality", x + 12, qualityY + 5, MUTED, false);
         int qGap = 3;
         int qW = Math.max(31, Math.min(39, (w - 112) / 3));
         int qX = x + w - (qW * 3 + qGap * 2) - 9;
