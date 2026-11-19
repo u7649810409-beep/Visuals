@@ -36,7 +36,7 @@ public final class RuffyClickGui extends Screen {
         HUD("HUD", "Your in-game information layout", "▣"),
         PRESETS("Presets", "Ready-made visual profiles", "▤"),
         COSMETICS("Cosmetics", "Auras, companions and movement trails", "✧"),
-        STYLE("Visuals", "Colors, motion and interface tuning", "◈"),
+        STYLE("Appearance", "Colors, motion and interface tuning", "◈"),
         MUSIC("Spotify", "Music and lyrics", "♫"),
         CONFIGS("Settings", "Configuration and reset options", "⚙"),
         SETUP("About", "Ruffy Visuals information", "ⓘ");
@@ -90,10 +90,11 @@ public final class RuffyClickGui extends Screen {
     private int searchX, searchY, searchW;
     private int filterY, listTop, rowHeight, cardGap, cardWidth;
 
-    // Responsive home-dashboard geometry, derived from the same app shell.
+    // Responsive dashboard regions: hero/player above three lower cards.
     private int homeCenterX, homeCenterW, homeRightX, homeRightW;
     private int homeHeroY, homeHeroH, homeModulesY, homeModulesH;
     private int homeSpotifyY, homeSpotifyH, homeAppearanceY, homeAppearanceH;
+    private int homeQuickX, homeQuickW, homeLyricsX, homeLyricsW, homeModulesW;
     private int homeBottomY, homePerfW, homeVersionX, homeVersionW, homeSocialX;
 
     public RuffyClickGui() {
