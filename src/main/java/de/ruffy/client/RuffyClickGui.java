@@ -150,7 +150,7 @@ public final class RuffyClickGui extends Screen {
         g.fill(0, 0, width, height, 0x5A050615);
 
         // Slow, sparse star glints are drawn in UI space, independent of game particles.
-        double time = System.nanoTime() / 1_000_000_000.0;
+        double time = RuffyAnimation.timeSeconds();
         for (int i = 0; i < 26; i++) {
             float pulse = RuffyAnimation.breathe(time, 0.12 + (i % 5) * 0.025,
                     i * 1.731F);
@@ -184,7 +184,7 @@ public final class RuffyClickGui extends Screen {
         g.drawCenteredString(font, "R", logoX + 13, logoY + 8, WHITE);
 
         g.drawString(font, "RUFFY VISUALS", panelX + 53, panelY + 8, WHITE, false);
-        g.drawString(font, "GALAXY CLIENT  ·  2.0", panelX + 53, panelY + 22,
+        g.drawString(font, "GALAXY CLIENT  ·  2.2", panelX + 53, panelY + 22,
                 secondary, false);
         fillRounded(g, panelX + 204, panelY + 16, 5, 5,
                 withAlpha(primary, 210), 3);
@@ -996,7 +996,7 @@ public final class RuffyClickGui extends Screen {
             RuffyConfig.setInt("hud_opacity", 44);
             RuffyConfig.setInt("hud_scale", 96);
             RuffyConfig.setInt("menu_opacity", 94);
-            RuffyConfig.setInt("effect_quality", 2);
+            RuffyConfig.setInt("effect_quality", 1);
             RuffyConfig.set("smooth_animations", true);
             RuffyConfig.setInt("animation_smoothness", 78);
             return true;

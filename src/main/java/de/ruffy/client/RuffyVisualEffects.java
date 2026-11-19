@@ -26,11 +26,23 @@ public final class RuffyVisualEffects {
     private static final List<PulseRing> RINGS = new ArrayList<>();
     private static final List<SlashArc> SLASHES = new ArrayList<>();
 
-    private static final int MAX_POINTS = 420;
-    private static final int MAX_RINGS = 48;
-    private static final int MAX_SLASHES = 24;
+    // Hard caps keep burst spam and long sessions from growing render work.
+    private static final int MAX_POINTS = 180;
+    private static final int MAX_RINGS = 12;
+    private static final int MAX_SLASHES = 4;
     private static final double TAU = Math.PI * 2.0;
     private static final long CLIENT_TICK_NANOS = 50_000_000L;
+    private static final int CIRCLE_SAMPLES = 48;
+    private static final double[] CIRCLE_COS = new double[CIRCLE_SAMPLES];
+    private static final double[] CIRCLE_SIN = new double[CIRCLE_SAMPLES];
+
+    static {
+        for (int i = 0; i < CIRCLE_SAMPLES; i++) {
+            double angle = TAU * i / CIRCLE_SAMPLES;
+            CIRCLE_COS[i] = Math.cos(angle);
+            CIRCLE_SIN[i] = Math.sin(angle);
+        }
+    }
 
     private static long tick;
     private static boolean wasGrounded = true;
@@ -291,7 +303,9 @@ public final class RuffyVisualEffects {
     public static synchronized void render(WorldRenderContext context) {
         Minecraft client = Minecraft.getInstance();
         if (context == null || client.player == null || client.level == null
-                || context.matrices() == null || context.consumers() == null) {
+                || context.matrices() == null || context.consumers() == null
+                || client.screen instanceof RuffyClickGui
+                || client.screen instanceof RuffySpotifyScreen) {
             return;
         }
         if (POINTS.isEmpty() && RINGS.isEmpty() && SLASHES.isEmpty()
@@ -302,6 +316,14 @@ public final class RuffyVisualEffects {
 
         LocalPlayer player = client.player;
         Vec3 camera = context.gameRenderer().getMainCamera().position();
+        int quality = RuffyConfig.getInt("effect_quality");
+        int pointBudget = quality == 0 ? 24 : quality == 1 ? 48 : 96;
+        double renderDistance = quality == 0 ? 16.0 : quality == 1 ? 24.0 : 32.0;
+        double renderDistanceSqr = renderDistance * renderDistance;
+        // If the local player is outside the quality-tier radius, none of the
+        // player-attached geometry can contribute to the current camera view.
+        if (distanceSqr(camera, player.position()) > renderDistanceSqr) return;
+
         PoseStack matrices = context.matrices();
         matrices.pushPose();
         try {
@@ -311,23 +333,37 @@ public final class RuffyVisualEffects {
             if (lines == null) return;
 
             long renderNanos = System.nanoTime();
-            for (PulseRing ring : RINGS) {
-                drawRing(lines, pose, ring, renderNanos);
+            double timeSeconds = renderNanos * 1.0E-9;
+
+            // Draw only recent, nearby points. Older particles are still simulated
+            // and expire normally, but distant points never consume GPU vertices.
+            for (int i = RINGS.size() - 1; i >= 0; i--) {
+                PulseRing ring = RINGS.get(i);
+                if (distanceSqr(camera, ring.center) <= renderDistanceSqr) {
+                    drawRing(lines, pose, ring, renderNanos, quality);
+                }
             }
-            for (SlashArc slash : SLASHES) {
-                drawSlash(lines, pose, slash, renderNanos);
+            for (int i = SLASHES.size() - 1; i >= 0; i--) {
+                SlashArc slash = SLASHES.get(i);
+                if (distanceSqr(camera, slash.center) <= renderDistanceSqr) {
+                    drawSlash(lines, pose, slash, renderNanos, quality);
+                }
             }
-            for (GlowPoint point : POINTS) {
-                drawPoint(lines, pose, point, renderNanos);
+            int renderedPoints = 0;
+            for (int i = POINTS.size() - 1; i >= 0 && renderedPoints < pointBudget; i--) {
+                GlowPoint point = POINTS.get(i);
+                if (distanceSqr(camera, point.position) > renderDistanceSqr) continue;
+                drawPoint(lines, pose, point, renderNanos, quality);
+                renderedPoints++;
             }
             if (RuffyConfig.get("orbit_particles")) {
-                drawOrbit(lines, pose, player);
+                drawOrbit(lines, pose, player, quality, timeSeconds);
             }
             if (RuffyConfig.get("prism_core")) {
-                drawPrismCore(lines, pose, player);
+                drawPrismCore(lines, pose, player, quality, timeSeconds);
             }
-            if (RuffyConfig.get("orbit_drones")) {
-                drawOrbitDrones(lines, pose, player);
+            if (RuffyConfig.get("orbit_drones") && quality > 0) {
+                drawOrbitDrones(lines, pose, player, timeSeconds);
             }
         } finally {
             matrices.popPose();
@@ -403,71 +439,89 @@ public final class RuffyVisualEffects {
         return RANDOM.nextBoolean() ? RuffyConfig.primaryColor() : RuffyConfig.secondaryColor();
     }
 
-    private static void drawOrbit(VertexConsumer out, PoseStack.Pose pose, LocalPlayer player) {
+    private static void drawOrbit(VertexConsumer out, PoseStack.Pose pose,
+                                   LocalPlayer player, int quality, double time) {
         float opacity = amountForRender("orbit_particles");
         if (opacity <= 0.01F) return;
+        int segments = quality == 0 ? 12 : quality == 1 ? 24 : 48;
+        int stride = CIRCLE_SAMPLES / segments;
         Vec3 base = player.position().add(0.0, 0.95, 0.0);
-        double time = System.nanoTime() * 1.0E-9;
+        int alpha = Math.round(150 * opacity);
         for (int ring = 0; ring < 2; ring++) {
             double radius = ring == 0 ? 0.72 : 0.54;
             double tilt = ring == 0 ? 0.28 : -0.42;
             int color = ring == 0 ? RuffyConfig.primaryColor() : RuffyConfig.secondaryColor();
-            Vec3 previous = orbitPoint(base, radius, tilt, time, 0.0);
-            for (int i = 1; i <= 48; i++) {
-                double angle = TAU * i / 48.0;
-                Vec3 next = orbitPoint(base, radius, tilt, time, angle);
-                drawLine(out, pose, previous, next, withAlpha(color, Math.round(175 * opacity)), 1.6F);
+            Vec3 previous = null;
+            for (int i = 0; i <= segments; i++) {
+                int index = (i * stride) % CIRCLE_SAMPLES;
+                double x = CIRCLE_COS[index] * radius;
+                double z = CIRCLE_SIN[index] * radius;
+                double angle = TAU * index / CIRCLE_SAMPLES;
+                double y = Math.sin((angle + time) * 2.0 + time) * 0.13;
+                Vec3 next = base.add(x, y + z * tilt, z);
+                if (previous != null) {
+                    drawLine(out, pose, previous, next, withAlpha(color, alpha), 1.35F);
+                }
                 previous = next;
             }
         }
     }
 
     /**
-     * 3D Prism Core: two independently rotating octahedra, an inner cube and
-     * three animated latitude loops. All vertices are generated in local space.
+     * Custom 3D prism. Mesh transforms are prepared once per object and
+     * the latitude loops use a small, quality-scaled, precomputed circle.
      */
     private static void drawPrismCore(VertexConsumer out, PoseStack.Pose pose,
-                                      LocalPlayer player) {
+                                      LocalPlayer player, int quality, double time) {
         float opacity = amountForRender("prism_core");
         if (opacity <= 0.01F) return;
 
-        double time = System.nanoTime() * 1.0E-9;
         Vec3 center = player.position().add(0.0, 1.13, 0.0);
         drawOctahedron(out, pose, center, 0.52,
                 time, 0.48 + Math.sin(time * 0.7) * 0.16, -time * 0.62,
-                withAlpha(RuffyConfig.primaryColor(), Math.round(235 * opacity)), 1.8F);
+                withAlpha(RuffyConfig.primaryColor(), Math.round(225 * opacity)), 1.55F);
         drawOctahedron(out, pose, center, 0.37,
                 -time * 0.72, time * 0.54, time * 0.88,
-                withAlpha(RuffyConfig.secondaryColor(), Math.round(190 * opacity)), 1.35F);
+                withAlpha(RuffyConfig.secondaryColor(), Math.round(175 * opacity)), 1.2F);
 
         Vec3[] cube = cubeVertices(center, 0.20, time * 0.8, time * 0.5, 0.0);
         drawEdges(out, pose, cube, CUBE_EDGES,
-                withAlpha(0xFFFFF0F4, Math.round(155 * opacity)), 1.0F);
+                withAlpha(0xFFFFF0F4, Math.round(140 * opacity)), 0.9F);
 
-        int[][] loops = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2}};
-        for (int loop = 0; loop < loops.length; loop++) {
+        int segments = quality == 0 ? 12 : quality == 1 ? 24 : 24;
+        int stride = CIRCLE_SAMPLES / segments;
+        int loopCount = quality == 0 ? 1 : quality == 1 ? 2 : 3;
+        for (int loop = 0; loop < loopCount; loop++) {
             double radius = 0.72 + loop * 0.055;
             double tilt = (loop - 1) * 0.52;
-            Vec3 previous = coreLoopPoint(center, radius, tilt, time, 0.0);
-            for (int i = 1; i <= 42; i++) {
-                double angle = TAU * i / 42.0;
-                Vec3 next = coreLoopPoint(center, radius, tilt, time, angle);
-                int color = loop == 1 ? RuffyConfig.secondaryColor() : RuffyConfig.primaryColor();
-                drawLine(out, pose, previous, next,
-                        withAlpha(color, Math.round((92 - loop * 12) * opacity)), 1.0F);
+            RuffyAnimation.Rotation3 rotation =
+                    RuffyAnimation.rotation3D(time * 0.2, tilt, time * 0.08);
+            Vec3 previous = null;
+            for (int i = 0; i <= segments; i++) {
+                int index = (i * stride) % CIRCLE_SAMPLES;
+                double angle = TAU * index / CIRCLE_SAMPLES;
+                double y = Math.sin(angle * 2.0 + time) * 0.10;
+                Vec3 local = new Vec3(CIRCLE_COS[index] * radius,
+                        y, CIRCLE_SIN[index] * radius);
+                Vec3 next = center.add(rotation.transform(local));
+                if (previous != null) {
+                    int color = loop == 1 ? RuffyConfig.secondaryColor()
+                            : RuffyConfig.primaryColor();
+                    int loopAlpha = Math.round((quality == 0 ? 68 : 82 - loop * 10) * opacity);
+                    drawLine(out, pose, previous, next, withAlpha(color, loopAlpha), 0.9F);
+                }
                 previous = next;
             }
         }
     }
 
-    /** Three small rotating 3D crystal drones follow different orbital paths. */
+    /** Three small rotating crystals; only rendered at medium/high quality. */
     private static void drawOrbitDrones(VertexConsumer out, PoseStack.Pose pose,
-                                        LocalPlayer player) {
+                                        LocalPlayer player, double time) {
         float opacity = amountForRender("orbit_drones");
         if (opacity <= 0.01F) return;
 
         Vec3 body = player.position().add(0.0, 1.00, 0.0);
-        double time = System.nanoTime() * 1.0E-9;
         for (int i = 0; i < 3; i++) {
             double angle = time + TAU * i / 3.0;
             double radius = 1.12 + Math.sin(time * 1.2 + i) * 0.08;
@@ -478,19 +532,13 @@ public final class RuffyVisualEffects {
                     : i == 1 ? RuffyConfig.secondaryColor() : 0xFFFFE8EF;
             drawOctahedron(out, pose, center, 0.17 + i * 0.012,
                     -angle * 1.6, angle * 0.8, time * (i % 2 == 0 ? 1.2 : -1.1),
-                    withAlpha(color, Math.round(225 * opacity)), 1.25F);
+                    withAlpha(color, Math.round(205 * opacity)), 1.05F);
             drawLine(out, pose, body, center,
-                    withAlpha(color, Math.round(48 * opacity)), 0.8F);
+                    withAlpha(color, Math.round(38 * opacity)), 0.7F);
         }
     }
 
-    private static Vec3 coreLoopPoint(Vec3 center, double radius, double tilt,
-                                      double time, double angle) {
-        Vec3 local = new Vec3(Math.cos(angle) * radius,
-                Math.sin(angle * 2.0 + time) * 0.10,
-                Math.sin(angle) * radius);
-        return center.add(RuffyAnimation.rotate3D(local, time * 0.2, tilt, time * 0.08));
-    }
+
 
     private static void drawOctahedron(VertexConsumer out, PoseStack.Pose pose,
                                        Vec3 center, double radius,
@@ -503,9 +551,9 @@ public final class RuffyVisualEffects {
         vertices[3] = new Vec3(0.0, -radius, 0.0);
         vertices[4] = new Vec3(0.0, 0.0, radius);
         vertices[5] = new Vec3(0.0, 0.0, -radius);
+        RuffyAnimation.Rotation3 rotation = RuffyAnimation.rotation3D(yaw, pitch, roll);
         for (int i = 0; i < vertices.length; i++) {
-            vertices[i] = center.add(RuffyAnimation.rotate3D(
-                    vertices[i], yaw, pitch, roll));
+            vertices[i] = center.add(rotation.transform(vertices[i]));
         }
         drawEdges(out, pose, vertices, OCTAHEDRON_EDGES, color, width);
     }
@@ -513,12 +561,13 @@ public final class RuffyVisualEffects {
     private static Vec3[] cubeVertices(Vec3 center, double radius,
                                        double yaw, double pitch, double roll) {
         Vec3[] vertices = new Vec3[8];
+        RuffyAnimation.Rotation3 rotation = RuffyAnimation.rotation3D(yaw, pitch, roll);
         for (int i = 0; i < 8; i++) {
             Vec3 local = new Vec3(
                     (i & 1) == 0 ? -radius : radius,
                     (i & 2) == 0 ? -radius : radius,
                     (i & 4) == 0 ? -radius : radius);
-            vertices[i] = center.add(RuffyAnimation.rotate3D(local, yaw, pitch, roll));
+            vertices[i] = center.add(rotation.transform(local));
         }
         return vertices;
     }
@@ -542,13 +591,8 @@ public final class RuffyVisualEffects {
             {2, 3}, {2, 6}, {3, 7}, {4, 5}, {4, 6}, {5, 7}, {6, 7}
     };
 
-    private static Vec3 orbitPoint(Vec3 base, double radius, double tilt,
-                                   double time, double angle) {
-        double a = angle + time;
-        double x = Math.cos(a) * radius;
-        double z = Math.sin(a) * radius;
-        double y = Math.sin(a * 2.0 + time) * 0.13;
-        return base.add(x, y + z * tilt, z);
+    private static double distanceSqr(Vec3 a, Vec3 b) {
+        return a.distanceToSqr(b);
     }
 
     private static float amountForRender(String key) {
@@ -557,48 +601,55 @@ public final class RuffyVisualEffects {
     }
 
     private static void drawRing(VertexConsumer out, PoseStack.Pose pose,
-                                 PulseRing ring, long now) {
+                                 PulseRing ring, long now, int quality) {
         float progress = lifeProgress(ring.age, ring.life, ring.lastStepNanos, now);
-        float eased = RuffyAnimation.easeOut(progress);
-        float radius = (float) (ring.startRadius
-                + (ring.endRadius - ring.startRadius) * eased);
+        float radius = (float) RuffyAnimation.lerp((float) ring.startRadius,
+                (float) ring.endRadius, RuffyAnimation.easeOut(progress));
         float fade = 1.0F - RuffyAnimation.easeInOut(progress);
         int alpha = Math.round(((ring.color >>> 24) & 0xFF) * fade);
-        int color = (ring.color & 0x00FFFFFF) | (alpha << 24);
-        Vec3 previous = ring.center.add(radius, ring.verticalDrift(progress), 0.0);
-        for (int i = 1; i <= 64; i++) {
-            double angle = TAU * i / 64.0;
-            Vec3 next = ring.center.add(Math.cos(angle) * radius,
-                    ring.verticalDrift(progress), Math.sin(angle) * radius);
-            drawLine(out, pose, previous, next, withAlpha(color, alpha), ring.width);
+        if (alpha < 3) return;
+
+        int segments = quality == 0 ? 12 : quality == 1 ? 24 : 48;
+        int stride = CIRCLE_SAMPLES / segments;
+        double y = ring.verticalDrift(progress);
+        Vec3 previous = ring.center.add(radius, y, 0.0);
+        for (int i = 1; i <= segments; i++) {
+            int index = (i * stride) % CIRCLE_SAMPLES;
+            Vec3 next = ring.center.add(CIRCLE_COS[index] * radius, y,
+                    CIRCLE_SIN[index] * radius);
+            drawLine(out, pose, previous, next, withAlpha(ring.color, alpha), ring.width);
             previous = next;
         }
     }
 
-    private static void drawSlash(VertexConsumer out, PoseStack.Pose pose, SlashArc slash, long now) {
+    private static void drawSlash(VertexConsumer out, PoseStack.Pose pose,
+                                   SlashArc slash, long now, int quality) {
         float progress = lifeProgress(slash.age, slash.life, slash.lastStepNanos, now);
         float fade = 1.0F - RuffyAnimation.easeInOut(progress);
+        if (fade < 0.015F) return;
         float growth = 0.5F + 0.5F * RuffyAnimation.easeOut(Math.min(1.0F, progress * 1.8F));
         int primary = withAlpha(slash.primary, Math.round(255 * fade));
-        int secondary = withAlpha(slash.secondary, Math.round(200 * fade));
-        Vec3 depth = slash.right.cross(slash.up).normalize().scale(0.16 * growth);
+        int secondary = withAlpha(slash.secondary, Math.round(185 * fade));
+        Vec3 depth = slash.right.cross(slash.up).normalize().scale(0.13 * growth);
         Vec3 last = slash.point(0.0, growth);
-        Vec3 lastGlow = slash.point(0.0, growth * 1.10);
+        Vec3 lastGlow = slash.point(0.0, growth * 1.08);
         Vec3 lastBack = last.add(depth);
-        for (int i = 1; i <= 36; i++) {
-            double t = i / 36.0;
+        int segments = quality == 0 ? 12 : quality == 1 ? 20 : 28;
+        boolean volume = quality > 0 && RuffyConfig.get("three_d_slash");
+        int ribEvery = quality == 1 ? 5 : 4;
+        for (int i = 1; i <= segments; i++) {
+            double t = i / (double) segments;
             Vec3 next = slash.point(t, growth);
-            Vec3 glow = slash.point(t, growth * 1.10);
+            Vec3 glow = slash.point(t, growth * 1.08);
             Vec3 nextBack = next.add(depth);
-            drawLine(out, pose, lastGlow, glow,
-                    withAlpha(secondary, Math.round(82 * fade)), 4.2F);
-            drawLine(out, pose, last, next, primary, 2.2F);
+            drawLine(out, pose, lastGlow, glow, withAlpha(secondary, Math.round(65 * fade)), 3.0F);
+            drawLine(out, pose, last, next, primary, 1.8F);
 
-            if (RuffyConfig.get("three_d_slash") && i % 3 == 0) {
-                int ribAlpha = Math.round(115 * fade);
-                drawLine(out, pose, last, lastBack, withAlpha(secondary, ribAlpha), 1.1F);
-                drawLine(out, pose, next, nextBack, withAlpha(secondary, ribAlpha), 1.1F);
-                drawLine(out, pose, lastBack, nextBack, withAlpha(secondary, ribAlpha), 1.0F);
+            if (volume && i % ribEvery == 0) {
+                int ribAlpha = Math.round(90 * fade);
+                drawLine(out, pose, last, lastBack, withAlpha(secondary, ribAlpha), 0.9F);
+                drawLine(out, pose, next, nextBack, withAlpha(secondary, ribAlpha), 0.9F);
+                drawLine(out, pose, lastBack, nextBack, withAlpha(secondary, ribAlpha), 0.8F);
             }
             last = next;
             lastGlow = glow;
@@ -606,38 +657,47 @@ public final class RuffyVisualEffects {
         }
     }
 
-    private static void drawPoint(VertexConsumer out, PoseStack.Pose pose, GlowPoint point, long now) {
+    private static void drawPoint(VertexConsumer out, PoseStack.Pose pose,
+                                  GlowPoint point, long now, int quality) {
         float progress = lifeProgress(point.age, point.life, point.lastStepNanos, now);
         float fade = 1.0F - RuffyAnimation.easeInOut(progress);
-        float pulse = 0.72F + 0.28F * RuffyAnimation.breathe(
+        if (fade < 0.015F) return;
+        float pulse = 0.82F + 0.18F * RuffyAnimation.breathe(
                 now / 1_000_000_000.0, 0.9, point.phase);
         float size = point.size * (0.75F + 0.25F * RuffyAnimation.easeOut(progress));
         int alpha = Math.round(((point.color >>> 24) & 0xFF) * fade * pulse);
+        if (alpha < 3) return;
         int color = (point.color & 0x00FFFFFF) | (alpha << 24);
         double frameBlend = interpolation(point.lastStepNanos, now);
         Vec3 position = point.previousPosition.add(
                 point.position.subtract(point.previousPosition).scale(frameBlend));
 
         if (point.shape == Shape.RING) {
-            Vec3 last = position.add(size, 0.0, 0.0);
-            for (int i = 1; i <= 12; i++) {
-                double angle = TAU * i / 12.0;
-                Vec3 next = position.add(Math.cos(angle) * size, 0.0,
-                        Math.sin(angle) * size);
-                drawLine(out, pose, last, next, color, 1.1F);
-                last = next;
+            int segments = quality == 0 ? 6 : quality == 1 ? 8 : 12;
+            int stride = CIRCLE_SAMPLES / segments;
+            Vec3 previous = position.add(size, 0.0, 0.0);
+            for (int i = 1; i <= segments; i++) {
+                int index = (i * stride) % CIRCLE_SAMPLES;
+                Vec3 next = position.add(CIRCLE_COS[index] * size, 0.0,
+                        CIRCLE_SIN[index] * size);
+                drawLine(out, pose, previous, next, color, 0.9F);
+                previous = next;
             }
             return;
         }
 
         Vec3 tail = position.subtract(point.velocity.scale(2.8));
-        drawLine(out, pose, tail, position, withAlpha(color, alpha), 1.2F);
-        if (point.shape == Shape.STREAK) return;
+        drawLine(out, pose, tail, position, color, 1.0F);
+        if (point.shape == Shape.STREAK || quality == 0) return;
 
-        Vec3 p = position;
-        drawLine(out, pose, p.add(-size, 0.0, 0.0), p.add(size, 0.0, 0.0), color, 1.0F);
-        drawLine(out, pose, p.add(0.0, -size, 0.0), p.add(0.0, size, 0.0), color, 1.0F);
-        drawLine(out, pose, p.add(0.0, 0.0, -size), p.add(0.0, 0.0, size), color, 1.0F);
+        drawLine(out, pose, position.add(-size, 0.0, 0.0),
+                position.add(size, 0.0, 0.0), color, 0.9F);
+        drawLine(out, pose, position.add(0.0, -size, 0.0),
+                position.add(0.0, size, 0.0), color, 0.9F);
+        if (quality >= 2) {
+            drawLine(out, pose, position.add(0.0, 0.0, -size),
+                    position.add(0.0, 0.0, size), color, 0.8F);
+        }
     }
 
     private static void drawLine(VertexConsumer out, PoseStack.Pose pose,
