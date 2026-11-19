@@ -3,7 +3,7 @@
   "id": "ruffyclient",
   "version": "${version}",
   "name": "Ruffy Visuals",
-  "description": "A Galaxy Edition client with a procedural nebula background, anti-aliased rounded glass controls, a Nebula HUD and custom 3D effects.",
+  "description": "A Galaxy Edition client with a redesigned control center, custom animations, an anti-aliased rounded UI, a Nebula HUD, Spotify integration and custom 3D effects.",
   "authors": ["Ruffy"],
   "license": "MIT",
   "environment": "client",
