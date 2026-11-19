@@ -251,6 +251,7 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void drawSidebar(GuiGraphics g, int mouseX, int mouseY) {
+        boolean compact = compactSidebar();
         RuffyRoundedUi.shadow(g, sidebarX, sidebarY, sidebarW, sidebarH,
                 RuffyRoundedUi.RADIUS_PANEL, 28);
         fillRounded(g, sidebarX, sidebarY, sidebarW, sidebarH,
@@ -271,34 +272,65 @@ public final class RuffyClickGui extends Screen {
                 withAlpha(0xFFE8C9FF, 125), 1);
         g.drawCenteredString(font, "RUFFY VISUALS", sidebarX + sidebarW / 2,
                 sidebarY + 68, WHITE);
-        g.drawCenteredString(font, "GALAXY EDITION", sidebarX + sidebarW / 2,
+        g.drawCenteredString(font, "GALAXY STUDIO", sidebarX + sidebarW / 2,
                 sidebarY + 81, RuffyConfig.primaryColor());
 
         int navX = sidebarX + 8;
         int navW = sidebarW - 16;
-        drawSidebarLabel(g, "WORKSPACE", sidebarX + 12, panelY + 104);
-        drawNavItem(g, Tab.HOME, navX, panelY + 116, navW, 24, mouseX, mouseY);
-        drawNavItem(g, Tab.VISUALS, navX, panelY + 142, navW, 24, mouseX, mouseY);
-        drawNavItem(g, Tab.STYLE, navX, panelY + 168, navW, 24, mouseX, mouseY);
-        drawNavItem(g, Tab.COSMETICS, navX, panelY + 194, navW, 24, mouseX, mouseY);
-        drawNavItem(g, Tab.HUD, navX, panelY + 220, navW, 24, mouseX, mouseY);
+        int[] ys = navigationYPositions();
+        int itemHeight = navigationItemHeight();
+        drawSidebarLabel(g, "WORKSPACE", sidebarX + 12,
+                panelY + (compact ? 98 : 104));
+        Tab[] firstGroup = {Tab.HOME, Tab.VISUALS, Tab.STYLE, Tab.COSMETICS, Tab.HUD};
+        for (int i = 0; i < firstGroup.length; i++) {
+            drawNavItem(g, firstGroup[i], navX, ys[i], navW, itemHeight, mouseX, mouseY);
+        }
 
-        drawSidebarLabel(g, "CONNECT", sidebarX + 12, panelY + 257);
-        drawNavItem(g, Tab.MUSIC, navX, panelY + 269, navW, 24, mouseX, mouseY);
+        drawSidebarLabel(g, "CONNECT", sidebarX + 12,
+                panelY + (compact ? 216 : 257));
+        drawNavItem(g, Tab.MUSIC, navX, ys[5], navW, itemHeight, mouseX, mouseY);
 
-        drawSidebarLabel(g, "PREFERENCES", sidebarX + 12, panelY + 306);
-        drawNavItem(g, Tab.CONFIGS, navX, panelY + 318, navW, 24, mouseX, mouseY);
-        drawNavItem(g, Tab.SETUP, navX, panelY + 344, navW, 24, mouseX, mouseY);
+        drawSidebarLabel(g, "PREFERENCES", sidebarX + 12,
+                panelY + (compact ? 252 : 306));
+        drawNavItem(g, Tab.CONFIGS, navX, ys[6], navW, itemHeight, mouseX, mouseY);
+        drawNavItem(g, Tab.SETUP, navX, ys[7], navW, itemHeight, mouseX, mouseY);
 
-        int bottomY = sidebarY + sidebarH - 41;
-        fillRounded(g, sidebarX + 8, bottomY, navW, 33,
-                0x9A111424, RuffyRoundedUi.RADIUS_CONTROL);
-        fillRounded(g, sidebarX + 16, bottomY + 9, 6, 6,
-                0xFF45DB91, 3);
-        g.drawString(font, "SYSTEM ONLINE", sidebarX + 29,
-                bottomY + 6, WHITE, false);
-        g.drawString(font, "LOCAL PROFILE", sidebarX + 16,
-                bottomY + 19, DIM, false);
+        if (compact) {
+            int dotY = sidebarY + sidebarH - 13;
+            fillRounded(g, sidebarX + 16, dotY, 6, 6, 0xFF45DB91, 3);
+            g.drawString(font, "ONLINE", sidebarX + 29, dotY - 1, DIM, false);
+        } else {
+            int bottomY = sidebarY + sidebarH - 41;
+            fillRounded(g, sidebarX + 8, bottomY, navW, 33,
+                    0x9A111424, RuffyRoundedUi.RADIUS_CONTROL);
+            fillRounded(g, sidebarX + 16, bottomY + 9, 6, 6,
+                    0xFF45DB91, 3);
+            g.drawString(font, "SYSTEM ONLINE", sidebarX + 29,
+                    bottomY + 6, WHITE, false);
+            g.drawString(font, "LOCAL PROFILE", sidebarX + 16,
+                    bottomY + 19, DIM, false);
+        }
+    }
+
+    private boolean compactSidebar() {
+        return panelH < 450;
+    }
+
+    private int navigationItemHeight() {
+        return compactSidebar() ? 19 : 24;
+    }
+
+    private int[] navigationYPositions() {
+        if (compactSidebar()) {
+            return new int[]{
+                    panelY + 110, panelY + 130, panelY + 150, panelY + 170,
+                    panelY + 190, panelY + 228, panelY + 264, panelY + 284
+            };
+        }
+        return new int[]{
+                panelY + 116, panelY + 142, panelY + 168, panelY + 194,
+                panelY + 220, panelY + 269, panelY + 318, panelY + 344
+        };
     }
 
     private void drawSidebarLabel(GuiGraphics g, String value, int x, int y) {
@@ -1594,17 +1626,14 @@ public final class RuffyClickGui extends Screen {
     private boolean handleNavigation(int mx, int my) {
         int x = sidebarX + 8;
         int w = sidebarW - 16;
-        int[] ys = {
-                panelY + 116, panelY + 142, panelY + 168,
-                panelY + 194, panelY + 220, panelY + 269,
-                panelY + 318, panelY + 344
-        };
+        int[] ys = navigationYPositions();
+        int itemHeight = navigationItemHeight();
         Tab[] tabs = {
-                Tab.HOME, Tab.VISUALS, Tab.COSMETICS, Tab.STYLE,
+                Tab.HOME, Tab.VISUALS, Tab.STYLE, Tab.COSMETICS,
                 Tab.HUD, Tab.MUSIC, Tab.CONFIGS, Tab.SETUP
         };
         for (int i = 0; i < tabs.length; i++) {
-            if (!inside(mx, my, x, ys[i], w, 26)) continue;
+            if (!inside(mx, my, x, ys[i], w, itemHeight)) continue;
             tab = tabs[i];
             modulePage = 0;
             if (searchBox != null) searchBox.setVisible(true);
