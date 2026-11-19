@@ -32,7 +32,7 @@ public final class RuffyRoundedUi {
     public static final int RADIUS_CONTROL = 10;
     public static final int RADIUS_SMALL = 8;
 
-    private static final int[] RADIUS_STEPS = {2, 4, 8, 12, 16, 20, 24, 28, 30};
+    private static final int[] RADIUS_STEPS = {2, 4, 8, 10, 12, 14, 16, 20, 24, 28, 30};
     private static final Map<Integer, Identifier> FILLS = new HashMap<>();
     private static final Map<Integer, Identifier> OUTLINES = new HashMap<>();
 
@@ -115,6 +115,8 @@ public final class RuffyRoundedUi {
     }
 
     private static int quantizeRadius(int requested, int maximum) {
+        // A true pill/circle must keep the exact half-height radius.
+        if (requested >= maximum) return maximum;
         int selected = 0;
         int distance = Integer.MAX_VALUE;
         for (int step : RADIUS_STEPS) {
