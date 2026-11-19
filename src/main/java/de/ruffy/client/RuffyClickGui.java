@@ -435,15 +435,15 @@ public final class RuffyClickGui extends Screen {
         homeRightX = homeCenterX + homeCenterW + gap;
         homeRightW = Math.max(70, mainX + mainW - homeRightX);
 
-        homeHeroY = panelY + Math.round(panelH * 0.145F);
-        homeHeroH = Math.max(58, Math.round(panelH * 0.355F));
+        homeHeroY = panelY + Math.round(panelH * 0.170F);
+        homeHeroH = Math.max(58, Math.round(panelH * 0.350F));
         homeModulesY = homeHeroY + homeHeroH + Math.max(5, Math.round(panelH * 0.020F));
         homeBottomY = panelY + panelH - Math.round(panelH * 0.150F);
-        homeModulesH = Math.max(48, homeBottomY - homeModulesY - Math.max(8, gap));
+        homeModulesH = Math.max(48, homeBottomY - homeModulesY);
 
-        homeSpotifyY = panelY + Math.round(panelH * 0.060F);
-        homeSpotifyH = Math.round(panelH * 0.375F);
-        homeLyricsY = homeSpotifyY + homeSpotifyH - Math.max(2, gap / 3);
+        homeSpotifyY = panelY + Math.round(panelH * 0.085F);
+        homeSpotifyH = Math.round(panelH * 0.370F);
+        homeLyricsY = homeSpotifyY + homeSpotifyH + 1;
         homeLyricsH = Math.max(25, Math.round(panelH * 0.112F));
 
         int lowerWidth = Math.max(140, mainW - gap);
@@ -453,12 +453,12 @@ public final class RuffyClickGui extends Screen {
         homeLyricsX = homeRightX;
         homeLyricsW = homeRightW;
         homeAppearanceY = homeModulesY + Math.max(7, Math.round(homeModulesH * 0.13F));
-        homeAppearanceH = Math.max(34, homeModulesH - Math.max(8, Math.round(homeModulesH * 0.09F)));
+        homeAppearanceH = Math.max(34, homeModulesH - Math.max(4, Math.round(homeModulesH * 0.05F)));
 
-        homePerfW = Math.max(90, Math.min(300, mainW * 37 / 100));
-        homeSocialX = mainX + mainW - 4 * 44 - 3 * 14;
+        homePerfW = Math.max(90, Math.min(260, mainW * 34 / 100));
+        homeSocialX = mainX + mainW - 4 * 24 - 3 * 8;
         homeVersionX = mainX + homePerfW + gap;
-        homeVersionW = Math.max(80, homeSocialX - homeVersionX - gap);
+        homeVersionW = Math.max(65, homeSocialX - homeVersionX - gap);
     }
 
     private void drawHomeDashboard(GuiGraphics g, int mouseX, int mouseY) {
