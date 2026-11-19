@@ -699,12 +699,12 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, "⌄", controlsX + themeW - 9, themeY + 4, MUTED, false);
 
         int sliderW = Math.max(18, right - controlsX);
-        int opacityLabelY = y + 46;
-        g.drawString(font, "Opacity", controlsX, opacityLabelY, MUTED, false);
-        String opacity = RuffyConfig.getInt("menu_opacity") + "%";
-        g.drawString(font, opacity, right - font.width(opacity), opacityLabelY, WHITE, false);
-        drawSlider(g, controlsX, y + 47, sliderW,
-                RuffyConfig.getInt("menu_opacity"), 60, 100);
+        int blurLabelY = y + 46;
+        int blurValue = Minecraft.getInstance().options.menuBackgroundBlurriness().get();
+        g.drawString(font, "Blur", controlsX, blurLabelY, MUTED, false);
+        String blur = (blurValue * 10) + "%";
+        g.drawString(font, blur, right - font.width(blur), blurLabelY, WHITE, false);
+        drawSlider(g, controlsX, y + 47, sliderW, blurValue, 0, 10);
 
         int particlesLabelY = y + 61;
         g.drawString(font, "Particles", controlsX, particlesLabelY, MUTED, false);
@@ -880,10 +880,11 @@ public final class RuffyClickGui extends Screen {
             return true;
         }
         int sliderW = Math.max(18, right - controlsX);
-        int opacityY = quickY + 47;
-        if (inside(mx, my, controlsX - 3, opacityY - 2, sliderW + 6, 12)) {
-            int value = 60 + Math.round((mx - controlsX) * 40.0F / Math.max(1, sliderW));
-            RuffyConfig.setInt("menu_opacity", value);
+        int blurY = quickY + 47;
+        if (inside(mx, my, controlsX - 3, blurY - 2, sliderW + 6, 12)) {
+            int value = Math.round((mx - controlsX) * 10.0F / Math.max(1, sliderW));
+            Minecraft.getInstance().options.menuBackgroundBlurriness().set(
+                    Math.max(0, Math.min(10, value)));
             return true;
         }
         int particlesY = quickY + 62;
