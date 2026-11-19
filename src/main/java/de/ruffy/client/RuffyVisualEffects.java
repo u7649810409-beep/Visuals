@@ -93,6 +93,36 @@ public final class RuffyVisualEffects {
         float cave = amount("cave_dust");
         float starfall = amount("starfall");
         float impact = amount("hit_sparks");
+        int cosmeticAura = RuffyConfig.getInt("cosmetic_aura");
+        int cosmeticTrail = RuffyConfig.getInt("cosmetic_trail");
+
+        // Cosmetic aura: a low-density orbit of small sparks, independent of combat events.
+        if (cosmeticAura > 0 && shouldEmit(1.0F, (int) tick, quality == 0 ? 10 : 7)) {
+            double angle = tick * 0.19;
+            double y = 0.30 + (Math.sin(angle * 1.3) + 1.0) * 0.48;
+            Vec3 p = position.add(Math.cos(angle) * 0.68, y,
+                    Math.sin(angle) * 0.68);
+            addPoint(p, new Vec3(-Math.sin(angle) * 0.006, 0.015,
+                    Math.cos(angle) * 0.006), cosmeticAuraColor(cosmeticAura),
+                    0.022F, 30, 0.982F, 0.0F);
+        }
+
+        // Equipped movement trail is a cosmetic: it works without enabling gameplay FX modules.
+        if (cosmeticTrail > 0 && horizontalSpeed > 0.045
+                && shouldEmit(1.0F, (int) tick, quality == 0 ? 4 : 2)) {
+            Vec3 back = new Vec3(-velocity.x / horizontalSpeed, 0.0,
+                    -velocity.z / horizontalSpeed);
+            Vec3 base = position.add(back.scale(0.30)).add(0.0, 0.16, 0.0);
+            int count = quality == 0 ? 1 : 2;
+            for (int i = 0; i < count; i++) {
+                Vec3 p = base.add(back.scale(i * 0.18))
+                        .add(0.0, i * 0.045, 0.0);
+                addPoint(p, back.scale(0.016).add(0.0, 0.007, 0.0),
+                        cosmeticTrailColor(cosmeticTrail, (int) tick + i),
+                        0.023F + i * 0.004F, 22, 0.94F, 0.0002F,
+                        cosmeticTrail == 4 ? Shape.STREAK : Shape.GLINT);
+            }
+        }
 
         // Slow drifting glints around the player, using Ruffy's own point integrator.
         if (shouldEmit(ambient, ambientCounter++, ambientInterval)) {
@@ -310,7 +340,9 @@ public final class RuffyVisualEffects {
         }
         if (POINTS.isEmpty() && RINGS.isEmpty() && SLASHES.isEmpty()
                 && !RuffyConfig.get("orbit_particles")
-                && !RuffyConfig.get("prism_core") && !RuffyConfig.get("orbit_drones")) {
+                && !RuffyConfig.get("prism_core") && !RuffyConfig.get("orbit_drones")
+                && RuffyConfig.getInt("cosmetic_aura") == 0
+                && RuffyConfig.getInt("cosmetic_companion") == 0) {
             return;
         }
 
@@ -364,6 +396,12 @@ public final class RuffyVisualEffects {
             }
             if (RuffyConfig.get("orbit_drones") && quality > 0) {
                 drawOrbitDrones(lines, pose, player, timeSeconds);
+            }
+            if (RuffyConfig.getInt("cosmetic_aura") > 0) {
+                drawCosmeticAura(lines, pose, player, quality, timeSeconds);
+            }
+            if (RuffyConfig.getInt("cosmetic_companion") > 0 && quality > 0) {
+                drawCosmeticCompanion(lines, pose, player, timeSeconds);
             }
         } finally {
             matrices.popPose();
@@ -437,6 +475,98 @@ public final class RuffyVisualEffects {
 
     private static int randomAccent() {
         return RANDOM.nextBoolean() ? RuffyConfig.primaryColor() : RuffyConfig.secondaryColor();
+    }
+
+    private static int cosmeticAuraColor(int style) {
+        return switch (style) {
+            case 2 -> 0xFFFFB34D; // Solar
+            case 3 -> 0xFF79E7FF; // Frost
+            case 4 -> 0xFFFF70B8; // Rose
+            default -> RuffyConfig.primaryColor(); // Nebula
+        };
+    }
+
+    private static int cosmeticCompanionColor(int style) {
+        return switch (style) {
+            case 2 -> 0xFFFFC15A;
+            case 3 -> 0xFF8CEBFF;
+            case 4 -> 0xFFFF78C6;
+            default -> 0xFFC98BFF;
+        };
+    }
+
+    private static int cosmeticTrailColor(int style, int tickOffset) {
+        return switch (style) {
+            case 2 -> (tickOffset & 1) == 0 ? 0xFFFF9A42 : 0xFFFFD36B;
+            case 3 -> (tickOffset & 1) == 0 ? 0xFF79E7FF : 0xFFCAEFFF;
+            case 4 -> (tickOffset & 1) == 0 ? 0xFFCA7BFF : 0xFF71CFFF;
+            default -> (tickOffset & 1) == 0
+                    ? RuffyConfig.primaryColor() : RuffyConfig.secondaryColor();
+        };
+    }
+
+    /** Low-cost twin orbital rings around the local player's waist and shoulders. */
+    private static void drawCosmeticAura(VertexConsumer out, PoseStack.Pose pose,
+                                         LocalPlayer player, int quality, double time) {
+        int style = RuffyConfig.getInt("cosmetic_aura");
+        if (style <= 0) return;
+        int color = cosmeticAuraColor(style);
+        int segments = quality == 0 ? 12 : quality == 1 ? 20 : 28;
+        int stride = CIRCLE_SAMPLES / segments;
+        Vec3 center = player.position().add(0.0, 0.78, 0.0);
+        double pulse = 0.04 * Math.sin(time * 1.6);
+        double[] radii = {0.62 + pulse, 0.49 - pulse};
+        for (int ring = 0; ring < radii.length; ring++) {
+            double radius = radii[ring];
+            RuffyAnimation.Rotation3 rotation = RuffyAnimation.rotation3D(
+                    ring == 0 ? time * 0.22 : -time * 0.18,
+                    ring == 0 ? 0.30 : -0.48,
+                    ring == 0 ? 0.0 : time * 0.28);
+            Vec3 previous = null;
+            for (int i = 0; i <= segments; i++) {
+                int index = (i * stride) % CIRCLE_SAMPLES;
+                Vec3 local = new Vec3(CIRCLE_COS[index] * radius, 0.0,
+                        CIRCLE_SIN[index] * radius);
+                Vec3 next = center.add(rotation.transform(local));
+                if (previous != null) {
+                    int alpha = ring == 0 ? 112 : 72;
+                    drawLine(out, pose, previous, next, withAlpha(color, alpha),
+                            ring == 0 ? 1.25F : 0.9F);
+                }
+                previous = next;
+            }
+        }
+    }
+
+    /** A single shoulder companion, with restrained geometry and a short orbital halo. */
+    private static void drawCosmeticCompanion(VertexConsumer out, PoseStack.Pose pose,
+                                               LocalPlayer player, double time) {
+        int style = RuffyConfig.getInt("cosmetic_companion");
+        if (style <= 0) return;
+        int color = cosmeticCompanionColor(style);
+        double angle = time * 0.85;
+        Vec3 anchor = player.position().add(0.0, 1.48, 0.0);
+        Vec3 companion = anchor.add(Math.cos(angle) * 0.78,
+                0.12 + Math.sin(angle * 1.7) * 0.17,
+                Math.sin(angle) * 0.62);
+        drawLine(out, pose, anchor, companion, withAlpha(color, 52), 0.7F);
+        drawOctahedron(out, pose, companion, 0.13,
+                -angle * 1.6, angle * 0.9, time * 0.7,
+                withAlpha(color, 225), 1.15F);
+
+        Vec3 previous = null;
+        int segments = 12;
+        int stride = CIRCLE_SAMPLES / segments;
+        for (int i = 0; i <= segments; i++) {
+            int index = (i * stride) % CIRCLE_SAMPLES;
+            Vec3 point = companion.add(CIRCLE_COS[index] * 0.22,
+                    Math.sin(angle + i * 0.32) * 0.045,
+                    CIRCLE_SIN[index] * 0.22);
+            if (previous != null) {
+                drawLine(out, pose, previous, point, withAlpha(color, 90), 0.75F);
+            }
+            previous = point;
+        }
     }
 
     private static void drawOrbit(VertexConsumer out, PoseStack.Pose pose,
