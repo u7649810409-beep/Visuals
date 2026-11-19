@@ -376,15 +376,15 @@ public final class RuffyClickGui extends Screen {
         int controlsX = mainX + mainW - 45;
         int controlsY = panelY + 14;
         for (int i = 0; i < 3; i++) {
-            int cx = controlsX + i * 13;
-            fillRounded(g, cx, controlsY, 11, 11,
-                    0xB50D1020, 6);
-            outlineRounded(g, cx, controlsY, 11, 11,
-                    0x77785EBA, 6);
+            int cx = controlsX + i * 15;
+            int controlColor = i == 2 ? 0xFFFF6487 : 0xFF8E78C5;
+            fillRounded(g, cx, controlsY, 12, 12, 0xC20D0B1B, 6);
+            outlineRounded(g, cx, controlsY, 12, 12,
+                    withAlpha(controlColor, i == 2 ? 172 : 94), 6);
         }
-        g.drawCenteredString(font, "−", controlsX + 5, controlsY + 1, MUTED);
-        g.drawCenteredString(font, "□", controlsX + 18, controlsY + 1, MUTED);
-        g.drawCenteredString(font, "×", controlsX + 31, controlsY + 1, WHITE);
+        g.drawCenteredString(font, "−", controlsX + 6, controlsY + 1, MUTED);
+        g.drawCenteredString(font, "□", controlsX + 21, controlsY + 1, MUTED);
+        g.drawCenteredString(font, "×", controlsX + 36, controlsY + 1, 0xFFFFA8BD);
     }
 
 
