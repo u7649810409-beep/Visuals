@@ -96,8 +96,8 @@ public final class RuffyClickGui extends Screen {
         RuffyAnimation.set("gui.open", 0.0F);
         calculateLayout();
 
-        searchBox = new EditBox(font, searchX, searchY + 3,
-                searchW, 18, Component.literal("Search modules"));
+        searchBox = new EditBox(font, searchX + 26, searchY + 3,
+                Math.max(72, searchW - 34), 18, Component.literal("Search modules"));
         searchBox.setBordered(false);
         searchBox.setMaxLength(36);
         searchBox.setTextColor(0xFFF1F0FF);
@@ -142,8 +142,8 @@ public final class RuffyClickGui extends Screen {
         rowHeight = Math.max(44, Math.min(58, (available - cardGap * 3) / 4));
 
         if (searchBox != null) {
-            searchBox.setPosition(searchX + 7, searchY + 3);
-            searchBox.setWidth(Math.max(90, searchW - 14));
+            searchBox.setPosition(searchX + 26, searchY + 3);
+            searchBox.setWidth(Math.max(72, searchW - 34));
         }
     }
 
@@ -156,7 +156,7 @@ public final class RuffyClickGui extends Screen {
         searchY += lift;
         filterY += lift;
         listTop += lift;
-        if (searchBox != null) searchBox.setPosition(searchX + 7, searchY + 3);
+        if (searchBox != null) searchBox.setPosition(searchX + 26, searchY + 3);
     }
 
     @Override
@@ -349,6 +349,18 @@ public final class RuffyClickGui extends Screen {
         List<RuffyFeature> features = filteredFeatures(requiredSection);
         int pages = Math.max(1, (features.size() + 7) / 8);
         modulePage = Math.max(0, Math.min(modulePage, pages - 1));
+
+        if (features.isEmpty()) {
+            String emptyTitle = searchText.isBlank() ? "NO MODULES IN THIS VIEW" : "NO MATCHES FOUND";
+            String emptyHint = searchText.isBlank()
+                    ? "Choose another section or filter to explore more effects."
+                    : "Try a shorter search or clear the active filter.";
+            int centerY = listTop + Math.max(30, (rowHeight * 2) / 2);
+            g.drawCenteredString(font, emptyTitle, mainX + mainW / 2,
+                    centerY, WHITE);
+            g.drawCenteredString(font, trimToWidth(emptyHint, mainW - 28),
+                    mainX + mainW / 2, centerY + 16, MUTED);
+        }
 
         for (int i = 0; i < 8; i++) {
             int index = modulePage * 8 + i;
@@ -944,16 +956,16 @@ public final class RuffyClickGui extends Screen {
 
             int switchX = x + cardWidth - 47;
             int switchY = y + rowHeight - 22;
-            if (inside(mx, my, switchX - 3, switchY - 4, 44, 26)) {
-                RuffyConfig.set(feature.key(), !RuffyConfig.get(feature.key()));
-                selectedKey = feature.key();
-                return true;
-            }
-
             int starX = x + cardWidth - 26;
             if (inside(mx, my, starX - 1, y + 2, 18, 18)) {
                 String key = "favorite_" + feature.key();
                 RuffyConfig.set(key, !RuffyConfig.get(key));
+                return true;
+            }
+
+            if (inside(mx, my, switchX - 2, switchY - 2, 42, 22)) {
+                RuffyConfig.set(feature.key(), !RuffyConfig.get(feature.key()));
+                selectedKey = feature.key();
                 return true;
             }
 
