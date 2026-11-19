@@ -316,6 +316,14 @@ public final class RuffyVisualEffects {
 
         LocalPlayer player = client.player;
         Vec3 camera = context.gameRenderer().getMainCamera().position();
+        int quality = RuffyConfig.getInt("effect_quality");
+        int pointBudget = quality == 0 ? 24 : quality == 1 ? 48 : 96;
+        double renderDistance = quality == 0 ? 16.0 : quality == 1 ? 24.0 : 32.0;
+        double renderDistanceSqr = renderDistance * renderDistance;
+        // If the local player is outside the quality-tier radius, none of the
+        // player-attached geometry can contribute to the current camera view.
+        if (distanceSqr(camera, player.position()) > renderDistanceSqr) return;
+
         PoseStack matrices = context.matrices();
         matrices.pushPose();
         try {
@@ -326,10 +334,6 @@ public final class RuffyVisualEffects {
 
             long renderNanos = System.nanoTime();
             double timeSeconds = renderNanos * 1.0E-9;
-            int quality = RuffyConfig.getInt("effect_quality");
-            int pointBudget = quality == 0 ? 24 : quality == 1 ? 48 : 96;
-            double renderDistance = quality == 0 ? 16.0 : quality == 1 ? 24.0 : 32.0;
-            double renderDistanceSqr = renderDistance * renderDistance;
 
             // Draw only recent, nearby points. Older particles are still simulated
             // and expire normally, but distant points never consume GPU vertices.
@@ -464,10 +468,6 @@ public final class RuffyVisualEffects {
     }
 
     /**
-     * 3D Prism Core: two independently rotating octahedra, an inner cube and
-     * three animated latitude loops. All vertices are generated in local space.
-     */
-    /**
      * Custom 3D prism. Mesh transforms are prepared once per object and
      * the latitude loops use a small, quality-scaled, precomputed circle.
      */
@@ -515,7 +515,6 @@ public final class RuffyVisualEffects {
         }
     }
 
-    /** Three small rotating 3D crystal drones follow different orbital paths. */
     /** Three small rotating crystals; only rendered at medium/high quality. */
     private static void drawOrbitDrones(VertexConsumer out, PoseStack.Pose pose,
                                         LocalPlayer player, double time) {
