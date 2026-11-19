@@ -734,7 +734,27 @@ public final class RuffyClickGui extends Screen {
                 particlesY + 3, WHITE, false);
     }
 
-        private void drawHomeLyrics(GuiGraphics g, int mouseX, int mouseY) {
+        private void drawAlbumArt(GuiGraphics g, int x, int y, int size) {
+        int radius = size / 2;
+        fillRounded(g, x, y, size, size, 0xFF100A25, radius);
+        fillRounded(g, x + 2, y + 3, size - 4, size - 6,
+                0xFF24104D, radius);
+        fillRounded(g, x + 4, y + size / 2 - 4, size - 8,
+                Math.max(6, size / 4), 0xFF8B42D0, Math.max(3, size / 8));
+        fillRounded(g, x + size / 4, y + size / 5,
+                size / 2, size / 2, 0xFF6330A6, size / 4);
+        fillRounded(g, x + size / 3, y + size / 4,
+                Math.max(4, size / 4), Math.max(4, size / 4),
+                0xFFC89AFF, Math.max(2, size / 8));
+        fillRounded(g, x + 5, y + size / 2 + 4, size - 10,
+                Math.max(3, size / 10), 0xFFD78BFF, Math.max(2, size / 12));
+        fillRounded(g, x + size / 3, y + size / 4,
+                Math.max(2, size / 10), Math.max(2, size / 10),
+                0xFFFFF4FF, Math.max(1, size / 20));
+        outlineRounded(g, x, y, size, size, 0x998A5CE6, radius);
+    }
+
+    private void drawHomeLyrics(GuiGraphics g, int mouseX, int mouseY) {
         int x = homeLyricsX;
         int y = homeLyricsY;
         int w = homeLyricsW;
