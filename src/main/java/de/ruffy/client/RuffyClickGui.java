@@ -72,6 +72,7 @@ public final class RuffyClickGui extends Screen {
         PRIMARY, TONAL, OUTLINE, GHOST, SEGMENT
     }
 
+    private static boolean referencePaletteNormalized;
     private static final String[] PALETTE_NAMES = {
             "Nebula", "Rose", "Magenta", "Violet", "Azure",
             "Ice", "Mint", "Emerald", "Amber", "Solar"
@@ -106,6 +107,11 @@ public final class RuffyClickGui extends Screen {
     protected void init() {
         super.init();
         RuffyAnimation.set("gui.open", 0.0F);
+        // Start in the same Nebula-violet palette as the reference, once per client session.
+        if (!referencePaletteNormalized) {
+            RuffyConfig.setInt("palette", 0);
+            referencePaletteNormalized = true;
+        }
         calculateLayout();
 
         searchBox = new EditBox(font, searchX + 26, searchY + 3,
@@ -858,7 +864,7 @@ public final class RuffyClickGui extends Screen {
             RuffySpotify.nextTrack();
             return true;
         }
-        if (inside(mx, my, spotifyX + spotifyW - 27, spotifyY + 12, 20, 22)
+        if (inside(mx, my, spotifyX + spotifyW - 27, spotifyY + (homeSpotifyH < 130 ? 7 : 13), 20, 22)
                 || inside(mx, my, spotifyX, spotifyY, spotifyW, 34)) {
             if (minecraft != null) minecraft.setScreen(new RuffySpotifyScreen(this));
             return true;
