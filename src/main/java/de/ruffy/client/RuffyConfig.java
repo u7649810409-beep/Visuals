@@ -58,7 +58,10 @@ public final class RuffyConfig {
             "menu_opacity", 94,
             "effect_quality", 1,
             "animation_smoothness", 78,
-            "hud_scale", 96
+            "hud_scale", 96,
+            "cosmetic_aura", 1,
+            "cosmetic_companion", 1,
+            "cosmetic_trail", 0
     );
 
     private static final int[] PRIMARY = {
@@ -122,6 +125,8 @@ public final class RuffyConfig {
             case "effect_quality" -> Math.max(0, Math.min(2, value));
             case "animation_smoothness" -> Math.max(0, Math.min(100, value));
             case "hud_scale" -> Math.max(75, Math.min(120, value));
+            case "cosmetic_aura", "cosmetic_companion", "cosmetic_trail" ->
+                    Math.max(0, Math.min(4, value));
             default -> value;
         };
         VALUES.setProperty(key, Integer.toString(clamped));
