@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Ruffy Visuals 2.6 — Galaxy dashboard with client-side cosmetic collection.
+ * Ruffy Visuals 2.7 — Cosmic desktop studio with a non-game-space interface.
  *
  * The layout follows an app-shell model: persistent task navigation at the
  * left, one clear content workspace, compact two-column module cards and a
@@ -1335,7 +1335,7 @@ public final class RuffyClickGui extends Screen {
         drawInfoRow(g, x, y + 108, "CONFIG FILE",
                 "config/ruffyclient.properties");
         drawInfoRow(g, x, y + 144, "BUILD",
-                "Ruffy Visuals 2.6.0 · Minecraft 1.21.11 · Fabric");
+                "Ruffy Visuals 2.7.0 · Minecraft 1.21.11 · Fabric");
     }
 
     private void drawMusicLanding(GuiGraphics g, int mouseX, int mouseY) {
@@ -1513,7 +1513,7 @@ public final class RuffyClickGui extends Screen {
         fillRounded(g, mainX + 14, y, 58, 1,
                 withAlpha(RuffyConfig.primaryColor(), 125), 1);
         if (tab != Tab.HOME) {
-            g.drawString(font, "RUFFY VISUALS 2.6  ·  GALAXY EDITION",
+            g.drawString(font, "RUFFY VISUALS 2.7  ·  GALAXY STUDIO",
                     mainX, panelY + panelH - 18, DIM, false);
             String hint = "RIGHT SHIFT  ·  ESC";
             g.drawString(font, hint, mainX + mainW - font.width(hint),
