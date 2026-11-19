@@ -580,7 +580,7 @@ public final class RuffyClickGui extends Screen {
         outlineRounded(g, x + 2, y + 2, w - 4, h - 4,
                 withAlpha(RuffyConfig.primaryColor(), 32), RuffyRoundedUi.RADIUS_PANEL);
 
-        int headerY = y + (compact ? 7 : 12);
+        int headerY = y + (compact ? 7 : 17);
         int spotifyMark = compact ? 22 : 25;
         fillRounded(g, x + 11, headerY, spotifyMark, spotifyMark,
                 0xFF1ED760, spotifyMark / 2);
@@ -851,8 +851,8 @@ public final class RuffyClickGui extends Screen {
         int spotifyY = homeSpotifyY;
         int spotifyW = homeRightW;
         int center = spotifyX + spotifyW / 2;
-        int controlsYPlayer = spotifyY + homeSpotifyH - (homeSpotifyH < 120 ? 22 : 25);
-        if (inside(mx, my, center - 36, controlsYPlayer, 22, 20)) {
+        int controlsYPlayer = spotifyY + homeSpotifyH - (homeSpotifyH < 130 ? 22 : 27);
+        if (inside(mx, my, center - 38, controlsYPlayer, 23, 21)) {
             RuffySpotify.previousTrack();
             return true;
         }
@@ -860,12 +860,12 @@ public final class RuffyClickGui extends Screen {
             RuffySpotify.togglePlayback();
             return true;
         }
-        if (inside(mx, my, center + 15, controlsYPlayer, 22, 20)) {
+        if (inside(mx, my, center + 15, controlsYPlayer, 23, 21)) {
             RuffySpotify.nextTrack();
             return true;
         }
-        if (inside(mx, my, spotifyX + spotifyW - 24, spotifyY + 7, 18, 20)
-                || inside(mx, my, spotifyX, spotifyY, spotifyW, 32)) {
+        if (inside(mx, my, spotifyX + spotifyW - 27, spotifyY + 12, 20, 22)
+                || inside(mx, my, spotifyX, spotifyY, spotifyW, 34)) {
             if (minecraft != null) minecraft.setScreen(new RuffySpotifyScreen(this));
             return true;
         }
@@ -914,7 +914,7 @@ public final class RuffyClickGui extends Screen {
         int footerY = homeBottomY + 6;
         int footerH = Math.max(48, Math.min(66, Math.round(panelH * 0.135F)));
         for (int i = 0; i < 4; i++) {
-            int sx = homeSocialX + i * 54;
+            int sx = homeSocialX + i * 58;
             if (!inside(mx, my, sx, footerY + (footerH - 42) / 2, 42, 42)) continue;
             switch (i) {
                 case 0 -> tab = Tab.HOME;
