@@ -338,9 +338,11 @@ public final class RuffyClickGui extends Screen {
 
     private void drawHeader(GuiGraphics g, int mouseX, int mouseY) {
         if (tab == Tab.HOME) {
-            g.drawString(font, "RUFFY VISUALS", mainX, panelY + 15, WHITE, false);
-            g.drawString(font, "GALAXY EDITION  ✦", mainX, panelY + 29,
-                    RuffyConfig.primaryColor(), false);
+            g.drawString(font, "Ruffy", mainX, panelY + 12, WHITE, false);
+            g.drawString(font, "Visuals", mainX + font.width("Ruffy ") - 1,
+                    panelY + 12, RuffyConfig.primaryColor(), false);
+            g.drawString(font, "GALAXY STUDIO  ·  2.7", mainX, panelY + 28,
+                    MUTED, false);
         } else {
             String title = switch (tab) {
                 case HOME -> "Home";
@@ -349,7 +351,7 @@ public final class RuffyClickGui extends Screen {
                 case HUD -> "HUD studio";
                 case PRESETS -> "Visual profiles";
                 case COSMETICS -> "Cosmetics";
-                case STYLE -> "Visuals";
+                case STYLE -> "Appearance";
                 case MUSIC -> "Spotify";
                 case CONFIGS -> "Settings";
                 case SETUP -> "About";
@@ -371,7 +373,7 @@ public final class RuffyClickGui extends Screen {
             searchBox.setWidth(Math.max(72, searchW - 33));
         }
 
-        int controlsX = mainX + mainW - 36;
+        int controlsX = mainX + mainW - 45;
         int controlsY = panelY + 14;
         for (int i = 0; i < 3; i++) {
             int cx = controlsX + i * 13;
