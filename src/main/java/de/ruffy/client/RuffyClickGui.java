@@ -1,5 +1,6 @@
 package de.ruffy.client;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -29,14 +30,15 @@ public final class RuffyClickGui extends Screen {
     private static final int CARD_HOVER = 0xD31D2340;
 
     private enum Tab {
-        VISUALS("Visuals", "Visual effects and client modules", "✦"),
+        HOME("Home", "Your Galaxy dashboard", "⌂"),
+        VISUALS("Modules", "Visual effects and client modules", "✦"),
         WORLD("World", "Atmosphere and world-side effects", "◇"),
         HUD("HUD", "Your in-game information layout", "▣"),
         PRESETS("Presets", "Ready-made visual profiles", "▤"),
-        STYLE("Appearance", "Colors, motion and interface tuning", "◈"),
+        STYLE("Visuals", "Colors, motion and interface tuning", "◈"),
         MUSIC("Spotify", "Music and lyrics", "♫"),
         CONFIGS("Settings", "Configuration and reset options", "⚙"),
-        SETUP("Help", "Controls and client information", "?");
+        SETUP("About", "Ruffy Visuals information", "ⓘ");
 
         private final String label;
         private final String subtitle;
@@ -53,6 +55,7 @@ public final class RuffyClickGui extends Screen {
         ALL("All", 38),
         ENTITIES("Entities", 62),
         MOTION("Motion", 54),
+        WORLD("World", 50),
         STARRED("Favorites", 64);
 
         private final String label;
@@ -73,7 +76,7 @@ public final class RuffyClickGui extends Screen {
             "Ice", "Mint", "Emerald", "Amber", "Solar"
     };
 
-    private Tab tab = Tab.VISUALS;
+    private Tab tab = Tab.HOME;
     private Filter filter = Filter.ALL;
     private EditBox searchBox;
     private String searchText = "";
@@ -85,6 +88,12 @@ public final class RuffyClickGui extends Screen {
     private int mainX, mainW;
     private int searchX, searchY, searchW;
     private int filterY, listTop, rowHeight, cardGap, cardWidth;
+
+    // Responsive home-dashboard geometry, derived from the same app shell.
+    private int homeCenterX, homeCenterW, homeRightX, homeRightW;
+    private int homeHeroY, homeHeroH, homeModulesY, homeModulesH;
+    private int homeSpotifyY, homeSpotifyH, homeAppearanceY, homeAppearanceH;
+    private int homeBottomY, homePerfW, homeVersionX, homeVersionW, homeSocialX;
 
     public RuffyClickGui() {
         super(Component.literal("Ruffy Visuals Control Center"));
@@ -106,8 +115,9 @@ public final class RuffyClickGui extends Screen {
         searchBox.setResponder(value -> {
             searchText = value.toLowerCase(Locale.ROOT);
             modulePage = 0;
+            if (!value.isBlank() && !isModuleTab()) tab = Tab.VISUALS;
         });
-        searchBox.setVisible(isModuleTab());
+        searchBox.setVisible(true);
         addRenderableWidget(searchBox);
     }
 
@@ -130,9 +140,9 @@ public final class RuffyClickGui extends Screen {
         mainX = sidebarX + sidebarW + 16;
         mainW = panelX + panelW - 16 - mainX;
 
-        searchW = Math.min(164, Math.max(112, mainW - 205));
-        searchX = mainX + mainW - searchW;
-        searchY = panelY + 20;
+        searchW = Math.min(158, Math.max(112, mainW - 210));
+        searchX = mainX + mainW - searchW - 42;
+        searchY = panelY + 13;
 
         filterY = panelY + 80;
         listTop = panelY + 119;
@@ -142,8 +152,8 @@ public final class RuffyClickGui extends Screen {
         rowHeight = Math.max(44, Math.min(58, (available - cardGap * 3) / 4));
 
         if (searchBox != null) {
-            searchBox.setPosition(searchX + 26, searchY + 3);
-            searchBox.setWidth(Math.max(72, searchW - 34));
+            searchBox.setPosition(searchX + 25, searchY + 3);
+            searchBox.setWidth(Math.max(72, searchW - 33));
         }
     }
 
@@ -156,7 +166,7 @@ public final class RuffyClickGui extends Screen {
         searchY += lift;
         filterY += lift;
         listTop += lift;
-        if (searchBox != null) searchBox.setPosition(searchX + 26, searchY + 3);
+        if (searchBox != null) searchBox.setPosition(searchX + 25, searchY + 3);
     }
 
     @Override
@@ -168,6 +178,7 @@ public final class RuffyClickGui extends Screen {
         drawHeader(g, mouseX, mouseY);
 
         switch (tab) {
+            case HOME -> drawHomeDashboard(g, mouseX, mouseY);
             case VISUALS -> drawModuleBrowser(g, mouseX, mouseY, null);
             case WORLD -> drawModuleBrowser(g, mouseX, mouseY, RuffyFeature.Section.WORLD);
             case HUD -> drawModuleBrowser(g, mouseX, mouseY, RuffyFeature.Section.HUD);
