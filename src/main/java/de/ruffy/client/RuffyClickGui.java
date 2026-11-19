@@ -452,7 +452,7 @@ public final class RuffyClickGui extends Screen {
         homeLyricsX = homeRightX;
         homeLyricsW = homeRightW;
         homeAppearanceY = homeModulesY + Math.max(7, Math.round(homeModulesH * 0.13F));
-        homeAppearanceH = Math.max(34, homeModulesH - Math.max(8, Math.round(homeModulesH * 0.13F)));
+        homeAppearanceH = Math.max(34, homeModulesH - Math.max(8, Math.round(homeModulesH * 0.09F)));
 
         homePerfW = Math.max(90, Math.min(300, mainW * 37 / 100));
         homeSocialX = mainX + mainW - 4 * 44 - 3 * 14;
@@ -690,9 +690,9 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, "Customize your look", x + 11, y + 20, MUTED, false);
 
         int thumbX = x + 10;
-        int thumbY = y + 39;
+        int thumbY = y + 48;
         int thumbW = Math.min(84, Math.max(58, w * 33 / 100));
-        int thumbH = Math.max(28, h - 47);
+        int thumbH = Math.max(28, h - 56);
         fillRounded(g, thumbX - 2, thumbY - 2, thumbW + 4, thumbH + 4,
                 withAlpha(RuffyConfig.primaryColor(), 34), RuffyRoundedUi.RADIUS_CONTROL);
         RuffyDashboardArt.drawHero(g, thumbX, thumbY, thumbW, thumbH);
@@ -701,7 +701,7 @@ public final class RuffyClickGui extends Screen {
 
         int controlsX = thumbX + thumbW + 11;
         int right = x + w - 10;
-        int themeY = y + 39;
+        int themeY = y + 52;
         g.drawString(font, "Theme", controlsX, themeY + 6, MUTED, false);
         int themeW = Math.min(88, Math.max(58, right - controlsX - 42));
         int themeX = right - themeW;
@@ -717,7 +717,7 @@ public final class RuffyClickGui extends Screen {
         int labelW = font.width("Particles") + 5;
         int sliderX = controlsX + labelW;
         int sliderW = Math.max(20, right - sliderX - 30);
-        int opacityY = y + 72;
+        int opacityY = y + 83;
         g.drawString(font, "Opacity", controlsX, opacityY + 4, MUTED, false);
         drawSlider(g, sliderX, opacityY, sliderW,
                 RuffyConfig.getInt("menu_opacity"), 60, 100);
@@ -725,7 +725,7 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, opacity, right - font.width(opacity),
                 opacityY + 3, WHITE, false);
 
-        int particlesY = y + 101;
+        int particlesY = y + 109;
         g.drawString(font, "Particles", controlsX, particlesY + 4, MUTED, false);
         drawSlider(g, sliderX, particlesY, sliderW,
                 RuffyConfig.getInt("particle_density"), 0, 100);
