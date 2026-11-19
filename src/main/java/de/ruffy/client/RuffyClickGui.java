@@ -201,39 +201,19 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void drawBackdrop(GuiGraphics g) {
-        // Opaque, abstract nebula canvas: the live game scene is fully hidden.
-        RuffyGalaxyUi.draw(g, width, height);
-        g.fill(0, 0, width, height, 0x26040212);
+        // Leave the live world visible around the floating application window,
+        // exactly as in the in-game reference. Only a very light scrim is added.
+        g.fill(0, 0, width, height, 0x24060918);
 
         double time = RuffyAnimation.timeSeconds();
-        for (int i = 0; i < 34; i++) {
-            float pulse = RuffyAnimation.breathe(time, 0.075 + (i % 5) * 0.016,
-                    i * 1.27F);
-            int x = Math.floorMod(i * 127 + (int) (Math.sin(time * 0.055 + i) * 14.0),
-                    Math.max(1, width));
-            int y = Math.floorMod(i * 71 + (int) (Math.cos(time * 0.048 + i * 0.7) * 10.0),
-                    Math.max(1, height));
-            int color = i % 4 == 0 ? 0xFFFFD7FF : RuffyConfig.primaryColor();
-            int alpha = Math.round(18 + pulse * 38);
-            int size = i % 9 == 0 ? 3 : 2;
-            fillRounded(g, x, y, size, size, withAlpha(color, alpha), size / 2);
-        }
-
-        // Sparse orbit dust in the corners adds depth without any game-world motifs.
-        for (int ring = 0; ring < 2; ring++) {
-            double rx = width * (ring == 0 ? 0.27 : 0.19);
-            double ry = height * (ring == 0 ? 0.20 : 0.13);
-            double cx = width * (ring == 0 ? 0.80 : 0.16);
-            double cy = height * (ring == 0 ? 0.14 : 0.84);
-            for (int i = 0; i < 54; i++) {
-                double angle = (i / 54.0) * Math.PI * 2.0
-                        + time * (ring == 0 ? 0.018 : -0.014);
-                int px = (int) Math.round(cx + Math.cos(angle) * rx);
-                int py = (int) Math.round(cy + Math.sin(angle) * ry);
-                if (px < 0 || px >= width || py < 0 || py >= height) continue;
-                fillRounded(g, px, py, 1, 1,
-                        withAlpha(RuffyConfig.secondaryColor(), 25), 1);
-            }
+        for (int i = 0; i < 26; i++) {
+            int x = Math.floorMod(i * 173
+                    + (int) (Math.sin(time * 0.045 + i) * 18.0), Math.max(1, width));
+            int y = Math.floorMod(i * 97
+                    + (int) (Math.cos(time * 0.038 + i * 0.7) * 12.0), Math.max(1, height));
+            int alpha = Math.round(8 + RuffyAnimation.breathe(time, 0.06, i) * 18);
+            fillRounded(g, x, y, i % 8 == 0 ? 2 : 1, i % 8 == 0 ? 2 : 1,
+                    withAlpha(RuffyConfig.primaryColor(), alpha), 1);
         }
     }
 
@@ -330,8 +310,8 @@ public final class RuffyClickGui extends Screen {
         int h = sidebarH;
         return new int[]{
                 sidebarY + Math.round(h * 0.18F),
-                sidebarY + Math.round(h * 0.31F),
-                sidebarY + Math.round(h * 0.41F),
+                sidebarY + Math.round(h * 0.29F),
+                sidebarY + Math.round(h * 0.40F),
                 sidebarY + Math.round(h * 0.49F),
                 sidebarY + Math.round(h * 0.58F),
                 sidebarY + Math.round(h * 0.67F),
@@ -415,7 +395,7 @@ public final class RuffyClickGui extends Screen {
             searchBox.setWidth(Math.max(72, searchW - 33));
         }
 
-        int controlsX = mainX + mainW - 45;
+        int controlsX = mainX + mainW - 90;
         int controlsY = panelY + 14;
         for (int i = 0; i < 3; i++) {
             int cx = controlsX + i * 15;
@@ -433,18 +413,18 @@ public final class RuffyClickGui extends Screen {
     private void prepareHomeLayout() {
         int gap = Math.max(5, Math.round(panelW * 0.009F));
         homeCenterX = mainX;
-        homeCenterW = Math.max(100, (mainW - gap) * 64 / 100);
+        homeCenterW = Math.max(100, (mainW - gap) * 67 / 100);
         homeRightX = homeCenterX + homeCenterW + gap;
         homeRightW = Math.max(70, mainX + mainW - homeRightX);
 
-        homeHeroY = panelY + Math.round(panelH * 0.135F);
-        homeHeroH = Math.max(58, Math.round(panelH * 0.365F));
+        homeHeroY = panelY + Math.round(panelH * 0.145F);
+        homeHeroH = Math.max(58, Math.round(panelH * 0.355F));
         homeModulesY = homeHeroY + homeHeroH + Math.max(5, Math.round(panelH * 0.020F));
-        homeBottomY = panelY + panelH - Math.round(panelH * 0.157F);
-        homeModulesH = Math.max(48, homeBottomY - homeModulesY - Math.max(3, gap / 2));
+        homeBottomY = panelY + panelH - Math.round(panelH * 0.150F);
+        homeModulesH = Math.max(48, homeBottomY - homeModulesY - Math.max(8, gap));
 
-        homeSpotifyY = panelY + Math.round(panelH * 0.040F);
-        homeSpotifyH = Math.round(panelH * 0.390F);
+        homeSpotifyY = panelY + Math.round(panelH * 0.060F);
+        homeSpotifyH = Math.round(panelH * 0.375F);
         homeLyricsY = homeSpotifyY + homeSpotifyH - Math.max(2, gap / 3);
         homeLyricsH = Math.max(25, Math.round(panelH * 0.112F));
 
@@ -454,13 +434,13 @@ public final class RuffyClickGui extends Screen {
         homeQuickW = homeRightW;
         homeLyricsX = homeRightX;
         homeLyricsW = homeRightW;
-        homeAppearanceY = homeModulesY + Math.max(5, Math.round(homeModulesH * 0.09F));
-        homeAppearanceH = Math.max(34, homeModulesH - Math.max(6, Math.round(homeModulesH * 0.09F)));
+        homeAppearanceY = homeModulesY + Math.max(7, Math.round(homeModulesH * 0.13F));
+        homeAppearanceH = Math.max(34, homeModulesH - Math.max(8, Math.round(homeModulesH * 0.13F)));
 
-        homePerfW = Math.max(78, Math.min(220, mainW * 31 / 100));
-        homeSocialX = mainX + mainW - 4 * 27 - 3 * 5;
+        homePerfW = Math.max(90, Math.min(300, mainW * 36 / 100));
+        homeSocialX = mainX + mainW - 4 * 44 - 3 * 10;
         homeVersionX = mainX + homePerfW + gap;
-        homeVersionW = Math.max(65, homeSocialX - homeVersionX - gap);
+        homeVersionW = Math.max(80, homeSocialX - homeVersionX - gap);
     }
 
     private void drawHomeDashboard(GuiGraphics g, int mouseX, int mouseY) {
@@ -528,7 +508,7 @@ public final class RuffyClickGui extends Screen {
         String[] icons = {"✥", "✧", "◉", "★"};
         int gap = Math.max(4, Math.round(w * 0.012F));
         int left = x + 10;
-        int top = y + Math.max(16, Math.round(panelH * 0.075F));
+        int top = y + Math.max(16, Math.round(panelH * 0.100F));
         int tileW = Math.max(38, (w - 20 - gap * 3) / 4);
         int tileH = Math.max(24, h - (top - y) - Math.max(4, Math.round(panelH * 0.02F)));
 
@@ -771,42 +751,56 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void drawHomeBottom(GuiGraphics g, int mouseX, int mouseY) {
-        int y = homeBottomY + 7;
-        int h = 32;
+        int y = homeBottomY + 6;
+        int h = Math.max(48, Math.min(66, Math.round(panelH * 0.135F)));
 
         fillRounded(g, mainX, y, homePerfW, h, 0xE1090818,
                 RuffyRoundedUi.RADIUS_CONTROL);
         outlineRounded(g, mainX, y, homePerfW, h, BORDER,
                 RuffyRoundedUi.RADIUS_CONTROL);
         String fps = Minecraft.getInstance().getFps() + " FPS";
-        g.drawString(font, "ϟ", mainX + 10, y + 8,
+        g.drawString(font, "ϟ", mainX + 12, y + 15,
                 RuffyConfig.primaryColor(), false);
-        g.drawString(font, "Performance", mainX + 25, y + 6, WHITE, false);
-        g.drawString(font, fps, mainX + 25, y + 18,
-                RuffyConfig.primaryColor(), false);
+        g.drawString(font, "Performance", mainX + 30, y + 12, WHITE, false);
+        g.drawString(font, "Smooth as ever before", mainX + 30, y + 25, MUTED, false);
+        int gaugeX = mainX + homePerfW - 44;
+        int gaugeY = y + h / 2;
+        double gaugeTime = RuffyAnimation.timeSeconds();
+        for (int i = 0; i < 30; i++) {
+            double a = Math.PI * (1.12 + i / 29.0 * 0.76);
+            int px = gaugeX + (int) Math.round(Math.cos(a) * 17);
+            int py = gaugeY + (int) Math.round(Math.sin(a) * 17);
+            int alpha = 80 + Math.round(145 * RuffyAnimation.breathe(gaugeTime, 0.08, i));
+            fillRounded(g, px, py, 2, 2,
+                    withAlpha(RuffyConfig.primaryColor(), alpha), 1);
+        }
+        g.drawCenteredString(font, Integer.toString(Minecraft.getInstance().getFps()),
+                gaugeX, gaugeY - 2, WHITE);
+        g.drawCenteredString(font, "FPS", gaugeX, gaugeY + 9, MUTED);
 
         fillRounded(g, homeVersionX, y, homeVersionW, h, 0xE1090819,
                 RuffyRoundedUi.RADIUS_CONTROL);
         outlineRounded(g, homeVersionX, y, homeVersionW, h,
                 withAlpha(RuffyConfig.primaryColor(), 140), RuffyRoundedUi.RADIUS_CONTROL);
-        g.drawString(font, "♛", homeVersionX + 9, y + 8, 0xFFFFD45E, false);
+        g.drawString(font, "♛", homeVersionX + 12, y + Math.max(12, h / 2 - 5),
+                0xFFFFD45E, false);
         g.drawString(font, trimToWidth("Ruffy Visuals 2.7.0",
-                Math.max(1, homeVersionW - 34)),
-                homeVersionX + 24, y + 6, WHITE, false);
-        g.drawString(font, trimToWidth("A cleaner visual universe.",
-                Math.max(1, homeVersionW - 34)),
-                homeVersionX + 24, y + 18, MUTED, false);
+                Math.max(1, homeVersionW - 42)),
+                homeVersionX + 31, y + Math.max(10, h / 2 - 10), WHITE, false);
+        g.drawString(font, trimToWidth("The best visuals. Better than ever.",
+                Math.max(1, homeVersionW - 42)),
+                homeVersionX + 31, y + Math.max(24, h / 2 + 5), MUTED, false);
 
-        String[] actions = {"⌂", "♫", "⚙", "ⓘ"};
+        String[] actions = {"◉", "▶", "⌘", "◎"};
         for (int i = 0; i < actions.length; i++) {
-            int sx = homeSocialX + i * 29;
-            boolean hover = inside(mouseX, mouseY, sx, y + 4, 24, 24);
-            fillRounded(g, sx, y + 4, 24, 24,
-                    hover ? 0xE3261A42 : 0xD20D1020, 12);
-            outlineRounded(g, sx, y + 4, 24, 24,
-                    withAlpha(RuffyConfig.primaryColor(), hover ? 185 : 105), 12);
-            g.drawCenteredString(font, actions[i], sx + 12, y + 12,
-                    i == 1 ? 0xFF7DE5B1 : WHITE);
+            int sx = homeSocialX + i * 54;
+            boolean hover = inside(mouseX, mouseY, sx, y + (h - 42) / 2, 44, 42);
+            fillRounded(g, sx, y + (h - 42) / 2, 42, 42,
+                    hover ? 0xE3261A42 : 0xD20D1020, 21);
+            outlineRounded(g, sx, y + (h - 42) / 2, 42, 42,
+                    withAlpha(RuffyConfig.primaryColor(), hover ? 220 : 150), 21);
+            g.drawCenteredString(font, actions[i], sx + 21,
+                    y + (h - 42) / 2 + 16, i == 1 ? 0xFF7DE5B1 : WHITE);
         }
     }
 
@@ -841,9 +835,9 @@ public final class RuffyClickGui extends Screen {
         prepareHomeLayout();
 
         // Window close action matches the rightmost circular title-bar control.
-        int controlsX = mainX + mainW - 45;
+        int controlsX = mainX + mainW - 90;
         int controlsY = panelY + 14;
-        if (inside(mx, my, controlsX + 30, controlsY, 12, 12)) {
+        if (inside(mx, my, controlsX + 60, controlsY, 12, 12)) {
             onClose();
             return true;
         }
@@ -869,7 +863,7 @@ public final class RuffyClickGui extends Screen {
         String[] keys = {"prism_core", "nebula_particles", "orbit_particles", "swing_animation"};
         int gap = Math.max(4, Math.round(homeModulesW * 0.012F));
         int left = homeCenterX + 10;
-        int top = homeModulesY + Math.max(16, Math.round(panelH * 0.075F));
+        int top = homeModulesY + Math.max(16, Math.round(panelH * 0.100F));
         int tileW = Math.max(38, (homeModulesW - 20 - gap * 3) / 4);
         int tileH = Math.max(24, homeModulesH - (top - homeModulesY)
                 - Math.max(4, Math.round(panelH * 0.02F)));
@@ -957,10 +951,11 @@ public final class RuffyClickGui extends Screen {
         }
 
         // Footer shortcuts are real navigation destinations.
-        int footerY = homeBottomY + 7;
+        int footerY = homeBottomY + 6;
+        int footerH = Math.max(48, Math.min(66, Math.round(panelH * 0.135F)));
         for (int i = 0; i < 4; i++) {
-            int sx = homeSocialX + i * 29;
-            if (!inside(mx, my, sx, footerY + 4, 24, 24)) continue;
+            int sx = homeSocialX + i * 54;
+            if (!inside(mx, my, sx, footerY + (footerH - 42) / 2, 42, 42)) continue;
             switch (i) {
                 case 0 -> tab = Tab.HOME;
                 case 1 -> {
