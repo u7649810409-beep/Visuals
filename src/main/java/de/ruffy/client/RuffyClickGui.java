@@ -456,8 +456,8 @@ public final class RuffyClickGui extends Screen {
         homeQuickW = homeRightW;
         homeLyricsX = homeRightX;
         homeLyricsW = homeRightW;
-        homeAppearanceY = homeModulesY + Math.max(3, Math.round(homeModulesH * 0.045F));
-        homeAppearanceH = Math.max(38, homeModulesH - Math.max(6, Math.round(homeModulesH * 0.09F)));
+        homeAppearanceY = homeModulesY + Math.max(5, Math.round(homeModulesH * 0.09F));
+        homeAppearanceH = Math.max(34, homeModulesH - Math.max(8, Math.round(homeModulesH * 0.18F)));
 
         homePerfW = Math.max(78, Math.min(220, mainW * 31 / 100));
         homeSocialX = mainX + mainW - 4 * 27 - 3 * 5;
@@ -748,7 +748,7 @@ public final class RuffyClickGui extends Screen {
                 RuffyConfig.primaryColor(), false);
         String source = RuffySpotify.getLyrics();
         String[] lines = source == null ? new String[0] : source.split("\\R");
-        int textY = y + Math.max(15, h * 38 / 100);
+        int textY = y + Math.max(13, h * 35 / 100);
         if (lines.length == 0 || lines[0].isBlank()) {
             String hint = RuffySpotify.isConnected()
                     ? "Lyrics not available for this track."
@@ -759,7 +759,7 @@ public final class RuffyClickGui extends Screen {
             int maxShown = Math.min(2, lines.length);
             for (int i = 0; i < maxShown; i++) {
                 g.drawCenteredString(font, trimToWidth(lines[i], w - 20),
-                        x + w / 2, textY + i * Math.max(9, h * 30 / 100),
+                        x + w / 2, textY + i * Math.max(7, h * 25 / 100),
                         i == 0 ? WHITE : MUTED);
             }
         }
@@ -948,13 +948,7 @@ public final class RuffyClickGui extends Screen {
             }
         }
 
-        int visualizerY = quickY + homeAppearanceH - 25;
-        if (inside(mx, my, quickX + quickW - 46, visualizerY - 2, 38, 22)) {
-            RuffyConfig.set("music_visualizer", !RuffyConfig.get("music_visualizer"));
-            return true;
-        }
-
-        // Lyrics opens the full player and lyrics screen.
+visualizerY        // Lyrics opens the full player and lyrics screen.
         if (inside(mx, my, homeLyricsX, homeLyricsY,
                 homeLyricsW, homeLyricsH)) {
             if (minecraft != null) minecraft.setScreen(new RuffySpotifyScreen(this));
