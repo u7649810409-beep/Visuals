@@ -36,7 +36,7 @@ public final class RuffyClickGui extends Screen {
         HUD("HUD", "Your in-game information layout", "▣"),
         PRESETS("Presets", "Ready-made visual profiles", "▤"),
         COSMETICS("Cosmetics", "Auras, companions and movement trails", "✧"),
-        STYLE("Appearance", "Colors, motion and interface tuning", "◈"),
+        STYLE("Visuals", "Colors, motion and interface tuning", "◈"),
         MUSIC("Spotify", "Music and lyrics", "♫"),
         CONFIGS("Settings", "Configuration and reset options", "⚙"),
         SETUP("About", "Ruffy Visuals information", "ⓘ");
@@ -95,6 +95,7 @@ public final class RuffyClickGui extends Screen {
     private int homeHeroY, homeHeroH, homeModulesY, homeModulesH;
     private int homeSpotifyY, homeSpotifyH, homeAppearanceY, homeAppearanceH;
     private int homeQuickX, homeQuickW, homeLyricsX, homeLyricsW, homeModulesW;
+    private int homeLyricsY, homeLyricsH;
     private int homeBottomY, homePerfW, homeVersionX, homeVersionW, homeSocialX;
 
     public RuffyClickGui() {
@@ -128,34 +129,37 @@ public final class RuffyClickGui extends Screen {
     }
 
     private void calculateLayout() {
-        panelW = Math.min(1180, Math.max(660, width - 28));
-        panelW = Math.min(panelW, width - 12);
-        panelH = Math.min(680, Math.max(410, height - 20));
-        panelH = Math.min(panelH, height - 12);
+        // App-sized floating shell with breathing room around the window.
+        panelW = Math.min(1180, Math.max(420, Math.round(width * 0.815F)));
+        panelW = Math.min(panelW, width - 16);
+        panelH = Math.min(680, Math.max(220, Math.round(height * 0.745F)));
+        panelH = Math.min(panelH, height - 14);
         panelX = (width - panelW) / 2;
-        panelY = (height - panelH) / 2;
+        panelY = (height - panelH) / 2 - Math.round(height * 0.035F);
+        panelY = Math.max(5, Math.min(height - panelH - 5, panelY));
 
-        sidebarX = panelX + 12;
-        sidebarY = panelY + 12;
-        sidebarW = Math.max(132, Math.min(170, Math.round(panelW * 0.18F)));
-        sidebarH = panelH - 24;
-        mainX = sidebarX + sidebarW + 14;
-        mainW = panelX + panelW - 14 - mainX;
+        sidebarX = panelX + Math.max(3, Math.round(panelW * 0.006F));
+        sidebarY = panelY + Math.round(panelH * 0.095F);
+        sidebarW = Math.max(58, Math.min(170, Math.round(panelW * 0.145F)));
+        sidebarH = panelH - Math.round(panelH * 0.12F);
+        mainX = sidebarX + sidebarW + Math.max(5, Math.round(panelW * 0.012F));
+        mainW = Math.max(170, panelX + panelW - Math.max(5, Math.round(panelW * 0.008F)) - mainX);
 
-        searchW = Math.min(226, Math.max(126, mainW * 34 / 100));
-        searchX = mainX + (mainW - searchW) / 2;
-        searchY = panelY + 14;
+        searchW = Math.min(260, Math.max(90, Math.round(mainW * 0.28F)));
+        searchX = mainX + Math.round((mainW - searchW) * 0.50F)
+                + Math.round(mainW * 0.02F);
+        searchY = panelY + Math.max(5, Math.round(panelH * 0.035F));
 
-        filterY = panelY + 82;
-        listTop = panelY + 121;
-        cardGap = 9;
+        filterY = panelY + Math.round(panelH * 0.17F);
+        listTop = panelY + Math.round(panelH * 0.25F);
+        cardGap = Math.max(5, Math.round(panelW * 0.008F));
         cardWidth = (mainW - cardGap) / 2;
-        int available = Math.max(150, panelY + panelH - 55 - listTop);
-        rowHeight = Math.max(44, Math.min(62, (available - cardGap * 3) / 4));
+        int available = Math.max(90, panelY + panelH - Math.round(panelH * 0.12F) - listTop);
+        rowHeight = Math.max(28, Math.min(62, (available - cardGap * 3) / 4));
 
         if (searchBox != null) {
             searchBox.setPosition(searchX + 25, searchY + 3);
-            searchBox.setWidth(Math.max(72, searchW - 33));
+            searchBox.setWidth(Math.max(56, searchW - 33));
         }
     }
 
@@ -235,19 +239,23 @@ public final class RuffyClickGui extends Screen {
 
     private void drawWindow(GuiGraphics g) {
         int accent = RuffyConfig.primaryColor();
-        int bodyAlpha = 218 + RuffyConfig.getInt("menu_opacity") / 7;
-        int body = (Math.min(245, bodyAlpha) << 24) | 0x000B0F1D;
+        int bodyAlpha = 228 + RuffyConfig.getInt("menu_opacity") / 8;
+        int body = (Math.min(250, bodyAlpha) << 24) | 0x00070A18;
 
-        RuffyRoundedUi.shadow(g, panelX - 2, panelY, panelW + 4, panelH + 4,
-                RuffyRoundedUi.RADIUS_WINDOW, 42);
-        fillRounded(g, panelX - 3, panelY - 3, panelW + 6, panelH + 6,
-                withAlpha(RuffyConfig.secondaryColor(), 17), RuffyRoundedUi.RADIUS_WINDOW);
+        RuffyRoundedUi.shadow(g, panelX - 4, panelY - 2, panelW + 8, panelH + 8,
+                RuffyRoundedUi.RADIUS_WINDOW, 64);
+        fillRounded(g, panelX - 5, panelY - 5, panelW + 10, panelH + 10,
+                withAlpha(accent, 22), RuffyRoundedUi.RADIUS_WINDOW);
+        outlineRounded(g, panelX - 2, panelY - 2, panelW + 4, panelH + 4,
+                withAlpha(accent, 80), RuffyRoundedUi.RADIUS_WINDOW);
         fillRounded(g, panelX, panelY, panelW, panelH, body,
                 RuffyRoundedUi.RADIUS_WINDOW);
         outlineRounded(g, panelX, panelY, panelW, panelH,
-                withAlpha(accent, 125), RuffyRoundedUi.RADIUS_WINDOW);
+                withAlpha(accent, 205), RuffyRoundedUi.RADIUS_WINDOW);
+        outlineRounded(g, panelX + 2, panelY + 2, panelW - 4, panelH - 4,
+                withAlpha(0xFFDFB4FF, 65), RuffyRoundedUi.RADIUS_WINDOW);
         fillRounded(g, panelX + 28, panelY + 1, panelW - 56, 1,
-                withAlpha(0xFFFFFFFF, 24), 1);
+                withAlpha(0xFFFFFFFF, 38), 1);
     }
 
     private void drawSidebar(GuiGraphics g, int mouseX, int mouseY) {
@@ -260,40 +268,40 @@ public final class RuffyClickGui extends Screen {
                 0x7D8C58D8, RuffyRoundedUi.RADIUS_PANEL);
 
         int logoX = sidebarX + (sidebarW - 48) / 2;
-        int logoY = sidebarY + 14;
-        fillRounded(g, logoX - 5, logoY - 4, 58, 58,
-                withAlpha(RuffyConfig.primaryColor(), 24), RuffyRoundedUi.RADIUS_PANEL);
+        int logoY = sidebarY + Math.max(5, Math.round(sidebarH * 0.025F));
+        fillRounded(g, logoX - 8, logoY - 7, 64, 64,
+                withAlpha(RuffyConfig.primaryColor(), 36), RuffyRoundedUi.RADIUS_PANEL);
+        fillRounded(g, logoX - 3, logoY - 3, 54, 54,
+                withAlpha(RuffyConfig.secondaryColor(), 68), RuffyRoundedUi.RADIUS_PANEL);
         fillRounded(g, logoX, logoY, 48, 48,
-                withAlpha(RuffyConfig.primaryColor(), 58), RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, logoX, logoY, 48, 48,
-                withAlpha(RuffyConfig.primaryColor(), 135), RuffyRoundedUi.RADIUS_PANEL);
-        g.drawCenteredString(font, "R", logoX + 24, logoY + 13, WHITE);
+                withAlpha(RuffyConfig.primaryColor(), 76), RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, logoX - 1, logoY - 1, 50, 50,
+                withAlpha(RuffyConfig.primaryColor(), 230), RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, logoX + 2, logoY + 2, 44, 44,
+                withAlpha(0xFFEACBFF, 75), RuffyRoundedUi.RADIUS_PANEL);
+        g.drawCenteredString(font, "R", logoX + 24, logoY + 12, WHITE);
         fillRounded(g, logoX + 7, logoY + 34, 34, 2,
-                withAlpha(0xFFE8C9FF, 125), 1);
-        g.drawCenteredString(font, "RUFFY VISUALS", sidebarX + sidebarW / 2,
-                sidebarY + 68, WHITE);
-        g.drawCenteredString(font, "GALAXY STUDIO", sidebarX + sidebarW / 2,
-                sidebarY + 81, RuffyConfig.primaryColor());
+                withAlpha(0xFFE8C9FF, 165), 1);
 
-        int navX = sidebarX + 8;
-        int navW = sidebarW - 16;
+        int navX = sidebarX + Math.max(4, Math.round(sidebarW * 0.06F));
+        int navW = sidebarW - Math.max(8, Math.round(sidebarW * 0.12F));
         int[] ys = navigationYPositions();
         int itemHeight = navigationItemHeight();
-        drawSidebarLabel(g, "WORKSPACE", sidebarX + 12,
-                panelY + (compact ? 98 : 104));
-        Tab[] firstGroup = {Tab.HOME, Tab.VISUALS, Tab.STYLE, Tab.COSMETICS, Tab.HUD};
+        drawSidebarLabel(g, "WORKSPACE", sidebarX + 7,
+                ys[0] - Math.max(15, Math.round(sidebarH * 0.075F)));
+        Tab[] firstGroup = {Tab.HOME, Tab.VISUALS, Tab.STYLE, Tab.HUD};
         for (int i = 0; i < firstGroup.length; i++) {
             drawNavItem(g, firstGroup[i], navX, ys[i], navW, itemHeight, mouseX, mouseY);
         }
 
-        drawSidebarLabel(g, "CONNECT", sidebarX + 12,
-                panelY + (compact ? 216 : 257));
-        drawNavItem(g, Tab.MUSIC, navX, ys[5], navW, itemHeight, mouseX, mouseY);
+        drawSidebarLabel(g, "CONNECT", sidebarX + 7,
+                ys[4] - Math.max(13, Math.round(sidebarH * 0.065F)));
+        drawNavItem(g, Tab.MUSIC, navX, ys[4], navW, itemHeight, mouseX, mouseY);
 
-        drawSidebarLabel(g, "PREFERENCES", sidebarX + 12,
-                panelY + (compact ? 252 : 306));
-        drawNavItem(g, Tab.CONFIGS, navX, ys[6], navW, itemHeight, mouseX, mouseY);
-        drawNavItem(g, Tab.SETUP, navX, ys[7], navW, itemHeight, mouseX, mouseY);
+        drawSidebarLabel(g, "PREFERENCES", sidebarX + 7,
+                ys[5] - Math.max(13, Math.round(sidebarH * 0.065F)));
+        drawNavItem(g, Tab.CONFIGS, navX, ys[5], navW, itemHeight, mouseX, mouseY);
+        drawNavItem(g, Tab.SETUP, navX, ys[6], navW, itemHeight, mouseX, mouseY);
 
         if (compact) {
             int dotY = sidebarY + sidebarH - 13;
@@ -317,19 +325,19 @@ public final class RuffyClickGui extends Screen {
     }
 
     private int navigationItemHeight() {
-        return compactSidebar() ? 19 : 24;
+        return compactSidebar() ? Math.max(16, Math.round(sidebarH * 0.09F)) : 24;
     }
 
     private int[] navigationYPositions() {
-        if (compactSidebar()) {
-            return new int[]{
-                    panelY + 110, panelY + 130, panelY + 150, panelY + 170,
-                    panelY + 190, panelY + 228, panelY + 264, panelY + 284
-            };
-        }
+        int h = sidebarH;
         return new int[]{
-                panelY + 116, panelY + 142, panelY + 168, panelY + 194,
-                panelY + 220, panelY + 269, panelY + 318, panelY + 344
+                sidebarY + Math.round(h * 0.18F),
+                sidebarY + Math.round(h * 0.28F),
+                sidebarY + Math.round(h * 0.38F),
+                sidebarY + Math.round(h * 0.48F),
+                sidebarY + Math.round(h * 0.60F),
+                sidebarY + Math.round(h * 0.72F),
+                sidebarY + Math.round(h * 0.82F)
         };
     }
 
@@ -370,11 +378,13 @@ public final class RuffyClickGui extends Screen {
 
     private void drawHeader(GuiGraphics g, int mouseX, int mouseY) {
         if (tab == Tab.HOME) {
-            g.drawString(font, "Ruffy", mainX, panelY + 12, WHITE, false);
-            g.drawString(font, "Visuals", mainX + font.width("Ruffy ") - 1,
-                    panelY + 12, RuffyConfig.primaryColor(), false);
-            g.drawString(font, "GALAXY STUDIO  ·  2.7", mainX, panelY + 28,
-                    MUTED, false);
+            int brandX = mainX + Math.max(8, Math.round(mainW * 0.055F));
+            int brandY = panelY + Math.max(5, Math.round(panelH * 0.022F));
+            g.drawString(font, "Ruffy", brandX, brandY, WHITE, false);
+            g.drawString(font, "Visuals", brandX + font.width("Ruffy ") - 1,
+                    brandY, RuffyConfig.primaryColor(), false);
+            g.drawString(font, "GALAXY STUDIO  ·  2.7", brandX,
+                    panelY + Math.round(panelH * 0.055F), MUTED, false);
         } else {
             String title = switch (tab) {
                 case HOME -> "Home";
@@ -394,11 +404,13 @@ public final class RuffyClickGui extends Screen {
             g.drawString(font, tab.subtitle, mainX, panelY + 42, MUTED, false);
         }
 
+        fillRounded(g, searchX - 2, searchY - 2, searchW + 4, 29,
+                withAlpha(RuffyConfig.primaryColor(), 22), RuffyRoundedUi.RADIUS_CONTROL);
         fillRounded(g, searchX, searchY, searchW, 25,
-                0xC6111225, RuffyRoundedUi.RADIUS_CONTROL);
+                0xE40B0C1C, RuffyRoundedUi.RADIUS_CONTROL);
         outlineRounded(g, searchX, searchY, searchW, 25,
-                0x666D67A8, RuffyRoundedUi.RADIUS_CONTROL);
-        g.drawString(font, "⌕", searchX + 8, searchY + 8, DIM, false);
+                withAlpha(RuffyConfig.secondaryColor(), 155), RuffyRoundedUi.RADIUS_CONTROL);
+        g.drawString(font, "⌕", searchX + 8, searchY + 8, 0xFFE8D9FF, false);
         if (searchBox != null) {
             searchBox.setVisible(true);
             searchBox.setPosition(searchX + 25, searchY + 3);
@@ -421,34 +433,36 @@ public final class RuffyClickGui extends Screen {
 
 
     private void prepareHomeLayout() {
-        int gap = 9;
+        int gap = Math.max(5, Math.round(panelW * 0.009F));
         homeCenterX = mainX;
-        homeCenterW = Math.max(230, (mainW - gap) * 63 / 100);
+        homeCenterW = Math.max(100, (mainW - gap) * 64 / 100);
         homeRightX = homeCenterX + homeCenterW + gap;
-        homeRightW = Math.max(150, mainX + mainW - homeRightX);
+        homeRightW = Math.max(70, mainX + mainW - homeRightX);
 
-        homeHeroY = panelY + 64;
-        int availableHeight = Math.max(160, panelH - 124);
-        homeHeroH = Math.max(104, Math.min(178, Math.round(availableHeight * 0.43F)));
-        homeModulesY = homeHeroY + homeHeroH + 8;
-        homeBottomY = panelY + panelH - 49;
-        homeModulesH = Math.max(92, homeBottomY - homeModulesY - 4);
+        homeHeroY = panelY + Math.round(panelH * 0.135F);
+        homeHeroH = Math.max(58, Math.round(panelH * 0.365F));
+        homeModulesY = homeHeroY + homeHeroH + Math.max(5, Math.round(panelH * 0.020F));
+        homeBottomY = panelY + panelH - Math.round(panelH * 0.157F);
+        homeModulesH = Math.max(48, homeBottomY - homeModulesY - Math.max(3, gap / 2));
 
-        homeSpotifyY = homeHeroY;
-        homeSpotifyH = homeHeroH;
-        int lowerWidth = Math.max(180, mainW - gap * 2);
-        homeModulesW = lowerWidth * 45 / 100;
-        homeQuickW = lowerWidth * 30 / 100;
-        homeLyricsW = lowerWidth - homeModulesW - homeQuickW;
-        homeQuickX = mainX + homeModulesW + gap;
-        homeLyricsX = homeQuickX + homeQuickW + gap;
-        homeAppearanceY = homeModulesY;
-        homeAppearanceH = homeModulesH;
+        homeSpotifyY = panelY + Math.round(panelH * 0.040F);
+        homeSpotifyH = Math.round(panelH * 0.390F);
+        homeLyricsY = homeSpotifyY + homeSpotifyH - Math.max(2, gap / 3);
+        homeLyricsH = Math.max(25, Math.round(panelH * 0.112F));
 
-        homePerfW = Math.max(130, Math.min(220, mainW * 30 / 100));
+        int lowerWidth = Math.max(140, mainW - gap);
+        homeModulesW = lowerWidth * 65 / 100;
+        homeQuickX = homeRightX;
+        homeQuickW = homeRightW;
+        homeLyricsX = homeRightX;
+        homeLyricsW = homeRightW;
+        homeAppearanceY = homeModulesY + Math.max(3, Math.round(homeModulesH * 0.045F));
+        homeAppearanceH = Math.max(38, homeModulesH - Math.max(6, Math.round(homeModulesH * 0.09F)));
+
+        homePerfW = Math.max(78, Math.min(220, mainW * 31 / 100));
         homeSocialX = mainX + mainW - 4 * 27 - 3 * 5;
-        homeVersionX = mainX + homePerfW + 8;
-        homeVersionW = Math.max(95, homeSocialX - homeVersionX - 8);
+        homeVersionX = mainX + homePerfW + gap;
+        homeVersionW = Math.max(65, homeSocialX - homeVersionX - gap);
     }
 
     private void drawHomeDashboard(GuiGraphics g, int mouseX, int mouseY) {
@@ -456,8 +470,8 @@ public final class RuffyClickGui extends Screen {
         drawHomeHero(g, mouseX, mouseY);
         drawHomeModules(g, mouseX, mouseY);
         drawHomeSpotify(g, mouseX, mouseY);
-        drawHomeAppearance(g, mouseX, mouseY);
         drawHomeLyrics(g, mouseX, mouseY);
+        drawHomeAppearance(g, mouseX, mouseY);
         drawHomeBottom(g, mouseX, mouseY);
     }
 
@@ -467,26 +481,32 @@ public final class RuffyClickGui extends Screen {
         int w = homeCenterW;
         int h = homeHeroH;
 
-        fillRounded(g, x, y, w, h, 0xE10B071D, RuffyRoundedUi.RADIUS_PANEL);
+        RuffyRoundedUi.shadow(g, x, y, w, h, RuffyRoundedUi.RADIUS_PANEL, 32);
+        fillRounded(g, x, y, w, h, 0xEB08051B, RuffyRoundedUi.RADIUS_PANEL);
         RuffyDashboardArt.drawHero(g, x + 1, y + 1, w - 2, h - 2);
-        fillRounded(g, x + 1, y + 1, Math.max(80, w / 2), h - 2,
-                0x56100925, RuffyRoundedUi.RADIUS_PANEL);
+        fillRounded(g, x + 1, y + 1, Math.max(80, w * 52 / 100), h - 2,
+                0x8A100827, RuffyRoundedUi.RADIUS_PANEL);
+        fillRounded(g, x + 7, y + h - 3, w - 14, 2,
+                withAlpha(RuffyConfig.primaryColor(), 115), 1);
         outlineRounded(g, x, y, w, h,
-                withAlpha(RuffyConfig.primaryColor(), 170), RuffyRoundedUi.RADIUS_PANEL);
+                withAlpha(RuffyConfig.primaryColor(), 230), RuffyRoundedUi.RADIUS_PANEL);
         outlineRounded(g, x + 2, y + 2, w - 4, h - 4,
-                withAlpha(0xFFE8C9FF, 48), RuffyRoundedUi.RADIUS_PANEL);
+                withAlpha(0xFFE8C9FF, 86), RuffyRoundedUi.RADIUS_PANEL);
 
-        int textX = x + 18;
-        g.drawString(font, "Welcome back!", textX, y + 22, WHITE, false);
-        g.drawString(font, "Your visual universe.", textX, y + 42, MUTED, false);
+        int textX = x + Math.max(10, w * 4 / 100);
+        int titleY = y + Math.max(12, h * 23 / 100);
+        g.drawString(font, "Welcome back!", textX, titleY, WHITE, false);
+        g.drawString(font, "Your visual universe.", textX,
+                titleY + Math.max(16, h * 18 / 100), MUTED, false);
         g.drawString(font, "Make it yours with Ruffy Visuals.", textX,
-                y + 56, 0xFFE8C9FF, false);
+                titleY + Math.max(28, h * 31 / 100), 0xFFE8C9FF, false);
 
-        int buttonY = y + h - 34;
-        int buttonW = Math.min(132, Math.max(106, w / 2));
-        drawButton(g, textX, buttonY, buttonW, 24,
+        int buttonH = Math.max(19, Math.min(28, h / 5));
+        int buttonY = y + h - buttonH - Math.max(8, h * 6 / 100);
+        int buttonW = Math.min(190, Math.max(90, w * 28 / 100));
+        drawButton(g, textX, buttonY, buttonW, buttonH,
                 "Explore Modules  →", ButtonStyle.PRIMARY,
-                inside(mouseX, mouseY, textX, buttonY, buttonW, 24), false);
+                inside(mouseX, mouseY, textX, buttonY, buttonW, buttonH), false);
     }
 
     private void drawHomeModules(GuiGraphics g, int mouseX, int mouseY) {
@@ -494,58 +514,60 @@ public final class RuffyClickGui extends Screen {
         int y = homeModulesY;
         int w = homeModulesW;
         int h = homeModulesH;
-        fillRounded(g, x, y, w, h, 0xE10A0818, RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, x, y, w, h, 0x765C3F9D, RuffyRoundedUi.RADIUS_PANEL);
-        g.drawString(font, "✦  Featured Modules", x + 12, y + 10, WHITE, false);
-        g.drawString(font, "Your visual toolkit", x + 12, y + 23, MUTED, false);
-        drawButton(g, x + w - 70, y + 8, 58, 20, "See all  →",
+        RuffyRoundedUi.shadow(g, x, y, w, h, RuffyRoundedUi.RADIUS_PANEL, 28);
+        fillRounded(g, x, y, w, h, 0xF008091B, RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x, y, w, h, withAlpha(RuffyConfig.secondaryColor(), 190),
+                RuffyRoundedUi.RADIUS_PANEL);
+        g.drawString(font, "✦  Modules", x + 12, y + 9, WHITE, false);
+        g.drawString(font, "Manage your modules", x + 12, y + 22, MUTED, false);
+        drawButton(g, x + w - 70, y + 7, 58, 20, "See all  →",
                 ButtonStyle.GHOST,
-                inside(mouseX, mouseY, x + w - 70, y + 8, 58, 20), false);
+                inside(mouseX, mouseY, x + w - 70, y + 7, 58, 20), false);
 
         String[] keys = {"prism_core", "nebula_particles", "orbit_particles", "swing_animation"};
-        String[] titles = {"Core", "Dust", "Rings", "Move"};
-        String[] descriptions = {"3D core", "Ambient FX", "Orbit accents", "Smooth swing"};
-        String[] icons = {"◇", "✧", "◎", "⌁"};
-        int gap = 7;
-        int left = x + 11;
-        int top = y + 37;
-        int tileW = Math.max(68, (w - 22 - gap) / 2);
-        int tileH = Math.max(28, (h - 47 - gap) / 2);
+        String[] titles = {"3D Prism", "Glints", "Orbit FX", "Animations"};
+        String[] descriptions = {"Visual core", "Ambient light", "Orbit rings", "Smooth motion"};
+        String[] icons = {"✥", "✧", "◉", "★"};
+        int gap = Math.max(4, Math.round(w * 0.012F));
+        int left = x + 10;
+        int top = y + 36;
+        int tileW = Math.max(38, (w - 20 - gap * 3) / 4);
+        int tileH = Math.max(24, h - 45);
 
         for (int i = 0; i < keys.length; i++) {
-            int column = i % 2;
-            int row = i / 2;
-            int tx = left + column * (tileW + gap);
-            int ty = top + row * (tileH + gap);
+            int tx = left + i * (tileW + gap);
+            int ty = top;
             boolean enabled = RuffyConfig.get(keys[i]);
             boolean hovered = inside(mouseX, mouseY, tx, ty, tileW, tileH);
             float hover = RuffyAnimation.animate("home.feature.hover." + keys[i],
                     hovered ? 1.0F : 0.0F);
-            int background = RuffyAnimation.blendColor(0xAA171329, 0xE3231B3B, hover * 0.9F);
-            fillRounded(g, tx, ty, tileW, tileH, background,
-                    RuffyRoundedUi.RADIUS_CONTROL);
+            int background = RuffyAnimation.blendColor(0xD70B1022, 0xF12C1744, hover * 0.9F);
+            RuffyRoundedUi.shadow(g, tx, ty, tileW, tileH, RuffyRoundedUi.RADIUS_CONTROL, 13);
+            fillRounded(g, tx, ty, tileW, tileH, background, RuffyRoundedUi.RADIUS_CONTROL);
             outlineRounded(g, tx, ty, tileW, tileH,
                     withAlpha(enabled ? RuffyConfig.primaryColor() : 0xFF877AAB,
-                            enabled ? 150 : 52), RuffyRoundedUi.RADIUS_CONTROL);
+                            enabled ? 205 : 78), RuffyRoundedUi.RADIUS_CONTROL);
 
-            fillRounded(g, tx + 6, ty + 6, 20, 20,
-                    withAlpha(RuffyConfig.primaryColor(), enabled ? 58 : 24),
+            int iconSize = Math.max(14, Math.min(22, tileW / 4));
+            fillRounded(g, tx + 7, ty + 6, iconSize, iconSize,
+                    withAlpha(RuffyConfig.primaryColor(), enabled ? 74 : 34),
                     RuffyRoundedUi.RADIUS_CONTROL);
-            g.drawCenteredString(font, icons[i], tx + 16, ty + 11,
-                    enabled ? 0xFFEAD8FF : MUTED);
+            g.drawCenteredString(font, icons[i], tx + 7 + iconSize / 2, ty + 10,
+                    enabled ? 0xFFF1DFFF : MUTED);
 
-            int textX = tx + 30;
-            int switchX = tx + tileW - 27;
-            int textW = Math.max(16, switchX - textX - 5);
+            int switchW = Math.max(20, Math.min(28, tileW / 4));
+            int switchH = Math.max(12, Math.min(16, tileH / 5));
+            int switchX = tx + tileW - switchW - 7;
+            int switchY = ty + 6;
+            int textX = tx + 8;
+            int textW = Math.max(15, tileW - 16);
             g.drawString(font, trimToWidth(titles[i], textW), textX,
-                    tileW < 115 ? ty + 12 : ty + 8, WHITE, false);
-            if (tileW >= 115) {
+                    ty + Math.max(16, tileH * 49 / 100), WHITE, false);
+            if (tileH >= 46) {
                 g.drawString(font, trimToWidth(descriptions[i], textW), textX,
-                        ty + 21, MUTED, false);
+                        ty + tileH - 14, MUTED, false);
             }
-
-            int switchY = ty + 8;
-            drawSwitch(g, switchX, switchY, enabled, 24, 14,
+            drawSwitch(g, switchX, switchY, enabled, switchW, switchH,
                     "home.feature." + keys[i]);
         }
     }
@@ -556,9 +578,10 @@ public final class RuffyClickGui extends Screen {
         int w = homeRightW;
         int h = homeSpotifyH;
         boolean compact = h < 120;
-        RuffyRoundedUi.shadow(g, x, y, w, h, RuffyRoundedUi.RADIUS_PANEL, 24);
-        fillRounded(g, x, y, w, h, 0xE0080917, RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, x, y, w, h, 0x865E45AF, RuffyRoundedUi.RADIUS_PANEL);
+        RuffyRoundedUi.shadow(g, x, y, w, h, RuffyRoundedUi.RADIUS_PANEL, 30);
+        fillRounded(g, x, y, w, h, 0xF0080919, RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x, y, w, h, withAlpha(RuffyConfig.secondaryColor(), 200),
+                RuffyRoundedUi.RADIUS_PANEL);
 
         fillRounded(g, x + 11, y + 9, 22, 22, 0xFF1ED760, 11);
         g.drawCenteredString(font, "≋", x + 22, y + 14, 0xFF092010);
@@ -663,74 +686,68 @@ public final class RuffyClickGui extends Screen {
         int x = homeQuickX;
         int y = homeAppearanceY;
         int w = homeQuickW;
-        fillRounded(g, x, y, w, homeAppearanceH, 0xE1090918, RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, x, y, w, homeAppearanceH, 0x765B3D96, RuffyRoundedUi.RADIUS_PANEL);
+        int h = homeAppearanceH;
+        RuffyRoundedUi.shadow(g, x, y, w, h, RuffyRoundedUi.RADIUS_PANEL, 28);
+        fillRounded(g, x, y, w, h, 0xF008091B, RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x, y, w, h, withAlpha(RuffyConfig.secondaryColor(), 185),
+                RuffyRoundedUi.RADIUS_PANEL);
+        g.drawString(font, "◉  Appearance", x + 11, y + Math.max(4, h * 7 / 100),
+                WHITE, false);
+        g.drawString(font, "Customize your look", x + 11, y + Math.max(13, h * 17 / 100),
+                MUTED, false);
 
-        g.drawString(font, "⚙  Quick Settings", x + 11, y + 10, WHITE, false);
-        // Keep the heading clear on the narrow dashboard column. The switch
-        // remains visible and interactive; the optional caption returns on
-        // wider layouts where it cannot collide with the title.
-        if (w >= 162) {
-            g.drawString(font, "WAVE", x + w - 79, y + 12, MUTED, false);
-        }
-        drawSwitch(g, x + w - 42, y + 8, RuffyConfig.get("music_visualizer"),
-                32, 18, "home.music.visualizer");
-
-        int themeY = y + 29;
-        g.drawString(font, "Theme", x + 12, themeY + 6, MUTED, false);
-        int themeW = Math.min(88, w - 78);
-        int themeX = x + w - themeW - 10;
-        fillRounded(g, themeX, themeY, themeW, 21, 0xA81E1734,
+        int themeY = y + Math.round(h * 0.25F);
+        g.drawString(font, "Theme", x + 12, themeY + 5, MUTED, false);
+        int themeW = Math.min(106, Math.max(46, w - 72));
+        int themeX = x + w - themeW - 9;
+        fillRounded(g, themeX, themeY, themeW, 20, 0xC51D1736,
                 RuffyRoundedUi.RADIUS_CONTROL);
-        outlineRounded(g, themeX, themeY, themeW, 21,
-                0x756C50A8, RuffyRoundedUi.RADIUS_CONTROL);
-        fillRounded(g, themeX + 7, themeY + 7, 7, 7, RuffyConfig.primaryColor(), 4);
+        outlineRounded(g, themeX, themeY, themeW, 20,
+                withAlpha(RuffyConfig.primaryColor(), 145), RuffyRoundedUi.RADIUS_CONTROL);
+        fillRounded(g, themeX + 7, themeY + 6, 7, 7, RuffyConfig.primaryColor(), 4);
         g.drawString(font, trimToWidth(paletteName(RuffyConfig.getInt("palette")),
-                Math.max(28, themeW - 30)), themeX + 19, themeY + 6, WHITE, false);
-        g.drawString(font, "⌄", themeX + themeW - 11, themeY + 6, MUTED, false);
+                Math.max(18, themeW - 30)), themeX + 19, themeY + 5, WHITE, false);
+        g.drawString(font, "⌄", themeX + themeW - 11, themeY + 5, MUTED, false);
 
-        int opacityY = y + 51;
+        int opacityY = y + Math.round(h * 0.47F);
         g.drawString(font, "Opacity", x + 12, opacityY + 4, MUTED, false);
-        int sliderX = x + 66;
-        int sliderW = Math.max(32, w - 111);
+        int sliderX = x + 58;
+        int sliderW = Math.max(20, w - 105);
         drawSlider(g, sliderX, opacityY, sliderW,
                 RuffyConfig.getInt("menu_opacity"), 60, 100);
         String opacity = RuffyConfig.getInt("menu_opacity") + "%";
-        g.drawString(font, opacity, x + w - font.width(opacity) - 9,
+        g.drawString(font, opacity, x + w - font.width(opacity) - 7,
                 opacityY + 3, WHITE, false);
 
-        int qualityY = y + 73;
-        g.drawString(font, w < 160 ? "FX" : "FX Quality", x + 12, qualityY + 5, MUTED, false);
-        int qGap = 3;
-        int qW = Math.max(31, Math.min(39, (w - 112) / 3));
-        int qX = x + w - (qW * 3 + qGap * 2) - 9;
+        int qualityY = y + Math.round(h * 0.68F);
+        g.drawString(font, "FX", x + 12, qualityY + 5, MUTED, false);
+        int qGap = 2;
+        int qW = Math.max(22, Math.min(34, (w - 90) / 3));
+        int qX = x + w - (qW * 3 + qGap * 2) - 8;
         String[] qualityLabels = {"LOW", "MID", "HIGH"};
         for (int i = 0; i < 3; i++) {
             boolean selected = RuffyConfig.getInt("effect_quality") == i;
             int bx = qX + i * (qW + qGap);
-            drawButton(g, bx, qualityY, qW, 20, qualityLabels[i],
+            drawButton(g, bx, qualityY, qW, 18, qualityLabels[i],
                     selected ? ButtonStyle.SEGMENT : ButtonStyle.GHOST,
-                    inside(mouseX, mouseY, bx, qualityY, qW, 20), selected);
+                    inside(mouseX, mouseY, bx, qualityY, qW, 18), selected);
         }
     }
 
     private void drawHomeLyrics(GuiGraphics g, int mouseX, int mouseY) {
         int x = homeLyricsX;
-        int y = homeAppearanceY;
+        int y = homeLyricsY;
         int w = homeLyricsW;
-        int h = homeAppearanceH;
-        fillRounded(g, x, y, w, h, 0xE1090919, RuffyRoundedUi.RADIUS_PANEL);
-        outlineRounded(g, x, y, w, h, 0x785C3F9D, RuffyRoundedUi.RADIUS_PANEL);
-        g.drawString(font, "♫  Lyrics", x + 11, y + 10,
+        int h = homeLyricsH;
+        RuffyRoundedUi.shadow(g, x, y, w, h, RuffyRoundedUi.RADIUS_PANEL, 20);
+        fillRounded(g, x, y, w, h, 0xF0090B1D, RuffyRoundedUi.RADIUS_PANEL);
+        outlineRounded(g, x, y, w, h, withAlpha(RuffyConfig.secondaryColor(), 175),
+                RuffyRoundedUi.RADIUS_PANEL);
+        g.drawString(font, "♫  Lyrics", x + 10, y + 5,
                 RuffyConfig.primaryColor(), false);
-        g.drawString(font, "NOW PLAYING", x + 11, y + 23, DIM, false);
-
-        int artY = y + 32;
-        int artH = Math.min(48, Math.max(30, h / 4));
-        RuffyDashboardArt.drawHero(g, x + 9, artY, w - 18, artH);
         String source = RuffySpotify.getLyrics();
         String[] lines = source == null ? new String[0] : source.split("\\R");
-        int textY = artY + artH + 6;
+        int textY = y + Math.max(15, h * 38 / 100);
         if (lines.length == 0 || lines[0].isBlank()) {
             String hint = RuffySpotify.isConnected()
                     ? "Lyrics not available for this track."
@@ -738,18 +755,16 @@ public final class RuffyClickGui extends Screen {
             g.drawCenteredString(font, trimToWidth(hint, w - 18),
                     x + w / 2, textY, MUTED);
         } else {
-            int maxShown = Math.min(3, Math.max(1, (h - 91) / 13));
-            maxShown = Math.min(maxShown, lines.length);
+            int maxShown = Math.min(2, lines.length);
             for (int i = 0; i < maxShown; i++) {
                 g.drawCenteredString(font, trimToWidth(lines[i], w - 20),
-                        x + w / 2, textY + i * 13, i == 0 ? WHITE : MUTED);
+                        x + w / 2, textY + i * Math.max(9, h * 30 / 100),
+                        i == 0 ? WHITE : MUTED);
             }
         }
-        String track = trimToWidth(RuffySpotify.getTrackName(), w - 20);
-        g.drawString(font, track, x + 10, y + h - 14, DIM, false);
         if (inside(mouseX, mouseY, x, y, w, h)) {
             outlineRounded(g, x + 1, y + 1, w - 2, h - 2,
-                    withAlpha(RuffyConfig.primaryColor(), 65), RuffyRoundedUi.RADIUS_PANEL);
+                    withAlpha(RuffyConfig.primaryColor(), 90), RuffyRoundedUi.RADIUS_PANEL);
         }
     }
 
@@ -841,26 +856,26 @@ public final class RuffyClickGui extends Screen {
         }
 
         int moduleSeeX = homeCenterX + homeModulesW - 70;
-        if (inside(mx, my, moduleSeeX, homeModulesY + 8, 58, 20)) {
+        if (inside(mx, my, moduleSeeX, homeModulesY + 7, 58, 20)) {
             tab = Tab.VISUALS;
             modulePage = 0;
             return true;
         }
 
         String[] keys = {"prism_core", "nebula_particles", "orbit_particles", "swing_animation"};
-        int gap = 7;
-        int left = homeCenterX + 11;
-        int top = homeModulesY + 37;
-        int tileW = Math.max(68, (homeModulesW - 22 - gap) / 2);
-        int tileH = Math.max(28, (homeModulesH - 47 - gap) / 2);
+        int gap = Math.max(4, Math.round(homeModulesW * 0.012F));
+        int left = homeCenterX + 10;
+        int top = homeModulesY + 36;
+        int tileW = Math.max(38, (homeModulesW - 20 - gap * 3) / 4);
+        int tileH = Math.max(24, homeModulesH - 45);
         for (int i = 0; i < keys.length; i++) {
-            int column = i % 2;
-            int row = i / 2;
-            int tx = left + column * (tileW + gap);
-            int ty = top + row * (tileH + gap);
-            int switchX = tx + tileW - 27;
-            int switchY = ty + 8;
-            if (inside(mx, my, switchX - 2, switchY - 2, 28, 18)) {
+            int tx = left + i * (tileW + gap);
+            int ty = top;
+            int switchW = Math.max(20, Math.min(28, tileW / 4));
+            int switchH = Math.max(12, Math.min(16, tileH / 5));
+            int switchX = tx + tileW - switchW - 7;
+            int switchY = ty + 6;
+            if (inside(mx, my, switchX - 2, switchY - 2, switchW + 4, switchH + 4)) {
                 RuffyConfig.set(keys[i], !RuffyConfig.get(keys[i]));
                 return true;
             }
@@ -900,26 +915,26 @@ public final class RuffyClickGui extends Screen {
         int quickX = homeQuickX;
         int quickY = homeAppearanceY;
         int quickW = homeQuickW;
-        int themeY = quickY + 35;
-        int themeW = Math.min(88, quickW - 78);
-        int themeX = quickX + quickW - themeW - 10;
+        int themeY = quickY + Math.round(homeAppearanceH * 0.25F);
+        int themeW = Math.min(106, Math.max(46, quickW - 72));
+        int themeX = quickX + quickW - themeW - 9;
         if (inside(mx, my, themeX, themeY, themeW, 21)) {
             RuffyConfig.setInt("palette", (RuffyConfig.getInt("palette") + 1) % 10);
             return true;
         }
 
-        int sliderX = quickX + 66;
-        int sliderW = Math.max(32, quickW - 111);
-        int opacityY = quickY + 51;
+        int sliderX = quickX + 58;
+        int sliderW = Math.max(20, quickW - 105);
+        int opacityY = quickY + Math.round(homeAppearanceH * 0.47F);
         if (inside(mx, my, sliderX - 4, opacityY, sliderW + 8, 16)) {
             int value = 60 + Math.round((mx - sliderX) * 40.0F / Math.max(1, sliderW));
             RuffyConfig.setInt("menu_opacity", value);
             return true;
         }
 
-        int qualityY = quickY + 73;
-        int qGap = 3;
-        int qW = Math.max(31, Math.min(39, (quickW - 112) / 3));
+        int qualityY = quickY + Math.round(homeAppearanceH * 0.68F);
+        int qGap = 2;
+        int qW = Math.max(22, Math.min(34, (quickW - 90) / 3));
         int qX = quickX + quickW - (qW * 3 + qGap * 2) - 9;
         for (int i = 0; i < 3; i++) {
             int bx = qX + i * (qW + qGap);
@@ -929,15 +944,15 @@ public final class RuffyClickGui extends Screen {
             }
         }
 
-        int visualizerY = quickY + 8;
-        if (inside(mx, my, quickX + quickW - 44, visualizerY - 2, 36, 22)) {
+        int visualizerY = quickY + homeAppearanceH - 25;
+        if (inside(mx, my, quickX + quickW - 46, visualizerY - 2, 38, 22)) {
             RuffyConfig.set("music_visualizer", !RuffyConfig.get("music_visualizer"));
             return true;
         }
 
         // Lyrics opens the full player and lyrics screen.
-        if (inside(mx, my, homeLyricsX, homeAppearanceY,
-                homeLyricsW, homeAppearanceH)) {
+        if (inside(mx, my, homeLyricsX, homeLyricsY,
+                homeLyricsW, homeLyricsH)) {
             if (minecraft != null) minecraft.setScreen(new RuffySpotifyScreen(this));
             return true;
         }
@@ -1649,8 +1664,8 @@ public final class RuffyClickGui extends Screen {
         int[] ys = navigationYPositions();
         int itemHeight = navigationItemHeight();
         Tab[] tabs = {
-                Tab.HOME, Tab.VISUALS, Tab.STYLE, Tab.COSMETICS,
-                Tab.HUD, Tab.MUSIC, Tab.CONFIGS, Tab.SETUP
+                Tab.HOME, Tab.VISUALS, Tab.STYLE, Tab.HUD,
+                Tab.MUSIC, Tab.CONFIGS, Tab.SETUP
         };
         for (int i = 0; i < tabs.length; i++) {
             if (!inside(mx, my, x, ys[i], w, itemHeight)) continue;
