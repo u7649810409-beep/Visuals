@@ -699,14 +699,14 @@ public final class RuffyClickGui extends Screen {
         g.drawString(font, "⌄", controlsX + themeW - 9, themeY + 4, MUTED, false);
 
         int sliderW = Math.max(18, right - controlsX);
-        int blurLabelY = y + 46;
+        int blurLabelY = y + 40;
         int blurValue = Minecraft.getInstance().options.menuBackgroundBlurriness().get();
         g.drawString(font, "Blur", controlsX, blurLabelY, MUTED, false);
         String blur = (blurValue * 10) + "%";
         g.drawString(font, blur, right - font.width(blur), blurLabelY, WHITE, false);
         drawSlider(g, controlsX, y + 47, sliderW, blurValue, 0, 10);
 
-        int particlesLabelY = y + 61;
+        int particlesLabelY = y + 55;
         g.drawString(font, "Particles", controlsX, particlesLabelY, MUTED, false);
         String particles = RuffyConfig.getInt("particle_density") + "%";
         g.drawString(font, particles, right - font.width(particles), particlesLabelY, WHITE, false);
