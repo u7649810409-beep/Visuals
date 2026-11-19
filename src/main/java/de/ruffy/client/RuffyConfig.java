@@ -49,7 +49,8 @@ public final class RuffyConfig {
             Map.entry("smooth_animations", true),
             Map.entry("prism_core", true),
             Map.entry("orbit_drones", false),
-            Map.entry("three_d_slash", true)
+            Map.entry("three_d_slash", true),
+            Map.entry("music_visualizer", true)
     );
 
     private static final Map<String, Integer> INTEGER_DEFAULTS = Map.of(
@@ -61,7 +62,8 @@ public final class RuffyConfig {
             "hud_scale", 96,
             "cosmetic_aura", 1,
             "cosmetic_companion", 0,
-            "cosmetic_trail", 0
+            "cosmetic_trail", 0,
+            "particle_density", 100
     );
 
     private static final int[] PRIMARY = {
@@ -123,7 +125,8 @@ public final class RuffyConfig {
             case "hud_opacity" -> Math.max(12, Math.min(90, value));
             case "menu_opacity" -> Math.max(60, Math.min(100, value));
             case "effect_quality" -> Math.max(0, Math.min(2, value));
-            case "animation_smoothness" -> Math.max(0, Math.min(100, value));
+            case "animation_smoothness", "particle_density" ->
+                    Math.max(0, Math.min(100, value));
             case "hud_scale" -> Math.max(75, Math.min(120, value));
             case "cosmetic_aura", "cosmetic_companion", "cosmetic_trail" ->
                     Math.max(0, Math.min(4, value));

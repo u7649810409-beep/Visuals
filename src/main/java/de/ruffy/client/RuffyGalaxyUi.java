@@ -24,7 +24,7 @@ public final class RuffyGalaxyUi {
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE,
                 0, 0, 0.0F, 0.0F,
                 width, height, TEX_WIDTH, TEX_HEIGHT,
-                TEX_WIDTH, TEX_HEIGHT, 0xF2FFFFFF);
+                TEX_WIDTH, TEX_HEIGHT, 0xFFFFFFFF);
     }
 
     private static void ensureTexture() {
