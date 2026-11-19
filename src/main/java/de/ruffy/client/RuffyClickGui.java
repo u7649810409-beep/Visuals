@@ -928,37 +928,36 @@ public final class RuffyClickGui extends Screen {
             return true;
         }
 
-        // Appearance / quick settings card.
+        // Appearance card: theme, glass opacity and actual particle density.
         int quickX = homeQuickX;
         int quickY = homeAppearanceY;
         int quickW = homeQuickW;
-        int themeY = quickY + Math.round(homeAppearanceH * 0.25F);
-        int themeW = Math.min(106, Math.max(46, quickW - 72));
-        int themeX = quickX + quickW - themeW - 9;
-        if (inside(mx, my, themeX, themeY, themeW, 21)) {
+        int thumbW = Math.min(84, Math.max(58, quickW * 33 / 100));
+        int controlsX = quickX + 10 + thumbW + 11;
+        int right = quickX + quickW - 10;
+        int themeY = quickY + 52;
+        int themeW = Math.min(88, Math.max(58, right - controlsX - 42));
+        int themeX = right - themeW;
+        if (inside(mx, my, themeX, themeY, themeW, 20)) {
             RuffyConfig.setInt("palette", (RuffyConfig.getInt("palette") + 1) % 10);
             return true;
         }
 
-        int sliderX = quickX + 58;
-        int sliderW = Math.max(20, quickW - 105);
-        int opacityY = quickY + Math.round(homeAppearanceH * 0.47F);
-        if (inside(mx, my, sliderX - 4, opacityY, sliderW + 8, 16)) {
+        int labelW = font.width("Particles") + 5;
+        int sliderX = controlsX + labelW;
+        int sliderW = Math.max(20, right - sliderX - 30);
+        int opacityY = quickY + 83;
+        if (inside(mx, my, sliderX - 4, opacityY - 3, sliderW + 8, 12)) {
             int value = 60 + Math.round((mx - sliderX) * 40.0F / Math.max(1, sliderW));
             RuffyConfig.setInt("menu_opacity", value);
             return true;
         }
 
-        int qualityY = quickY + Math.round(homeAppearanceH * 0.68F);
-        int qGap = 2;
-        int qW = Math.max(22, Math.min(34, (quickW - 90) / 3));
-        int qX = quickX + quickW - (qW * 3 + qGap * 2) - 9;
-        for (int i = 0; i < 3; i++) {
-            int bx = qX + i * (qW + qGap);
-            if (inside(mx, my, bx, qualityY, qW, 20)) {
-                RuffyConfig.setInt("effect_quality", i);
-                return true;
-            }
+        int particlesY = quickY + 109;
+        if (inside(mx, my, sliderX - 4, particlesY - 3, sliderW + 8, 12)) {
+            int value = Math.round((mx - sliderX) * 100.0F / Math.max(1, sliderW));
+            RuffyConfig.setInt("particle_density", value);
+            return true;
         }
 
         // Lyrics opens the full player and lyrics screen.
